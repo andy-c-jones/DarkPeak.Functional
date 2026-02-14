@@ -113,18 +113,18 @@ public abstract record Option<T> : IEnumerable<T>
     public abstract Option<T> OrElse(Func<Option<T>> alternativeFactory);
 
     /// <summary>
-    /// Executes an action if the option has a value.
+    /// Executes an action if the option has a value (side effect).
     /// </summary>
     /// <param name="action">Action to execute with the value.</param>
     /// <returns>This option for chaining.</returns>
-    public abstract Option<T> IfSome(Action<T> action);
+    public abstract Option<T> Tap(Action<T> action);
 
     /// <summary>
-    /// Executes an action if the option is empty.
+    /// Executes an action if the option is empty (side effect).
     /// </summary>
     /// <param name="action">Action to execute.</param>
     /// <returns>This option for chaining.</returns>
-    public abstract Option<T> IfNone(Action action);
+    public abstract Option<T> TapNone(Action action);
 
     /// <summary>
     /// Returns an enumerator that yields the value if present (for LINQ support).
@@ -204,13 +204,13 @@ public sealed record Some<T>(T Value) : Option<T>
 
     public override Option<T> OrElse(Func<Option<T>> alternativeFactory) => this;
 
-    public override Option<T> IfSome(Action<T> action)
+    public override Option<T> Tap(Action<T> action)
     {
         action(Value);
         return this;
     }
 
-    public override Option<T> IfNone(Action action) => this;
+    public override Option<T> TapNone(Action action) => this;
 
     public override IEnumerator<T> GetEnumerator()
     {
@@ -257,9 +257,9 @@ public sealed record None<T> : Option<T>
 
     public override Option<T> OrElse(Func<Option<T>> alternativeFactory) => alternativeFactory();
 
-    public override Option<T> IfSome(Action<T> action) => this;
+    public override Option<T> Tap(Action<T> action) => this;
 
-    public override Option<T> IfNone(Action action)
+    public override Option<T> TapNone(Action action)
     {
         action();
         return this;
