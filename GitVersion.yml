@@ -1,12 +1,12 @@
-mode: Mainline
+workflow: TrunkBased/preview1
 branches:
   main:
     regex: ^main$
-    tag: ci
+    label: ci
     increment: Patch
   feature:
     regex: ^(feature|feat|ci-cd|ci)[-/]
-    tag: alpha
+    label: alpha
     increment: Inherit
 major-version-bump-message: '(feat|fix|refactor|perf|style|docs|test|chore)(\(.+\))?!:'
 minor-version-bump-message: 'feat(\(.+\))?:'
