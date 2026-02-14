@@ -1,0 +1,14 @@
+- name: Getting Started
+  href: getting-started.md
+- name: Option
+  href: option.md
+- name: Result
+  href: result.md
+- name: Either
+  href: either.md
+- name: Validation
+  href: validation.md
+- name: Retry
+  href: retry.md
+- name: Memoize
+  href: memoize.md

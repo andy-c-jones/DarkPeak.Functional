@@ -28,3 +28,7 @@ TestResults/
 # OS files
 .DS_Store
 Thumbs.db
+
+# DocFX generated
+docs/_site/
+docs/api/
