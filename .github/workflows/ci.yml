@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
@@ -96,7 +94,7 @@ jobs:
           path: ./nupkg/*.nupkg
 
       - name: Publish to NuGet
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: Publish prerelease to NuGet
@@ -110,9 +108,17 @@ jobs:
             echo "NUGET_API_KEY not available, skipping prerelease publish"
           fi
 
+      - name: Create tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git tag "v${{ steps.version.outputs.semVer }}"
+          git push origin "v${{ steps.version.outputs.semVer }}"
+
       - name: Create GitHub Release
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.version.outputs.semVer }}
+          name: v${{ steps.version.outputs.semVer }}
           generate_release_notes: true
           files: ./nupkg/*.nupkg
