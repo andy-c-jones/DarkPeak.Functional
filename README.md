@@ -1,5 +1,8 @@
 # DarkPeak.Functional
 
+[![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.svg)](https://www.nuget.org/packages/DarkPeak.Functional/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/DarkPeak.Functional.svg)](https://www.nuget.org/packages/DarkPeak.Functional/)
+
 A functional programming library for .NET providing monadic types and railway-oriented programming patterns.
 
 ## Features
