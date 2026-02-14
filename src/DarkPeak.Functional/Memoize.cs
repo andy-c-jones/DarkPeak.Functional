@@ -3,6 +3,46 @@ using System.Collections.Concurrent;
 namespace DarkPeak.Functional;
 
 /// <summary>
+/// Abstraction for an external cache provider (e.g. Redis, SQL, etc.).
+/// Implement this interface to plug a distributed cache into memoized functions.
+/// The provider is responsible for its own serialization and transport concerns.
+/// </summary>
+public interface ICacheProvider<TKey, TValue>
+{
+    /// <summary>
+    /// Attempts to retrieve a value from the cache.
+    /// Returns Some if the key exists, None otherwise.
+    /// </summary>
+    Option<TValue> Get(TKey key);
+
+    /// <summary>
+    /// Attempts to retrieve a value from the cache asynchronously.
+    /// Returns Some if the key exists, None otherwise.
+    /// </summary>
+    Task<Option<TValue>> GetAsync(TKey key);
+
+    /// <summary>
+    /// Stores a value in the cache with an optional expiration.
+    /// </summary>
+    void Set(TKey key, TValue value, TimeSpan? expiration);
+
+    /// <summary>
+    /// Stores a value in the cache asynchronously with an optional expiration.
+    /// </summary>
+    Task SetAsync(TKey key, TValue value, TimeSpan? expiration);
+
+    /// <summary>
+    /// Removes a value from the cache.
+    /// </summary>
+    void Remove(TKey key);
+
+    /// <summary>
+    /// Removes a value from the cache asynchronously.
+    /// </summary>
+    Task RemoveAsync(TKey key);
+}
+
+/// <summary>
 /// Configuration options for memoized functions.
 /// </summary>
 public sealed record MemoizeOptions
@@ -17,6 +57,17 @@ public sealed record MemoizeOptions
     /// When the limit is reached, the least recently used entry is evicted.
     /// </summary>
     public int? MaxSize { get; init; }
+
+    /// <summary>
+    /// External cache provider for distributed caching. Null means memory-only.
+    /// </summary>
+    internal object? CacheProvider { get; init; }
+
+    /// <summary>
+    /// Whether the in-memory L1 cache is enabled.
+    /// True when MaxSize or Expiration is configured, or when no provider is set.
+    /// </summary>
+    internal bool UseMemoryCache => MaxSize.HasValue || Expiration.HasValue || CacheProvider is null;
 
     /// <summary>
     /// Sets the expiration time for cache entries.
@@ -34,6 +85,14 @@ public sealed record MemoizeOptions
 
         return this with { MaxSize = maxSize };
     }
+
+    /// <summary>
+    /// Sets an external cache provider for distributed caching.
+    /// When combined with MaxSize or Expiration, acts as L2 behind an in-memory L1.
+    /// When used alone, all caching is delegated to the provider.
+    /// </summary>
+    public MemoizeOptions WithCacheProvider<TKey, TValue>(ICacheProvider<TKey, TValue> provider) =>
+        this with { CacheProvider = provider };
 }
 
 /// <summary>
@@ -62,14 +121,15 @@ public static class Memoize
     }
 
     /// <summary>
-    /// Memoizes a single-argument function with configurable options (TTL, max size).
+    /// Memoizes a single-argument function with configurable options (TTL, max size, distributed cache).
     /// </summary>
     public static Func<T, TResult> Func<T, TResult>(
         Func<T, TResult> func,
         Func<MemoizeOptions, MemoizeOptions> configure) where T : notnull
     {
         var options = configure(new MemoizeOptions());
-        var cache = new MemoizeCache<T, TResult>(options);
+        var provider = options.CacheProvider as ICacheProvider<T, TResult>;
+        var cache = new MemoizeCache<T, TResult>(options, provider);
         return arg => cache.GetOrAdd(arg, func);
     }
 
@@ -84,7 +144,7 @@ public static class Memoize
     }
 
     /// <summary>
-    /// Memoizes a two-argument function with configurable options (TTL, max size).
+    /// Memoizes a two-argument function with configurable options (TTL, max size, distributed cache).
     /// </summary>
     public static Func<T1, T2, TResult> Func<T1, T2, TResult>(
         Func<T1, T2, TResult> func,
@@ -92,7 +152,8 @@ public static class Memoize
         where T1 : notnull where T2 : notnull
     {
         var options = configure(new MemoizeOptions());
-        var cache = new MemoizeCache<(T1, T2), TResult>(options);
+        var provider = options.CacheProvider as ICacheProvider<(T1, T2), TResult>;
+        var cache = new MemoizeCache<(T1, T2), TResult>(options, provider);
         return (a, b) => cache.GetOrAdd((a, b), key => func(key.Item1, key.Item2));
     }
 
@@ -110,7 +171,7 @@ public static class Memoize
     }
 
     /// <summary>
-    /// Memoizes an async single-argument function with configurable options (TTL, max size).
+    /// Memoizes an async single-argument function with configurable options (TTL, max size, distributed cache).
     /// Concurrent calls for the same key share the same Task (thundering-herd protection).
     /// </summary>
     public static Func<T, Task<TResult>> FuncAsync<T, TResult>(
@@ -118,15 +179,24 @@ public static class Memoize
         Func<MemoizeOptions, MemoizeOptions> configure) where T : notnull
     {
         var options = configure(new MemoizeOptions());
-        var cache = new MemoizeCache<T, Lazy<Task<TResult>>>(options);
-        return arg => cache.GetOrAdd(
-            arg,
-            key => new Lazy<Task<TResult>>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+        var provider = options.CacheProvider as ICacheProvider<T, TResult>;
+        if (provider is not null)
+        {
+            var cache = new MemoizeCache<T, TResult>(options, provider);
+            return arg => cache.GetOrAddAsync(arg, async key => await func(key));
+        }
+        else
+        {
+            var cache = new MemoizeCache<T, Lazy<Task<TResult>>>(options, null);
+            return arg => cache.GetOrAdd(
+                arg,
+                key => new Lazy<Task<TResult>>(() => func(key), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+        }
     }
 }
 
 /// <summary>
-/// Internal cache with TTL and LRU eviction support.
+/// Internal cache with TTL, LRU eviction, and optional external provider support.
 /// </summary>
 internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
 {
@@ -134,18 +204,21 @@ internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
     private readonly LinkedList<TKey> _accessOrder = new();
     private readonly Dictionary<TKey, LinkedListNode<TKey>> _nodes = new();
     private readonly MemoizeOptions _options;
+    private readonly ICacheProvider<TKey, TValue>? _provider;
     private readonly Lock _lock = new();
 
-    internal MemoizeCache(MemoizeOptions options)
+    internal MemoizeCache(MemoizeOptions options, ICacheProvider<TKey, TValue>? provider)
     {
         _options = options;
+        _provider = provider;
     }
 
     internal TValue GetOrAdd(TKey key, Func<TKey, TValue> factory)
     {
         lock (_lock)
         {
-            if (_cache.TryGetValue(key, out var existing))
+            // L1: check in-memory cache
+            if (_options.UseMemoryCache && _cache.TryGetValue(key, out var existing))
             {
                 if (_options.Expiration is null ||
                     existing.CreatedAt + _options.Expiration.Value > DateTimeOffset.UtcNow)
@@ -154,17 +227,103 @@ internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
                     return existing.Value;
                 }
 
-                // Expired — remove and recompute
-                Remove(key);
+                // Expired in L1 — remove
+                RemoveFromMemory(key);
             }
 
+            // L2: check external provider
+            if (_provider is not null)
+            {
+                var fromProvider = _provider.Get(key);
+                if (fromProvider is Some<TValue> some)
+                {
+                    // Populate L1 from L2
+                    if (_options.UseMemoryCache)
+                    {
+                        _cache[key] = new CacheEntry(some.Value, DateTimeOffset.UtcNow);
+                        TouchAccessOrder(key);
+                        EvictIfNeeded();
+                    }
+
+                    return some.Value;
+                }
+            }
+
+            // Miss everywhere — compute
             var value = factory(key);
-            _cache[key] = new CacheEntry(value, DateTimeOffset.UtcNow);
-            TouchAccessOrder(key);
-            EvictIfNeeded();
+
+            // Write to L1
+            if (_options.UseMemoryCache)
+            {
+                _cache[key] = new CacheEntry(value, DateTimeOffset.UtcNow);
+                TouchAccessOrder(key);
+                EvictIfNeeded();
+            }
+
+            // Write to L2
+            _provider?.Set(key, value, _options.Expiration);
 
             return value;
         }
+    }
+
+    internal async Task<TValue> GetOrAddAsync(TKey key, Func<TKey, Task<TValue>> factory)
+    {
+        // L1: check in-memory cache (synchronous, under lock)
+        lock (_lock)
+        {
+            if (_options.UseMemoryCache && _cache.TryGetValue(key, out var existing))
+            {
+                if (_options.Expiration is null ||
+                    existing.CreatedAt + _options.Expiration.Value > DateTimeOffset.UtcNow)
+                {
+                    TouchAccessOrder(key);
+                    return existing.Value;
+                }
+
+                RemoveFromMemory(key);
+            }
+        }
+
+        // L2: check external provider (async, outside lock)
+        if (_provider is not null)
+        {
+            var fromProvider = await _provider.GetAsync(key);
+            if (fromProvider is Some<TValue> some)
+            {
+                lock (_lock)
+                {
+                    if (_options.UseMemoryCache)
+                    {
+                        _cache[key] = new CacheEntry(some.Value, DateTimeOffset.UtcNow);
+                        TouchAccessOrder(key);
+                        EvictIfNeeded();
+                    }
+                }
+
+                return some.Value;
+            }
+        }
+
+        // Miss everywhere — compute (async, outside lock)
+        var value = await factory(key);
+
+        // Write to L1
+        lock (_lock)
+        {
+            if (_options.UseMemoryCache)
+            {
+                _cache[key] = new CacheEntry(value, DateTimeOffset.UtcNow);
+                TouchAccessOrder(key);
+                EvictIfNeeded();
+            }
+        }
+
+        // Write to L2
+        if (_provider is not null)
+            await _provider.SetAsync(key, value, _options.Expiration);
+
+        return value;
     }
 
     private void TouchAccessOrder(TKey key)
@@ -175,7 +334,7 @@ internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
         _nodes[key] = _accessOrder.AddLast(key);
     }
 
-    private void Remove(TKey key)
+    private void RemoveFromMemory(TKey key)
     {
         _cache.Remove(key);
         if (_nodes.Remove(key, out var node))
@@ -189,7 +348,7 @@ internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
 
         while (_cache.Count > _options.MaxSize.Value && _accessOrder.First is not null)
         {
-            Remove(_accessOrder.First.Value);
+            RemoveFromMemory(_accessOrder.First.Value);
         }
     }
 

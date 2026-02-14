@@ -427,4 +427,279 @@ public class MemoizeShould
         await Assert.That(err.IsSuccess).IsFalse();
         await Assert.That(callCount).IsEqualTo(2);
     }
+
+    // --- Distributed cache provider (sync) ---
+
+    [Test]
+    public async Task Memoize_WithProvider_DistributedOnly_CachesViaProvider()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var callCount = 0;
+        var memoized = Memoize.Func<string, int>(
+            key =>
+            {
+                callCount++;
+                return key.Length;
+            },
+            opts => opts.WithCacheProvider(provider));
+
+        var r1 = memoized("hello");
+        var r2 = memoized("hello");
+        var r3 = memoized("hi");
+
+        await Assert.That(r1).IsEqualTo(5);
+        await Assert.That(r2).IsEqualTo(5);
+        await Assert.That(r3).IsEqualTo(2);
+        await Assert.That(callCount).IsEqualTo(2);
+        await Assert.That(provider.SetCount).IsEqualTo(2);
+        await Assert.That(provider.GetCount).IsEqualTo(3); // first miss + hit + second miss
+    }
+
+    [Test]
+    public async Task Memoize_WithProvider_L1AndL2_ServesFromMemoryFirst()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var callCount = 0;
+        var memoized = Memoize.Func<string, int>(
+            key =>
+            {
+                callCount++;
+                return key.Length;
+            },
+            opts => opts
+                .WithMaxSize(10)
+                .WithCacheProvider(provider));
+
+        memoized("hello"); // miss everywhere, compute, write L1 + L2
+        memoized("hello"); // L1 hit, no provider call
+
+        await Assert.That(callCount).IsEqualTo(1);
+        await Assert.That(provider.SetCount).IsEqualTo(1);
+        await Assert.That(provider.GetCount).IsEqualTo(1); // only the first miss checked L2
+    }
+
+    [Test]
+    public async Task Memoize_WithProvider_L1Eviction_FallsBackToL2()
+    {
+        var provider = new FakeCacheProvider<int, int>();
+        var callCount = 0;
+        var memoized = Memoize.Func<int, int>(
+            x =>
+            {
+                callCount++;
+                return x * 10;
+            },
+            opts => opts
+                .WithMaxSize(2)
+                .WithCacheProvider(provider));
+
+        memoized(1); // compute, L1=[1], L2=[1]
+        memoized(2); // compute, L1=[1,2], L2=[1,2]
+        memoized(3); // compute, evict 1 from L1, L1=[2,3], L2=[1,2,3]
+
+        await Assert.That(callCount).IsEqualTo(3);
+
+        // 1 was evicted from L1 but lives in L2
+        var fromL2 = memoized(1);
+        await Assert.That(fromL2).IsEqualTo(10);
+        await Assert.That(callCount).IsEqualTo(3); // no recompute
+    }
+
+    [Test]
+    public async Task Memoize_WithProvider_PassesExpirationToProvider()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var expiration = TimeSpan.FromMinutes(5);
+        var memoized = Memoize.Func<string, int>(
+            key => key.Length,
+            opts => opts
+                .WithExpiration(expiration)
+                .WithCacheProvider(provider));
+
+        memoized("test");
+
+        await Assert.That(provider.LastSetExpiration).IsEqualTo(expiration);
+    }
+
+    [Test]
+    public async Task Memoize_WithProvider_NoExpiration_PassesNullToProvider()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var memoized = Memoize.Func<string, int>(
+            key => key.Length,
+            opts => opts.WithCacheProvider(provider));
+
+        memoized("test");
+
+        await Assert.That(provider.LastSetExpiration).IsNull();
+    }
+
+    // --- Distributed cache provider (async) ---
+
+    [Test]
+    public async Task MemoizeAsync_WithProvider_CachesViaProvider()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var callCount = 0;
+        var memoized = Memoize.FuncAsync<string, int>(
+            async key =>
+            {
+                callCount++;
+                await Task.Yield();
+                return key.Length;
+            },
+            opts => opts.WithCacheProvider(provider));
+
+        var r1 = await memoized("hello");
+        var r2 = await memoized("hello");
+
+        await Assert.That(r1).IsEqualTo(5);
+        await Assert.That(r2).IsEqualTo(5);
+        await Assert.That(callCount).IsEqualTo(1);
+        await Assert.That(provider.AsyncSetCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task MemoizeAsync_WithProvider_L1AndL2_ServesFromMemoryFirst()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var callCount = 0;
+        var memoized = Memoize.FuncAsync<string, int>(
+            async key =>
+            {
+                callCount++;
+                await Task.Yield();
+                return key.Length;
+            },
+            opts => opts
+                .WithMaxSize(10)
+                .WithCacheProvider(provider));
+
+        await memoized("hello"); // miss, compute, write both
+        await memoized("hello"); // L1 hit
+
+        await Assert.That(callCount).IsEqualTo(1);
+        await Assert.That(provider.AsyncGetCount).IsEqualTo(1); // only first miss checked L2
+    }
+
+    [Test]
+    public async Task MemoizeAsync_WithProvider_L1Eviction_FallsBackToL2()
+    {
+        var provider = new FakeCacheProvider<int, int>();
+        var callCount = 0;
+        var memoized = Memoize.FuncAsync<int, int>(
+            async x =>
+            {
+                callCount++;
+                await Task.Yield();
+                return x * 10;
+            },
+            opts => opts
+                .WithMaxSize(2)
+                .WithCacheProvider(provider));
+
+        await memoized(1);
+        await memoized(2);
+        await memoized(3); // evicts 1 from L1
+
+        await Assert.That(callCount).IsEqualTo(3);
+
+        var fromL2 = await memoized(1); // L2 hit
+        await Assert.That(fromL2).IsEqualTo(10);
+        await Assert.That(callCount).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task MemoizeAsync_WithProvider_PassesExpirationToProvider()
+    {
+        var provider = new FakeCacheProvider<string, int>();
+        var expiration = TimeSpan.FromSeconds(30);
+        var memoized = Memoize.FuncAsync<string, int>(
+            async key =>
+            {
+                await Task.Yield();
+                return key.Length;
+            },
+            opts => opts
+                .WithExpiration(expiration)
+                .WithCacheProvider(provider));
+
+        await memoized("test");
+
+        await Assert.That(provider.LastSetAsyncExpiration).IsEqualTo(expiration);
+    }
+
+    // --- Two-arg with provider ---
+
+    [Test]
+    public async Task Memoize_TwoArg_WithProvider_CachesViaProvider()
+    {
+        var provider = new FakeCacheProvider<(int, int), int>();
+        var callCount = 0;
+        var memoized = Memoize.Func<int, int, int>(
+            (a, b) =>
+            {
+                callCount++;
+                return a + b;
+            },
+            opts => opts.WithCacheProvider(provider));
+
+        var r1 = memoized(1, 2);
+        var r2 = memoized(1, 2);
+        var r3 = memoized(2, 1);
+
+        await Assert.That(r1).IsEqualTo(3);
+        await Assert.That(r2).IsEqualTo(3);
+        await Assert.That(r3).IsEqualTo(3);
+        await Assert.That(callCount).IsEqualTo(2);
+        await Assert.That(provider.SetCount).IsEqualTo(2);
+    }
+
+    // --- Fake ICacheProvider for testing ---
+
+    private sealed class FakeCacheProvider<TKey, TValue> : ICacheProvider<TKey, TValue> where TKey : notnull
+    {
+        private readonly Dictionary<TKey, TValue> _store = new();
+        public int GetCount { get; private set; }
+        public int SetCount { get; private set; }
+        public int AsyncGetCount { get; private set; }
+        public int AsyncSetCount { get; private set; }
+        public TimeSpan? LastSetExpiration { get; private set; }
+        public TimeSpan? LastSetAsyncExpiration { get; private set; }
+
+        public Option<TValue> Get(TKey key)
+        {
+            GetCount++;
+            return _store.TryGetValue(key, out var value)
+                ? Option.Some(value)
+                : Option.None<TValue>();
+        }
+
+        public Task<Option<TValue>> GetAsync(TKey key)
+        {
+            AsyncGetCount++;
+            Option<TValue> result = _store.TryGetValue(key, out var value)
+                ? Option.Some(value)
+                : Option.None<TValue>();
+            return Task.FromResult(result);
+        }
+
+        public void Set(TKey key, TValue value, TimeSpan? expiration)
+        {
+            SetCount++;
+            LastSetExpiration = expiration;
+            _store[key] = value;
+        }
+
+        public Task SetAsync(TKey key, TValue value, TimeSpan? expiration)
+        {
+            AsyncSetCount++;
+            LastSetAsyncExpiration = expiration;
+            _store[key] = value;
+            return Task.CompletedTask;
+        }
+
+        public void Remove(TKey key) => _store.Remove(key);
+        public Task RemoveAsync(TKey key) { _store.Remove(key); return Task.CompletedTask; }
+    }
 }
