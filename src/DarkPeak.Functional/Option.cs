@@ -297,4 +297,50 @@ public static class Option
     /// </summary>
     public static Option<T> From<T>(T? value) where T : struct =>
         value.HasValue ? new Some<T>(value.Value) : new None<T>();
+
+    /// <summary>
+    /// Executes a function and wraps the result in an option.
+    /// Returns Some if the function succeeds, None if it throws an exception.
+    /// </summary>
+    public static Option<T> Try<T>(Func<T> func)
+    {
+        try
+        {
+            return new Some<T>(func());
+        }
+        catch
+        {
+            return new None<T>();
+        }
+    }
+
+    /// <summary>
+    /// Executes an async function and wraps the result in an option.
+    /// Returns Some if the function succeeds, None if it throws an exception.
+    /// </summary>
+    public static async Task<Option<T>> TryAsync<T>(Func<Task<T>> func)
+    {
+        try
+        {
+            return new Some<T>(await func());
+        }
+        catch
+        {
+            return new None<T>();
+        }
+    }
+
+    /// <summary>
+    /// Attempts to parse a string into a value using IParsable.
+    /// Returns Some if parsing succeeds, None otherwise.
+    /// </summary>
+    public static Option<T> TryParse<T>(string? value) where T : IParsable<T> =>
+        T.TryParse(value, null, out var result) ? new Some<T>(result) : new None<T>();
+
+    /// <summary>
+    /// Attempts to parse a string into a value using IParsable with a format provider.
+    /// Returns Some if parsing succeeds, None otherwise.
+    /// </summary>
+    public static Option<T> TryParse<T>(string? value, IFormatProvider? provider) where T : IParsable<T> =>
+        T.TryParse(value, provider, out var result) ? new Some<T>(result) : new None<T>();
 }

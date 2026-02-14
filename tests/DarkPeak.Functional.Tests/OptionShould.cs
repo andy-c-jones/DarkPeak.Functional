@@ -433,4 +433,96 @@ public class OptionShould
 
         Assert.Throws<InvalidOperationException>(() => option.GetValueOrThrow());
     }
+
+    [Test]
+    public async Task Try_returns_some_on_success()
+    {
+        var option = Option.Try(() => int.Parse("42"));
+
+        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Try_returns_none_on_exception()
+    {
+        var option = Option.Try(() => int.Parse("not a number"));
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task TryAsync_returns_some_on_success()
+    {
+        var option = await Option.TryAsync(async () =>
+        {
+            await Task.Delay(1);
+            return 42;
+        });
+
+        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task TryAsync_returns_none_on_exception()
+    {
+        var option = await Option.TryAsync<int>(async () =>
+        {
+            await Task.Delay(1);
+            throw new InvalidOperationException("boom");
+        });
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task TryParse_returns_some_for_valid_int()
+    {
+        var option = Option.TryParse<int>("42");
+
+        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task TryParse_returns_none_for_invalid_int()
+    {
+        var option = Option.TryParse<int>("abc");
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task TryParse_returns_none_for_null()
+    {
+        var option = Option.TryParse<int>(null);
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task TryParse_returns_some_for_valid_double()
+    {
+        var option = Option.TryParse<double>("3.14");
+
+        await Assert.That(option.IsSome).IsTrue();
+    }
+
+    [Test]
+    public async Task TryParse_with_provider_returns_some()
+    {
+        var option = Option.TryParse<int>("42", System.Globalization.CultureInfo.InvariantCulture);
+
+        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task TryParse_with_provider_returns_none_for_invalid()
+    {
+        var option = Option.TryParse<int>("abc", System.Globalization.CultureInfo.InvariantCulture);
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
 }
