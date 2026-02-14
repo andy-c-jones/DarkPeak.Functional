@@ -19,25 +19,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
             8.0.x
             10.0.x
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3
+        uses: gittools/actions/gitversion/setup@v4
         with:
           versionSpec: '6.x'
 
       - name: Determine version
         id: version
-        uses: gittools/actions/gitversion/execute@v3
+        uses: gittools/actions/gitversion/execute@v4
         with:
           useConfigFile: true
 
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: coverage.cobertura.xml
@@ -88,7 +88,7 @@ jobs:
         run: dotnet pack src/DarkPeak.Functional/DarkPeak.Functional.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.version.outputs.semVer }}
 
       - name: Upload package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nupkg
           path: ./nupkg/*.nupkg
