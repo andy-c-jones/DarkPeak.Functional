@@ -87,6 +87,19 @@ public class ResultShould
         
         await Assert.That(output).IsEqualTo("Success: 42");
     }
+
+    [Test]
+    public async Task MatchAsync_failure_awaits_async_function()
+    {
+        var result = new Failure<int, Error>(new ValidationError { Message = "Invalid" });
+
+        var output = await result.MatchAsync(
+            success: async value => { await Task.Delay(1); return $"Success: {value}"; },
+            failure: async error => { await Task.Delay(1); return $"Failure: {error.Message}"; }
+        );
+
+        await Assert.That(output).IsEqualTo("Failure: Invalid");
+    }
     
     #endregion
     
@@ -480,5 +493,43 @@ public class ResultShould
         }
     }
     
+    #endregion
+
+    #region Failure Async Coverage
+
+    [Test]
+    public async Task MapAsync_failure_returns_failure()
+    {
+        var result = new Failure<int, Error>(new ValidationError { Message = "err" });
+
+        var mapped = await result.MapAsync(async x => { await Task.Yield(); return x * 2; });
+
+        await Assert.That(mapped.IsFailure).IsTrue();
+    }
+
+    [Test]
+    public async Task BindAsync_failure_returns_failure()
+    {
+        var result = new Failure<int, Error>(new ValidationError { Message = "err" });
+
+        var bound = await result.BindAsync(async x =>
+        {
+            await Task.Yield();
+            return Result.Success<string, Error>(x.ToString());
+        });
+
+        await Assert.That(bound.IsFailure).IsTrue();
+    }
+
+    [Test]
+    public async Task SelectMany_single_on_failure_returns_failure()
+    {
+        var result = new Failure<int, Error>(new ValidationError { Message = "err" });
+
+        var bound = result.SelectMany(x => Result.Success<string, Error>(x.ToString()));
+
+        await Assert.That(bound.IsFailure).IsTrue();
+    }
+
     #endregion
 }

@@ -38,7 +38,14 @@ jobs:
         run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.semVer }}
 
       - name: Test
-        run: dotnet test --configuration Release --no-build
+        run: dotnet run --project tests/DarkPeak.Functional.Tests --configuration Release --no-build -- --coverage --coverage-output ${{ github.workspace }}/coverage.cobertura.xml --coverage-output-format cobertura
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.cobertura.xml
 
       - name: Pack
         run: dotnet pack src/DarkPeak.Functional/DarkPeak.Functional.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.version.outputs.nuGetVersionV2 }}

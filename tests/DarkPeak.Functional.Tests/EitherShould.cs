@@ -400,5 +400,57 @@ public class EitherShould
         await Assert.That(value).IsEqualTo("second error");
     }
     
+    [Test]
+    public async Task SelectMany_single_parameter_chains_right()
+    {
+        var either = new Right<string, int>(10);
+
+        var result = either.SelectMany(x => (Either<string, int>)new Right<string, int>(x + 5));
+
+        await Assert.That(result.IsRight).IsTrue();
+        var value = result.Match(_ => 0, i => i);
+        await Assert.That(value).IsEqualTo(15);
+    }
+
+    [Test]
+    public async Task SelectMany_single_parameter_preserves_left()
+    {
+        var either = new Left<string, int>("error");
+
+        var result = either.SelectMany(x => (Either<string, int>)new Right<string, int>(x + 5));
+
+        await Assert.That(either.IsLeft).IsTrue();
+        var value = result.Match(s => s, _ => "");
+        await Assert.That(value).IsEqualTo("error");
+    }
+
+    [Test]
+    public async Task MapRightAsync_left_returns_left()
+    {
+        var either = new Left<string, int>("error");
+
+        var result = await either.MapRightAsync(async x => { await Task.Yield(); return x * 2; });
+
+        await Assert.That(result.IsLeft).IsTrue();
+        var value = result.Match(s => s, _ => "");
+        await Assert.That(value).IsEqualTo("error");
+    }
+
+    [Test]
+    public async Task BindAsync_left_returns_left()
+    {
+        var either = new Left<string, int>("error");
+
+        var result = await either.BindAsync(async x =>
+        {
+            await Task.Yield();
+            return (Either<string, int>)new Right<string, int>(x + 5);
+        });
+
+        await Assert.That(result.IsLeft).IsTrue();
+        var value = result.Match(s => s, _ => "");
+        await Assert.That(value).IsEqualTo("error");
+    }
+
     #endregion
 }

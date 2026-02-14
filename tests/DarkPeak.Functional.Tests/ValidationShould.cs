@@ -90,6 +90,19 @@ public class ValidationShould
         await Assert.That(result).IsEqualTo("Value: 42");
     }
 
+    [Test]
+    public async Task MatchAsync_invalid_calls_async_function()
+    {
+        var validation = Validation.Invalid<int, Error>(
+            new ValidationError { Message = "err" });
+
+        var result = await validation.MatchAsync(
+            valid: async v => { await Task.Delay(1); return $"Value: {v}"; },
+            invalid: async errs => { await Task.Delay(1); return $"Errors: {errs.Count}"; });
+
+        await Assert.That(result).IsEqualTo("Errors: 1");
+    }
+
     #endregion
 
     #region Map
@@ -535,6 +548,36 @@ public class ValidationShould
 
         await Assert.That(valid.IsValid).IsTrue();
         await Assert.That(valid.GetValueOrThrow()).IsEqualTo("Alice, 30, alice@example.com");
+    }
+
+    #endregion
+
+    #region Invalid Async Coverage
+
+    [Test]
+    public async Task MapAsync_invalid_returns_invalid()
+    {
+        var validation = Validation.Invalid<int, Error>(
+            new ValidationError { Message = "err" });
+
+        var mapped = await validation.MapAsync(async v => { await Task.Yield(); return v * 2; });
+
+        await Assert.That(mapped.IsInvalid).IsTrue();
+    }
+
+    [Test]
+    public async Task BindAsync_invalid_returns_invalid()
+    {
+        var validation = Validation.Invalid<int, Error>(
+            new ValidationError { Message = "err" });
+
+        var bound = await validation.BindAsync(async v =>
+        {
+            await Task.Yield();
+            return Validation.Valid<string, Error>(v.ToString());
+        });
+
+        await Assert.That(bound.IsInvalid).IsTrue();
     }
 
     #endregion
