@@ -12,3 +12,9 @@
   href: retry.md
 - name: Memoize
   href: memoize.md
+- name: Orchestration
+  href: orchestration.md
+- name: "Example: Minimal Web API"
+  href: example-web-api.md
+- name: "Example: Blazor Form"
+  href: example-blazor-form.md
