@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DarkPeak.Functional/DarkPeak.Functional.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DarkPeak.Functional.Tests/DarkPeak.Functional.Tests.csproj" />
+  </Folder>
+</Solution>
