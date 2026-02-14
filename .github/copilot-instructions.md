@@ -25,8 +25,18 @@ This is a .NET 10 functional programming library providing monadic types for rai
 - **`Option<T>`** - Represents a value that may or may not exist (alternative to null). Implementations: `Some<T>`, `None<T>`
 - **`Result<T, TError>`** - Represents an operation that can succeed with a value or fail with a typed error. Implementations: `Success<T, TError>`, `Failure<T, TError>`
 - **`Either<TLeft, TRight>`** - Represents a value that can be one of two types (both valid states, not success/failure). Implementations: `Left<TLeft, TRight>`, `Right<TLeft, TRight>`
-- **`Unit`** - The functional programming equivalent of void; a type with only one value
+- **`Validation<T, TError>`** - Accumulates multiple errors instead of short-circuiting. Implementations: `Valid<T, TError>`, `Invalid<T, TError>`
 - **`Error`** - Abstract base record for typed errors with HTTP-mapped subtypes (ValidationError, NotFoundError, UnauthorizedError, etc.)
+- **`RetryPolicy`** - Configurable retry with backoff strategies (None, Constant, Linear, Exponential). Entry point: `Retry.WithMaxAttempts()`
+- **`Memoize`** - Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
+
+### Extensions Namespace (`DarkPeak.Functional.Extensions`)
+
+- **`TypeConversionExtensions`** - Cross-type conversions (Option↔Result↔Either)
+- **`TaskOptionExtensions`** / **`TaskResultExtensions`** - Fluent async chaining on `Task<Option<T>>` and `Task<Result<T, TError>>`
+- **`EitherExtensions`** - GetLeftOrDefault, GetRightOrDefault, Flatten, Merge, Partition
+- **`ValidationExtensions`** - Apply (error accumulation), Combine, Sequence, ToResult/ToValidation interop
+- **`OptionExtensions`** / **`ResultExtensions`** - Collection operations (Choose, Partition, etc.)
 
 ### Type Hierarchy Pattern
 
@@ -66,4 +76,11 @@ All operations have async counterparts suffixed with `Async` (e.g., `Map` → `M
 Tests use TUnit (`[Test]` attribute) with async assertions (`await Assert.That(...)`).
 
 ### Commit Messages
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`, `docs:`, `test:`, `chore:`).
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`, `docs:`, `test:`, `chore:`). Versions are derived automatically by GitVersion.
+
+## CI/CD
+
+- **GitVersion** (Mainline mode) derives SemVer from conventional commits
+- **GitHub Actions** builds, tests, packs, and publishes on push to `main` (pre-release) and tag push (stable release)
+- **Dependabot** monitors GitHub Actions and NuGet dependencies weekly
+- **NuGet** package published to nuget.org (requires `NUGET_API_KEY` secret)
