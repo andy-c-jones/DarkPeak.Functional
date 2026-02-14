@@ -1,0 +1,9 @@
+mode: Mainline
+branches:
+  main:
+    regex: ^main$
+    tag: ci
+    increment: Patch
+major-version-bump-message: '(feat|fix|refactor|perf|style|docs|test|chore)(\(.+\))?!:'
+minor-version-bump-message: 'feat(\(.+\))?:'
+patch-version-bump-message: 'fix(\(.+\))?:'
