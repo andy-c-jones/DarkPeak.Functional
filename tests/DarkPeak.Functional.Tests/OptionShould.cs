@@ -525,4 +525,114 @@ public class OptionShould
 
         await Assert.That(option.IsNone).IsTrue();
     }
+
+    [Test]
+    public async Task MatchAsync_some_calls_some_function()
+    {
+        var option = Option.Some("hello");
+
+        var result = await option.MatchAsync(
+            some: async v => { await Task.Yield(); return v.ToUpper(); },
+            none: async () => { await Task.Yield(); return "default"; });
+
+        await Assert.That(result).IsEqualTo("HELLO");
+    }
+
+    [Test]
+    public async Task MatchAsync_none_calls_none_function()
+    {
+        var option = Option.None<string>();
+
+        var result = await option.MatchAsync(
+            some: async v => { await Task.Yield(); return v.ToUpper(); },
+            none: async () => { await Task.Yield(); return "default"; });
+
+        await Assert.That(result).IsEqualTo("default");
+    }
+
+    [Test]
+    public async Task MapAsync_none_returns_none()
+    {
+        var option = Option.None<int>();
+
+        var mapped = await option.MapAsync(async v => { await Task.Yield(); return v * 2; });
+
+        await Assert.That(mapped.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task OrElse_factory_returns_alternative_for_none()
+    {
+        var option = Option.None<int>();
+
+        var result = option.OrElse(() => Option.Some(99));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var value = result.Match(x => x, () => 0);
+        await Assert.That(value).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task OrElse_factory_returns_original_for_some()
+    {
+        var option = Option.Some(42);
+
+        var result = option.OrElse(() => Option.Some(99));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var value = result.Match(x => x, () => 0);
+        await Assert.That(value).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task From_reference_type_returns_some_for_non_null()
+    {
+        var option = Option.From("hello");
+
+        await Assert.That(option.IsSome).IsTrue();
+    }
+
+    [Test]
+    public async Task From_reference_type_returns_none_for_null()
+    {
+        var option = Option.From<string>(null);
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task From_value_type_returns_some_for_value()
+    {
+        var option = Option.From<int>(42);
+
+        await Assert.That(option.IsSome).IsTrue();
+    }
+
+    [Test]
+    public async Task From_value_type_returns_none_for_null()
+    {
+        var option = Option.From<int>(null);
+
+        await Assert.That(option.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task SelectMany_single_on_none_returns_none()
+    {
+        var option = Option.None<int>();
+
+        var result = option.SelectMany(x => Option.Some(x * 2));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Select_on_none_returns_none()
+    {
+        var option = Option.None<int>();
+
+        var result = option.Select(x => x * 2);
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
 }
