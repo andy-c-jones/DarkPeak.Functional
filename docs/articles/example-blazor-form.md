@@ -66,7 +66,7 @@ This example shows how to use `Validation` in a Blazor component to validate a u
 
 ## The Code-Behind
 
-```csharp
+```razor
 @code {
     [Inject] private IUserService UserService { get; set; } = default!;
 
