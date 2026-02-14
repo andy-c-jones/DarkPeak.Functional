@@ -28,7 +28,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v3
@@ -38,6 +40,8 @@ jobs:
       - name: Determine version
         id: version
         uses: gittools/actions/gitversion/execute@v3
+        with:
+          useConfigFile: true
 
       - name: Build
         run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.semVer }}
@@ -55,7 +59,7 @@ jobs:
           files: ${{ github.workspace }}/TestResults/test-results.trx
 
       - name: Coverage summary
-        if: always()
+        if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: coverage.cobertura.xml
@@ -65,18 +69,18 @@ jobs:
           thresholds: '80 90'
 
       - name: Write coverage to job summary
-        if: always()
+        if: (success() || failure()) && hashFiles('code-coverage-results.md') != ''
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       - name: Post coverage comment on PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && hashFiles('code-coverage-results.md') != ''
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
           path: code-coverage-results.md
 
       - name: Upload coverage artifact
-        if: always()
+        if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
