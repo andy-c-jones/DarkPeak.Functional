@@ -2,9 +2,9 @@
 
 This example shows how to use `Validation` in a Blazor component to validate a user creation form, displaying accumulated field errors inline.
 
-## The Form Component
+## The Form Component (`CreateUser.razor`)
 
-```razor
+```html
 @page "/users/create"
 @using DarkPeak.Functional
 @using DarkPeak.Functional.Extensions
@@ -62,11 +62,7 @@ This example shows how to use `Validation` in a Blazor component to validate a u
         <div class="alert alert-danger mt-3">@_generalError</div>
     }
 </EditForm>
-```
 
-## The Code-Behind
-
-```razor
 @code {
     [Inject] private IUserService UserService { get; set; } = default!;
 
