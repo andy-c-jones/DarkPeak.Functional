@@ -7,4 +7,18 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional</PackageId>
+    <Authors>Andrew Jones</Authors>
+    <Description>A functional programming library for .NET providing monadic types (Option, Result, Either, Validation) with railway-oriented programming, retry policies, and memoization.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>functional;monad;option;result;either;validation;railway;retry;memoize</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
 </Project>
