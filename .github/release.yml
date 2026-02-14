@@ -1,0 +1,38 @@
+changelog:
+  categories:
+    - title: "🚀 Breaking Changes"
+      labels:
+        - "breaking"
+      exclude:
+        labels:
+          - "dependencies"
+    - title: "✨ Features"
+      labels:
+        - "enhancement"
+        - "feature"
+      exclude:
+        labels:
+          - "dependencies"
+    - title: "🐛 Bug Fixes"
+      labels:
+        - "bug"
+        - "fix"
+      exclude:
+        labels:
+          - "dependencies"
+    - title: "📖 Documentation"
+      labels:
+        - "documentation"
+    - title: "📦 Dependencies"
+      labels:
+        - "dependencies"
+    - title: "🔧 Other Changes"
+      exclude:
+        labels:
+          - "breaking"
+          - "enhancement"
+          - "feature"
+          - "bug"
+          - "fix"
+          - "documentation"
+          - "dependencies"
