@@ -127,12 +127,6 @@ public abstract record Result<T, TError> where TError : Error
     public abstract Result<T, TError> OrElse(Func<Result<T, TError>> alternativeFactory);
 
     /// <summary>
-    /// Converts the result to an option, discarding any error information.
-    /// </summary>
-    /// <returns>Some with the value if successful, None if failure.</returns>
-    public abstract Option<T> AsOption();
-
-    /// <summary>
     /// Implicitly converts a value to Success.
     /// </summary>
     public static implicit operator Result<T, TError>(T value) => new Success<T, TError>(value);
@@ -208,8 +202,6 @@ public sealed record Success<T, TError>(T Value) : Result<T, TError> where TErro
     public override Result<T, TError> OrElse(Result<T, TError> alternative) => this;
 
     public override Result<T, TError> OrElse(Func<Result<T, TError>> alternativeFactory) => this;
-
-    public override Option<T> AsOption() => new Some<T>(Value);
 }
 
 /// <summary>
@@ -260,8 +252,6 @@ public sealed record Failure<T, TError>(TError Error) : Result<T, TError> where 
     public override Result<T, TError> OrElse(Result<T, TError> alternative) => alternative;
 
     public override Result<T, TError> OrElse(Func<Result<T, TError>> alternativeFactory) => alternativeFactory();
-
-    public override Option<T> AsOption() => new None<T>();
 }
 
 /// <summary>

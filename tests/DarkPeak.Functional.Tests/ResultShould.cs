@@ -1,4 +1,5 @@
 using DarkPeak.Functional;
+using DarkPeak.Functional.Extensions;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;

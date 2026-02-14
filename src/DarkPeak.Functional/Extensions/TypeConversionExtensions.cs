@@ -47,6 +47,19 @@ public static class TypeConversionExtensions
             none: () => new Left<TLeft, T>(leftFactory())
         );
 
+    // ── Result → Option ──
+
+    /// <summary>
+    /// Converts the result to an option, discarding any error information.
+    /// </summary>
+    /// <returns>Some with the value if successful, None if failure.</returns>
+    public static Option<T> AsOption<T, TError>(this Result<T, TError> result)
+        where TError : Error =>
+        result.Match<Option<T>>(
+            success: value => new Some<T>(value),
+            failure: _ => new None<T>()
+        );
+
     // ── Result → Either ──
 
     /// <summary>
