@@ -91,6 +91,14 @@ public abstract record Option<T> : IEnumerable<T>
     public abstract T GetValueOrDefault(Func<T> defaultFactory);
 
     /// <summary>
+    /// Returns the value if present, otherwise throws an exception.
+    /// Use this as an escape hatch - prefer Match or GetValueOrDefault.
+    /// </summary>
+    /// <returns>The option's value.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the option is empty.</exception>
+    public abstract T GetValueOrThrow();
+
+    /// <summary>
     /// Returns this option if it has a value, otherwise returns the alternative option.
     /// </summary>
     /// <param name="alternative">The alternative option to return if this is None.</param>
@@ -190,6 +198,8 @@ public sealed record Some<T>(T Value) : Option<T>
 
     public override T GetValueOrDefault(Func<T> defaultFactory) => Value;
 
+    public override T GetValueOrThrow() => Value;
+
     public override Option<T> OrElse(Option<T> alternative) => this;
 
     public override Option<T> OrElse(Func<Option<T>> alternativeFactory) => this;
@@ -239,6 +249,9 @@ public sealed record None<T> : Option<T>
     public override T GetValueOrDefault(T defaultValue) => defaultValue;
 
     public override T GetValueOrDefault(Func<T> defaultFactory) => defaultFactory();
+
+    public override T GetValueOrThrow() =>
+        throw new InvalidOperationException("Cannot get value from None.");
 
     public override Option<T> OrElse(Option<T> alternative) => alternative;
 

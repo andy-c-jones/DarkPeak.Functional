@@ -415,4 +415,22 @@ public class OptionShould
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(99);
     }
+
+    [Test]
+    public async Task GetValueOrThrow_returns_value_for_some()
+    {
+        var option = Option.Some(42);
+
+        var value = option.GetValueOrThrow();
+
+        await Assert.That(value).IsEqualTo(42);
+    }
+
+    [Test]
+    public void GetValueOrThrow_throws_for_none()
+    {
+        var option = Option.None<int>();
+
+        Assert.Throws<InvalidOperationException>(() => option.GetValueOrThrow());
+    }
 }
