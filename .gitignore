@@ -32,3 +32,4 @@ Thumbs.db
 # DocFX generated
 docs/_site/
 docs/api/
+!docs/api/index.md
