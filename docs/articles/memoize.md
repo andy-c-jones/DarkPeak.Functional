@@ -90,7 +90,7 @@ var cachedFetch = Memoize.FuncAsync<string, ApiResponse>(
 
 ## Distributed Cache Support
 
-Plug in any external cache (Redis, SQL, etc.) by implementing `ICacheProvider<TKey, TValue>`:
+Plug in any external cache by implementing `ICacheProvider<TKey, TValue>`. For a ready-made Redis implementation, see the [Redis](redis.md) documentation.
 
 ```csharp
 public interface ICacheProvider<TKey, TValue>

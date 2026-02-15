@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.*" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.*" />
+    <ProjectReference Include="..\..\src\DarkPeak.Functional.Redis\DarkPeak.Functional.Redis.csproj" />
+  </ItemGroup>
+
+</Project>
