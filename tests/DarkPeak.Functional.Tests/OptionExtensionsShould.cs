@@ -439,6 +439,173 @@ public class OptionExtensionsShould
         await Assert.That(joined.IsNone).IsTrue();
     }
 
+    // Join (4-arity)
+
+    [Test]
+    public async Task Join_four_some_returns_tuple()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4) = result.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+        await Assert.That(v4).IsEqualTo(4.0);
+    }
+
+    [Test]
+    public async Task Join_four_any_none_returns_none()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.None<string>(),
+                Option.Some(true),
+                Option.Some(4.0));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Join (5-arity)
+
+    [Test]
+    public async Task Join_five_some_returns_tuple()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5) = result.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v5).IsEqualTo('e');
+    }
+
+    [Test]
+    public async Task Join_five_any_none_returns_none()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.None<double>(),
+                Option.Some('e'));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Join (6-arity)
+
+    [Test]
+    public async Task Join_six_some_returns_tuple()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'),
+                Option.Some(6L));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6) = result.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v6).IsEqualTo(6L);
+    }
+
+    [Test]
+    public async Task Join_six_any_none_returns_none()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'),
+                Option.None<long>());
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Join (7-arity)
+
+    [Test]
+    public async Task Join_seven_some_returns_tuple()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'),
+                Option.Some(6L),
+                Option.Some(7.0f));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7) = result.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v7).IsEqualTo(7.0f);
+    }
+
+    [Test]
+    public async Task Join_seven_any_none_returns_none()
+    {
+        var result = Option.None<int>()
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'),
+                Option.Some(6L),
+                Option.Some(7.0f));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Join (8-arity)
+
+    [Test]
+    public async Task Join_eight_some_returns_tuple()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.Some(4.0),
+                Option.Some('e'),
+                Option.Some(6L),
+                Option.Some(7.0f),
+                Option.Some((byte)8));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7, v8) = result.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v8).IsEqualTo((byte)8);
+    }
+
+    [Test]
+    public async Task Join_eight_any_none_returns_none()
+    {
+        var result = Option.Some(1)
+            .Join(
+                Option.Some("two"),
+                Option.Some(true),
+                Option.None<double>(),
+                Option.Some('e'),
+                Option.Some(6L),
+                Option.Some(7.0f),
+                Option.Some((byte)8));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
     // SequenceAsync (sequential)
 
     [Test]
@@ -573,5 +740,59 @@ public class OptionExtensionsShould
         });
 
         await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Concurrency barrier tests for *Parallel methods
+
+    [Test]
+    public async Task SequenceParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var tasks = new[]
+        {
+            Task.Run(async () =>
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+                return Option.Some(1);
+            }),
+            Task.Run(async () =>
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+                return Option.Some(2);
+            })
+        };
+
+        var result = await tasks.SequenceParallel();
+
+        await Assert.That(result.IsSome).IsTrue();
+    }
+
+    [Test]
+    public async Task TraverseParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+        var items = new[] { 1, 2 };
+
+        var result = await items.TraverseParallel(async x =>
+        {
+            if (x == 1)
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+            }
+            else
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+            }
+            return Option.Some(x);
+        });
+
+        await Assert.That(result.IsSome).IsTrue();
     }
 }

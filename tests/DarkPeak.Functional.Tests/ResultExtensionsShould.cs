@@ -315,6 +315,179 @@ public class ResultExtensionsShould
         await Assert.That(error).IsEqualTo("err1");
     }
 
+    // Join (4-arity)
+
+    [Test]
+    public async Task Join_four_successes_returns_tuple()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2, v3, v4) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+        await Assert.That(v4).IsEqualTo(4.0);
+    }
+
+    [Test]
+    public async Task Join_four_first_failure_fails_fast()
+    {
+        var result = Result.Failure<int, InternalError>(new InternalError { Message = "err" })
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0));
+
+        await Assert.That(result.IsFailure).IsTrue();
+    }
+
+    // Join (5-arity)
+
+    [Test]
+    public async Task Join_five_successes_returns_tuple()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2, v3, v4, v5) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v5).IsEqualTo('e');
+    }
+
+    [Test]
+    public async Task Join_five_third_failure_fails_fast()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Failure<bool, InternalError>(new InternalError { Message = "err3" }),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'));
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(error).IsEqualTo("err3");
+    }
+
+    // Join (6-arity)
+
+    [Test]
+    public async Task Join_six_successes_returns_tuple()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'),
+                Result.Success<long, InternalError>(6L));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2, v3, v4, v5, v6) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v6).IsEqualTo(6L);
+    }
+
+    [Test]
+    public async Task Join_six_last_failure_fails_fast()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'),
+                Result.Failure<long, InternalError>(new InternalError { Message = "err6" }));
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(error).IsEqualTo("err6");
+    }
+
+    // Join (7-arity)
+
+    [Test]
+    public async Task Join_seven_successes_returns_tuple()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'),
+                Result.Success<long, InternalError>(6L),
+                Result.Success<float, InternalError>(7.0f));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v7).IsEqualTo(7.0f);
+    }
+
+    [Test]
+    public async Task Join_seven_failure_fails_fast()
+    {
+        var result = Result.Failure<int, InternalError>(new InternalError { Message = "err" })
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'),
+                Result.Success<long, InternalError>(6L),
+                Result.Success<float, InternalError>(7.0f));
+
+        await Assert.That(result.IsFailure).IsTrue();
+    }
+
+    // Join (8-arity)
+
+    [Test]
+    public async Task Join_eight_successes_returns_tuple()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Success<double, InternalError>(4.0),
+                Result.Success<char, InternalError>('e'),
+                Result.Success<long, InternalError>(6L),
+                Result.Success<float, InternalError>(7.0f),
+                Result.Success<byte, InternalError>((byte)8));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7, v8) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v8).IsEqualTo((byte)8);
+    }
+
+    [Test]
+    public async Task Join_eight_failure_fails_fast()
+    {
+        var result = Result.Success<int, InternalError>(1)
+            .Join(
+                Result.Success<string, InternalError>("two"),
+                Result.Success<bool, InternalError>(true),
+                Result.Failure<double, InternalError>(new InternalError { Message = "err4" }),
+                Result.Success<char, InternalError>('e'),
+                Result.Success<long, InternalError>(6L),
+                Result.Success<float, InternalError>(7.0f),
+                Result.Success<byte, InternalError>((byte)8));
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(error).IsEqualTo("err4");
+    }
+
     // SequenceAsync (sequential)
 
     [Test]
@@ -534,5 +707,113 @@ public class ResultExtensionsShould
         await Assert.That(chosen).Count().IsEqualTo(2);
         await Assert.That(chosen[0]).IsEqualTo(1);
         await Assert.That(chosen[1]).IsEqualTo(3);
+    }
+
+    // Concurrency barrier tests for *Parallel methods
+
+    [Test]
+    public async Task SequenceParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var tasks = new[]
+        {
+            Task.Run(async () =>
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+                return Result.Success<int, InternalError>(1);
+            }),
+            Task.Run(async () =>
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+                return Result.Success<int, InternalError>(2);
+            })
+        };
+
+        var result = await tasks.SequenceParallel();
+
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    [Test]
+    public async Task TraverseParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+        var items = new[] { 1, 2 };
+
+        var result = await items.TraverseParallel(async x =>
+        {
+            if (x == 1)
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+            }
+            else
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+            }
+            return Result.Success<int, InternalError>(x);
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    [Test]
+    public async Task PartitionParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var tasks = new[]
+        {
+            Task.Run(async () =>
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+                return Result.Success<int, InternalError>(1);
+            }),
+            Task.Run(async () =>
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+                return Result.Success<int, InternalError>(2);
+            })
+        };
+
+        var (successes, _) = await tasks.PartitionParallel();
+
+        await Assert.That(successes.ToList()).Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task ChooseParallel_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var tasks = new[]
+        {
+            Task.Run(async () =>
+            {
+                task1Started.SetResult();
+                await task2Started.Task;
+                return Result.Success<int, InternalError>(1);
+            }),
+            Task.Run(async () =>
+            {
+                task2Started.SetResult();
+                await task1Started.Task;
+                return Result.Success<int, InternalError>(2);
+            })
+        };
+
+        var chosen = (await tasks.ChooseParallel()).ToList();
+
+        await Assert.That(chosen).Count().IsEqualTo(2);
     }
 }

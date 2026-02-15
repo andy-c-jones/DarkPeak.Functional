@@ -238,18 +238,61 @@ public static class ResultExtensions
     /// <summary>
     /// Combines three independent Results into a tuple. Fails fast on the first failure.
     /// </summary>
-    /// <typeparam name="T1">The first success type.</typeparam>
-    /// <typeparam name="T2">The second success type.</typeparam>
-    /// <typeparam name="T3">The third success type.</typeparam>
-    /// <typeparam name="TError">The error type.</typeparam>
-    /// <param name="first">The first result.</param>
-    /// <param name="second">The second result.</param>
-    /// <param name="third">The third result.</param>
-    /// <returns>Success with a tuple of all values, or the first Failure.</returns>
     public static Result<(T1, T2, T3), TError> Join<T1, T2, T3, TError>(
         this Result<T1, TError> first, Result<T2, TError> second, Result<T3, TError> third)
         where TError : Error =>
         first.Bind(v1 => second.Bind(v2 => third.Map(v3 => (v1, v2, v3))));
+
+    /// <summary>
+    /// Combines four independent Results into a tuple. Fails fast on the first failure.
+    /// </summary>
+    public static Result<(T1, T2, T3, T4), TError> Join<T1, T2, T3, T4, TError>(
+        this Result<T1, TError> first, Result<T2, TError> second,
+        Result<T3, TError> third, Result<T4, TError> fourth)
+        where TError : Error =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Map(v4 => (v1, v2, v3, v4)))));
+
+    /// <summary>
+    /// Combines five independent Results into a tuple. Fails fast on the first failure.
+    /// </summary>
+    public static Result<(T1, T2, T3, T4, T5), TError> Join<T1, T2, T3, T4, T5, TError>(
+        this Result<T1, TError> first, Result<T2, TError> second,
+        Result<T3, TError> third, Result<T4, TError> fourth,
+        Result<T5, TError> fifth)
+        where TError : Error =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Map(v5 => (v1, v2, v3, v4, v5))))));
+
+    /// <summary>
+    /// Combines six independent Results into a tuple. Fails fast on the first failure.
+    /// </summary>
+    public static Result<(T1, T2, T3, T4, T5, T6), TError> Join<T1, T2, T3, T4, T5, T6, TError>(
+        this Result<T1, TError> first, Result<T2, TError> second,
+        Result<T3, TError> third, Result<T4, TError> fourth,
+        Result<T5, TError> fifth, Result<T6, TError> sixth)
+        where TError : Error =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Map(v6 => (v1, v2, v3, v4, v5, v6)))))));
+
+    /// <summary>
+    /// Combines seven independent Results into a tuple. Fails fast on the first failure.
+    /// </summary>
+    public static Result<(T1, T2, T3, T4, T5, T6, T7), TError> Join<T1, T2, T3, T4, T5, T6, T7, TError>(
+        this Result<T1, TError> first, Result<T2, TError> second,
+        Result<T3, TError> third, Result<T4, TError> fourth,
+        Result<T5, TError> fifth, Result<T6, TError> sixth,
+        Result<T7, TError> seventh)
+        where TError : Error =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Bind(v6 => seventh.Map(v7 => (v1, v2, v3, v4, v5, v6, v7))))))));
+
+    /// <summary>
+    /// Combines eight independent Results into a tuple. Fails fast on the first failure.
+    /// </summary>
+    public static Result<(T1, T2, T3, T4, T5, T6, T7, T8), TError> Join<T1, T2, T3, T4, T5, T6, T7, T8, TError>(
+        this Result<T1, TError> first, Result<T2, TError> second,
+        Result<T3, TError> third, Result<T4, TError> fourth,
+        Result<T5, TError> fifth, Result<T6, TError> sixth,
+        Result<T7, TError> seventh, Result<T8, TError> eighth)
+        where TError : Error =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Bind(v6 => seventh.Bind(v7 => eighth.Map(v8 => (v1, v2, v3, v4, v5, v6, v7, v8)))))))));
 
     // --- Async Sequential ---
 

@@ -143,3 +143,5 @@ The built function is reusable — call it multiple times with different inputs.
 | `Pipe` | Ad-hoc, inline transformations |
 | `Compose` | Building small, composable function building blocks |
 | `Pipeline.Create` | Complex, reusable multi-step workflows with error handling |
+
+> **Note:** `Pipe`, `Compose`, and `Pipeline` are inherently **sequential** — each step depends on the output of the previous step. If you need to run independent operations concurrently and combine the results, use [`Join`](join.md) instead. See also [Orchestration — Concurrency](orchestration.md#concurrency).

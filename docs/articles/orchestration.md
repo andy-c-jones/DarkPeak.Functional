@@ -136,3 +136,43 @@ validated.Match(
 ```
 
 See [Minimal Web API Example](example-web-api.md) for a complete example of this approach.
+
+## Concurrency
+
+When you have **independent** operations that can run at the same time, prefer the concurrent combinators over sequential chaining:
+
+| Need | Use | Runs |
+|---|---|---|
+| Combine 2-8 independent `Task<Result>` | `Join` | Concurrent (`Task.WhenAll`) |
+| Combine 2-8 independent `Task<Option>` | `Join` | Concurrent (`Task.WhenAll`) |
+| Combine 2-8 independent `Task<Validation>` | `Join` / `ZipWithAsync` | Concurrent (`Task.WhenAll`) |
+| Await a collection of `Task<Result>` | `SequenceParallel` / `TraverseParallel` | Concurrent (`Task.WhenAll`) |
+| Await a collection of `Task<Option>` | `SequenceParallel` / `TraverseParallel` | Concurrent (`Task.WhenAll`) |
+| Await a collection of `Task<Validation>` | `SequenceParallel` / `TraverseParallel` | Concurrent (`Task.WhenAll`) |
+
+### Example: Concurrent Validation
+
+```csharp
+// Validators that call external services — run concurrently
+Task<Validation<string, Error>> ValidateUsernameAsync(string name) => /* check DB */;
+Task<Validation<string, Error>> ValidateEmailAsync(string email) => /* check mailbox */;
+Task<Validation<int, Error>> ValidateAgeAsync(int age) => /* check against policy service */;
+
+var validated = await ValidateUsernameAsync(request.Name)
+    .Join(
+        ValidateEmailAsync(request.Email),
+        ValidateAgeAsync(request.Age));
+// All three HTTP calls run concurrently.
+// If any fail, errors are accumulated (Validation semantics).
+```
+
+### Sequential vs Concurrent
+
+Use `Bind` chains and `Pipeline` when each step **depends on** the previous step's output. Use `Join` and `*Parallel` when the operations are **independent** — this can dramatically reduce wall-clock time.
+
+```
+Sequential (Bind/Pipeline):  A ──► B ──► C     total = tA + tB + tC
+Concurrent (Join):           A ──┐
+                             B ──┤ join    total = max(tA, tB, tC)
+                             C ──┘
+```

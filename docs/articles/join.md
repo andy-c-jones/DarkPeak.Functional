@@ -1,6 +1,6 @@
 # Join
 
-`Join` combines independent computations into tuples. It comes in 2-arity and 3-arity for sync, and 2-arity for async.
+`Join` combines independent computations into tuples. It supports arities 2 through 8 for sync, and 2 through 8 for async.
 
 ## Semantics
 
@@ -26,6 +26,13 @@ var joined = name.Join(age);
 var email = Result.Success<string, Error>("alice@example.com");
 var joined = name.Join(age, email);
 // Success(("Alice", 30, "alice@example.com"))
+```
+
+Higher arities (up to 8) work the same way:
+
+```csharp
+var joined = v1.Join(v2, v3, v4, v5, v6, v7, v8);
+// Success((v1, v2, v3, v4, v5, v6, v7, v8))
 ```
 
 If any Result is a Failure, the first failure is returned (fail-fast):
@@ -85,23 +92,32 @@ var joined = name.Join(age, email);
 
 ## Async Join
 
-For `Task<Result<T, TError>>` and `Task<Option<T>>`, async `Join` runs both tasks concurrently using `Task.WhenAll`:
+For `Task<Result<T, TError>>`, `Task<Option<T>>`, and `Task<Validation<T, TError>>`, async `Join` runs all tasks concurrently using `Task.WhenAll`. Arities 2 through 8 are supported:
 
 ```csharp
 using DarkPeak.Functional.Extensions;
 
+// Result — concurrent, fail-fast
 var result = await FetchUserAsync(userId)
     .Join(FetchOrdersAsync(userId));
 // Success((user, orders)) — both tasks run concurrently
-```
 
-This is particularly useful when you have independent async operations that don't depend on each other:
-
-```csharp
-// Option variant
+// Option — concurrent, fail-fast
 var result = await FindConfigAsync("key1")
     .Join(FindConfigAsync("key2"));
 // Some((value1, value2)) or None
+
+// Validation — concurrent, error-accumulating
+var result = await ValidateNameAsync(name)
+    .Join(ValidateAgeAsync(age), ValidateEmailAsync(email));
+// Valid((name, age, email)) or Invalid with all accumulated errors
+```
+
+Higher-arity async join works the same way:
+
+```csharp
+var result = await task1.Join(task2, task3, task4, task5);
+// All five tasks run concurrently via Task.WhenAll
 ```
 
 ## Join vs ZipWith
@@ -119,3 +135,14 @@ var user = name.ZipWith(age, (n, a) => new User(n, a));
 ```
 
 Both accumulate errors the same way. Use `Join` when you want the raw tuple, `ZipWith` when you want to transform the result immediately.
+
+For async Validation, use `ZipWithAsync` to combine async validations with a projection:
+
+```csharp
+var user = await ValidateNameAsync(name)
+    .ZipWithAsync(
+        ValidateAgeAsync(age),
+        ValidateEmailAsync(email),
+        (n, a, e) => new User(n, a, e));
+// All tasks run concurrently, errors accumulated
+```

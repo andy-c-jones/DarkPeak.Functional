@@ -56,6 +56,106 @@ public static class ValidationExtensions
             .Apply(third);
 
     /// <summary>
+    /// Combines four validations with a projection function, accumulating errors from all.
+    /// </summary>
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, T4, TResult, TError>(
+        this Validation<T1, TError> first,
+        Validation<T2, TError> second,
+        Validation<T3, TError> third,
+        Validation<T4, TError> fourth,
+        Func<T1, T2, T3, T4, TResult> combiner)
+        where TError : Error =>
+        first
+            .Map<Func<T2, Func<T3, Func<T4, TResult>>>>(a => b => c => d => combiner(a, b, c, d))
+            .Apply(second)
+            .Apply(third)
+            .Apply(fourth);
+
+    /// <summary>
+    /// Combines five validations with a projection function, accumulating errors from all.
+    /// </summary>
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, T4, T5, TResult, TError>(
+        this Validation<T1, TError> first,
+        Validation<T2, TError> second,
+        Validation<T3, TError> third,
+        Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth,
+        Func<T1, T2, T3, T4, T5, TResult> combiner)
+        where TError : Error =>
+        first
+            .Map<Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>>(a => b => c => d => e => combiner(a, b, c, d, e))
+            .Apply(second)
+            .Apply(third)
+            .Apply(fourth)
+            .Apply(fifth);
+
+    /// <summary>
+    /// Combines six validations with a projection function, accumulating errors from all.
+    /// </summary>
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, T4, T5, T6, TResult, TError>(
+        this Validation<T1, TError> first,
+        Validation<T2, TError> second,
+        Validation<T3, TError> third,
+        Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth,
+        Validation<T6, TError> sixth,
+        Func<T1, T2, T3, T4, T5, T6, TResult> combiner)
+        where TError : Error =>
+        first
+            .Map<Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, TResult>>>>>>(a => b => c => d => e => f => combiner(a, b, c, d, e, f))
+            .Apply(second)
+            .Apply(third)
+            .Apply(fourth)
+            .Apply(fifth)
+            .Apply(sixth);
+
+    /// <summary>
+    /// Combines seven validations with a projection function, accumulating errors from all.
+    /// </summary>
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, T4, T5, T6, T7, TResult, TError>(
+        this Validation<T1, TError> first,
+        Validation<T2, TError> second,
+        Validation<T3, TError> third,
+        Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth,
+        Validation<T6, TError> sixth,
+        Validation<T7, TError> seventh,
+        Func<T1, T2, T3, T4, T5, T6, T7, TResult> combiner)
+        where TError : Error =>
+        first
+            .Map<Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, Func<T7, TResult>>>>>>>(a => b => c => d => e => f => g => combiner(a, b, c, d, e, f, g))
+            .Apply(second)
+            .Apply(third)
+            .Apply(fourth)
+            .Apply(fifth)
+            .Apply(sixth)
+            .Apply(seventh);
+
+    /// <summary>
+    /// Combines eight validations with a projection function, accumulating errors from all.
+    /// </summary>
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, T4, T5, T6, T7, T8, TResult, TError>(
+        this Validation<T1, TError> first,
+        Validation<T2, TError> second,
+        Validation<T3, TError> third,
+        Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth,
+        Validation<T6, TError> sixth,
+        Validation<T7, TError> seventh,
+        Validation<T8, TError> eighth,
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> combiner)
+        where TError : Error =>
+        first
+            .Map<Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, Func<T7, Func<T8, TResult>>>>>>>>(a => b => c => d => e => f => g => h => combiner(a, b, c, d, e, f, g, h))
+            .Apply(second)
+            .Apply(third)
+            .Apply(fourth)
+            .Apply(fifth)
+            .Apply(sixth)
+            .Apply(seventh)
+            .Apply(eighth);
+
+    /// <summary>
     /// Converts a sequence of validations into a single validation containing all values, accumulating all errors.
     /// Returns Valid with all values if all succeed, or Invalid with all collected errors.
     /// </summary>
@@ -151,16 +251,59 @@ public static class ValidationExtensions
     /// <summary>
     /// Combines three independent Validations into a tuple, accumulating all errors from all.
     /// </summary>
-    /// <typeparam name="T1">The first valid type.</typeparam>
-    /// <typeparam name="T2">The second valid type.</typeparam>
-    /// <typeparam name="T3">The third valid type.</typeparam>
-    /// <typeparam name="TError">The error type.</typeparam>
-    /// <param name="first">The first validation.</param>
-    /// <param name="second">The second validation.</param>
-    /// <param name="third">The third validation.</param>
-    /// <returns>Valid with a tuple of all values, or Invalid with all accumulated errors.</returns>
     public static Validation<(T1, T2, T3), TError> Join<T1, T2, T3, TError>(
         this Validation<T1, TError> first, Validation<T2, TError> second, Validation<T3, TError> third)
         where TError : Error =>
         first.ZipWith(second, third, (v1, v2, v3) => (v1, v2, v3));
+
+    /// <summary>
+    /// Combines four independent Validations into a tuple, accumulating all errors.
+    /// </summary>
+    public static Validation<(T1, T2, T3, T4), TError> Join<T1, T2, T3, T4, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second,
+        Validation<T3, TError> third, Validation<T4, TError> fourth)
+        where TError : Error =>
+        first.ZipWith(second, third, fourth, (v1, v2, v3, v4) => (v1, v2, v3, v4));
+
+    /// <summary>
+    /// Combines five independent Validations into a tuple, accumulating all errors.
+    /// </summary>
+    public static Validation<(T1, T2, T3, T4, T5), TError> Join<T1, T2, T3, T4, T5, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second,
+        Validation<T3, TError> third, Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth)
+        where TError : Error =>
+        first.ZipWith(second, third, fourth, fifth, (v1, v2, v3, v4, v5) => (v1, v2, v3, v4, v5));
+
+    /// <summary>
+    /// Combines six independent Validations into a tuple, accumulating all errors.
+    /// </summary>
+    public static Validation<(T1, T2, T3, T4, T5, T6), TError> Join<T1, T2, T3, T4, T5, T6, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second,
+        Validation<T3, TError> third, Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth, Validation<T6, TError> sixth)
+        where TError : Error =>
+        first.ZipWith(second, third, fourth, fifth, sixth, (v1, v2, v3, v4, v5, v6) => (v1, v2, v3, v4, v5, v6));
+
+    /// <summary>
+    /// Combines seven independent Validations into a tuple, accumulating all errors.
+    /// </summary>
+    public static Validation<(T1, T2, T3, T4, T5, T6, T7), TError> Join<T1, T2, T3, T4, T5, T6, T7, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second,
+        Validation<T3, TError> third, Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth, Validation<T6, TError> sixth,
+        Validation<T7, TError> seventh)
+        where TError : Error =>
+        first.ZipWith(second, third, fourth, fifth, sixth, seventh, (v1, v2, v3, v4, v5, v6, v7) => (v1, v2, v3, v4, v5, v6, v7));
+
+    /// <summary>
+    /// Combines eight independent Validations into a tuple, accumulating all errors.
+    /// </summary>
+    public static Validation<(T1, T2, T3, T4, T5, T6, T7, T8), TError> Join<T1, T2, T3, T4, T5, T6, T7, T8, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second,
+        Validation<T3, TError> third, Validation<T4, TError> fourth,
+        Validation<T5, TError> fifth, Validation<T6, TError> sixth,
+        Validation<T7, TError> seventh, Validation<T8, TError> eighth)
+        where TError : Error =>
+        first.ZipWith(second, third, fourth, fifth, sixth, seventh, eighth, (v1, v2, v3, v4, v5, v6, v7, v8) => (v1, v2, v3, v4, v5, v6, v7, v8));
 }

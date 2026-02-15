@@ -98,7 +98,7 @@ var result = new[] { "Alice", "", "Charlie" }.Traverse(ValidateName);
 
 ## Async Variants
 
-Both `Sequence` and `Traverse` have sequential and parallel async variants for `Result` and `Option`.
+Both `Sequence` and `Traverse` have sequential and parallel async variants for `Result`, `Option`, and `Validation`.
 
 ### Sequential (one at a time)
 
@@ -140,10 +140,10 @@ var values = await tasks.ChooseParallel();
 |---|---|---|---|
 | `Sequence` | Any None → None | First failure (fail-fast) | Accumulates all errors |
 | `Traverse` | Any None → None | First failure (fail-fast) | Accumulates all errors |
-| `SequenceAsync` | Sequential | Sequential, fail-fast | — |
-| `TraverseAsync` | Sequential | Sequential, fail-fast | — |
-| `SequenceParallel` | Concurrent | Concurrent, fail-fast | — |
-| `TraverseParallel` | Concurrent | Concurrent, fail-fast | — |
+| `SequenceAsync` | Sequential | Sequential, fail-fast | Sequential, accumulates errors |
+| `TraverseAsync` | Sequential | Sequential, fail-fast | Sequential, accumulates errors |
+| `SequenceParallel` | Concurrent | Concurrent, fail-fast | Concurrent, accumulates errors |
+| `TraverseParallel` | Concurrent | Concurrent, fail-fast | Concurrent, accumulates errors |
 | `PartitionAsync` | — | Sequential | — |
 | `ChooseAsync` | — | Sequential | — |
 | `PartitionParallel` | — | Concurrent | — |

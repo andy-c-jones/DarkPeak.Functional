@@ -187,16 +187,88 @@ public static class TaskResultExtensions
     /// Asynchronously combines two independent Result-producing tasks into a tuple.
     /// Both tasks are awaited concurrently. Fails fast on the first failure.
     /// </summary>
-    /// <typeparam name="T1">The first success type.</typeparam>
-    /// <typeparam name="T2">The second success type.</typeparam>
-    /// <typeparam name="TError">The error type.</typeparam>
-    /// <param name="first">The first task producing a result.</param>
-    /// <param name="second">The second task producing a result.</param>
-    /// <returns>Success with a tuple of both values, or the first Failure.</returns>
     public static async Task<Result<(T1, T2), TError>> Join<T1, T2, TError>(
         this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second) where TError : Error
     {
         await Task.WhenAll(first, second);
         return first.Result.Join(second.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines three independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3), TError>> Join<T1, T2, T3, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third) where TError : Error
+    {
+        await Task.WhenAll(first, second, third);
+        return first.Result.Join(second.Result, third.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines four independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3, T4), TError>> Join<T1, T2, T3, T4, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third, Task<Result<T4, TError>> fourth) where TError : Error
+    {
+        await Task.WhenAll(first, second, third, fourth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines five independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3, T4, T5), TError>> Join<T1, T2, T3, T4, T5, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third, Task<Result<T4, TError>> fourth,
+        Task<Result<T5, TError>> fifth) where TError : Error
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines six independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3, T4, T5, T6), TError>> Join<T1, T2, T3, T4, T5, T6, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third, Task<Result<T4, TError>> fourth,
+        Task<Result<T5, TError>> fifth, Task<Result<T6, TError>> sixth) where TError : Error
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines seven independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3, T4, T5, T6, T7), TError>> Join<T1, T2, T3, T4, T5, T6, T7, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third, Task<Result<T4, TError>> fourth,
+        Task<Result<T5, TError>> fifth, Task<Result<T6, TError>> sixth,
+        Task<Result<T7, TError>> seventh) where TError : Error
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth, seventh);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result, seventh.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines eight independent Result-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    public static async Task<Result<(T1, T2, T3, T4, T5, T6, T7, T8), TError>> Join<T1, T2, T3, T4, T5, T6, T7, T8, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second,
+        Task<Result<T3, TError>> third, Task<Result<T4, TError>> fourth,
+        Task<Result<T5, TError>> fifth, Task<Result<T6, TError>> sixth,
+        Task<Result<T7, TError>> seventh, Task<Result<T8, TError>> eighth) where TError : Error
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth, seventh, eighth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result, seventh.Result, eighth.Result);
     }
 }

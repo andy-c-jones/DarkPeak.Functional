@@ -332,16 +332,55 @@ public static class OptionExtensions
     /// Combines three independent Options into a tuple.
     /// Returns Some only if all are Some, otherwise None.
     /// </summary>
-    /// <typeparam name="T1">The first value type.</typeparam>
-    /// <typeparam name="T2">The second value type.</typeparam>
-    /// <typeparam name="T3">The third value type.</typeparam>
-    /// <param name="first">The first option.</param>
-    /// <param name="second">The second option.</param>
-    /// <param name="third">The third option.</param>
-    /// <returns>Some with a tuple of all values, or None.</returns>
     public static Option<(T1, T2, T3)> Join<T1, T2, T3>(
         this Option<T1> first, Option<T2> second, Option<T3> third) =>
         first.Bind(v1 => second.Bind(v2 => third.Map(v3 => (v1, v2, v3))));
+
+    /// <summary>
+    /// Combines four independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static Option<(T1, T2, T3, T4)> Join<T1, T2, T3, T4>(
+        this Option<T1> first, Option<T2> second, Option<T3> third, Option<T4> fourth) =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Map(v4 => (v1, v2, v3, v4)))));
+
+    /// <summary>
+    /// Combines five independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static Option<(T1, T2, T3, T4, T5)> Join<T1, T2, T3, T4, T5>(
+        this Option<T1> first, Option<T2> second, Option<T3> third,
+        Option<T4> fourth, Option<T5> fifth) =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Map(v5 => (v1, v2, v3, v4, v5))))));
+
+    /// <summary>
+    /// Combines six independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static Option<(T1, T2, T3, T4, T5, T6)> Join<T1, T2, T3, T4, T5, T6>(
+        this Option<T1> first, Option<T2> second, Option<T3> third,
+        Option<T4> fourth, Option<T5> fifth, Option<T6> sixth) =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Map(v6 => (v1, v2, v3, v4, v5, v6)))))));
+
+    /// <summary>
+    /// Combines seven independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static Option<(T1, T2, T3, T4, T5, T6, T7)> Join<T1, T2, T3, T4, T5, T6, T7>(
+        this Option<T1> first, Option<T2> second, Option<T3> third,
+        Option<T4> fourth, Option<T5> fifth, Option<T6> sixth,
+        Option<T7> seventh) =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Bind(v6 => seventh.Map(v7 => (v1, v2, v3, v4, v5, v6, v7))))))));
+
+    /// <summary>
+    /// Combines eight independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static Option<(T1, T2, T3, T4, T5, T6, T7, T8)> Join<T1, T2, T3, T4, T5, T6, T7, T8>(
+        this Option<T1> first, Option<T2> second, Option<T3> third,
+        Option<T4> fourth, Option<T5> fifth, Option<T6> sixth,
+        Option<T7> seventh, Option<T8> eighth) =>
+        first.Bind(v1 => second.Bind(v2 => third.Bind(v3 => fourth.Bind(v4 => fifth.Bind(v5 => sixth.Bind(v6 => seventh.Bind(v7 => eighth.Map(v8 => (v1, v2, v3, v4, v5, v6, v7, v8)))))))));
 
     // --- Async Sequential ---
 

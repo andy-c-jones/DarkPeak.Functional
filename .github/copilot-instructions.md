@@ -111,7 +111,7 @@ All four packages are versioned together and released simultaneously via the man
 ### Extensions Namespace (`DarkPeak.Functional.Extensions`)
 
 - **`TypeConversionExtensions`** — Cross-type conversions (Option↔Result↔Either)
-- **`TaskOptionExtensions`** / **`TaskResultExtensions`** — Fluent async chaining on `Task<Option<T>>` and `Task<Result<T, TError>>`
+- **`TaskOptionExtensions`** / **`TaskResultExtensions`** / **`TaskValidationExtensions`** — Fluent async chaining on `Task<Option<T>>`, `Task<Result<T, TError>>`, and `Task<Validation<T, TError>>`. Includes concurrent `Join` (arities 2-8), `ZipWithAsync` (Validation, arities 2-8), `SequenceAsync`, `TraverseAsync`, `SequenceParallel`, and `TraverseParallel`
 - **`EitherExtensions`** — GetLeftOrDefault, GetRightOrDefault, Flatten, Merge, Partition
 - **`ValidationExtensions`** — Apply (error accumulation), ZipWith (applicative combinator), Sequence, Traverse, Join (error-accumulating), ToResult/ToValidation interop
 - **`OptionExtensions`** / **`ResultExtensions`** — Collection operations (Choose, Partition, Sequence, Traverse, Join), async variants (SequenceAsync, TraverseAsync, PartitionAsync, ChooseAsync), parallel variants (SequenceParallel, TraverseParallel, PartitionParallel, ChooseParallel)
