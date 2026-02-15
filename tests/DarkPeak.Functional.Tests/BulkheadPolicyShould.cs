@@ -59,6 +59,7 @@ public class BulkheadPolicyShould
             .WithMaxQueueSize(0); // No queue
 
         var executing = 0;
+        var started = new SemaphoreSlim(0, 2);
         var tasks = new List<Task<Result<int, Error>>>();
 
         // Fill the bulkhead
@@ -67,14 +68,16 @@ public class BulkheadPolicyShould
             tasks.Add(bulkhead.ExecuteAsync<int, Error>(async ct =>
             {
                 Interlocked.Increment(ref executing);
+                started.Release(); // Signal that this task has started
                 await Task.Delay(500, ct);
                 Interlocked.Decrement(ref executing);
                 return Result.Success<int, Error>(i);
             }));
         }
 
-        // Wait for bulkhead to be full
-        await Task.Delay(50);
+        // Wait for both tasks to actually start executing
+        await started.WaitAsync();
+        await started.WaitAsync();
 
         // This should be rejected
         var result = await bulkhead.ExecuteAsync<int, Error>(
@@ -142,13 +145,17 @@ public class BulkheadPolicyShould
         var bulkhead = Bulkhead.WithMaxConcurrency(1)
             .WithMaxQueueSize(0);
 
+        var started = new SemaphoreSlim(0, 1);
+        
         var task1 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
+            started.Release(); // Signal that this task has started
             await Task.Delay(500, ct);
             return 1;
         });
 
-        await Task.Delay(50);
+        // Wait for task1 to actually start executing
+        await started.WaitAsync();
 
         var result2 = await bulkhead.ExecuteAsync<int, Error>(
             async ct =>
@@ -176,13 +183,17 @@ public class BulkheadPolicyShould
             .WithMaxQueueSize(0)
             .OnRejected(() => rejectionCount++);
 
+        var started = new SemaphoreSlim(0, 1);
+        
         var task1 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
+            started.Release(); // Signal that this task has started
             await Task.Delay(100, ct);
             return Result.Success<int, Error>(1);
         });
 
-        await Task.Delay(20);
+        // Wait for task1 to actually start executing
+        await started.WaitAsync();
 
         var result2 = await bulkhead.ExecuteAsync<int, Error>(
             async ct =>
@@ -233,26 +244,36 @@ public class BulkheadPolicyShould
         var bulkhead = Bulkhead.WithMaxConcurrency(2)
             .WithMaxQueueSize(1);
 
+        var started = new SemaphoreSlim(0, 2);
+
         // Fill bulkhead and queue
         var task1 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
+            started.Release(); // Signal that this task has started
             await Task.Delay(500, ct);
             return Result.Success<int, Error>(1);
         });
 
         var task2 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
+            started.Release(); // Signal that this task has started
             await Task.Delay(500, ct);
             return Result.Success<int, Error>(2);
         });
 
+        // Wait for both executing tasks to start
+        await started.WaitAsync();
+        await started.WaitAsync();
+
+        // Now start task3 which should be queued (won't execute until task1 or task2 completes)
         var task3 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
             await Task.Delay(500, ct);
             return Result.Success<int, Error>(3);
         });
 
-        await Task.Delay(50);
+        // Give task3 a moment to be queued
+        await Task.Yield();
 
         var result4 = await bulkhead.ExecuteAsync<int, Error>(
             async ct =>
