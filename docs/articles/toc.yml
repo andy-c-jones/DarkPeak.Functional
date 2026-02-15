@@ -20,10 +20,16 @@
   href: join.md
 - name: Retry
   href: retry.md
-- name: Memoize
-  href: memoize.md
+- name: Timeout
+  href: timeout.md
 - name: Circuit Breaker
   href: circuit-breaker.md
+- name: Bulkhead
+  href: bulkhead.md
+- name: Resilience Policy
+  href: resilience-policy.md
+- name: Memoize
+  href: memoize.md
 - name: Http
   href: http.md
 - name: AspNet
