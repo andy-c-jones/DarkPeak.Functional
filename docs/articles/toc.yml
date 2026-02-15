@@ -16,9 +16,11 @@
   href: circuit-breaker.md
 - name: Http
   href: http.md
+- name: AspNet
+  href: aspnet.md
 - name: Orchestration
   href: orchestration.md
-- name: "Example: Minimal Web API"
-  href: example-web-api.md
+- name: Redis
+  href: redis.md
 - name: "Example: Blazor Form"
   href: example-blazor-form.md

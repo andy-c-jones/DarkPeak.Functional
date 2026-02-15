@@ -1,0 +1,51 @@
+name: PR Labeler
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Label PR from conventional commit title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+
+            const mappings = [
+              { pattern: /^feat(!)?:\s/, label: 'enhancement', breaking: true },
+              { pattern: /^fix(!)?:\s/,  label: 'bug',         breaking: true },
+              { pattern: /^docs(!)?:\s/, label: 'documentation', breaking: true },
+              { pattern: /^ci(!)?:\s/,   label: null,           breaking: true },
+              { pattern: /^refactor(!)?:\s/, label: null,       breaking: true },
+              { pattern: /^perf(!)?:\s/,     label: null,       breaking: true },
+              { pattern: /^test(!)?:\s/,     label: null,       breaking: true },
+              { pattern: /^chore(!)?:\s/,    label: null,       breaking: true },
+              { pattern: /^build(!)?:\s/,    label: null,       breaking: true },
+            ];
+
+            const labels = [];
+
+            for (const { pattern, label, breaking } of mappings) {
+              const match = title.match(pattern);
+              if (match) {
+                if (label) labels.push(label);
+                if (breaking && match[1] === '!') labels.push('breaking');
+                break;
+              }
+            }
+
+            if (labels.length === 0) return;
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels,
+            });

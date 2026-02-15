@@ -9,30 +9,26 @@ changelog:
     - title: "✨ Features"
       labels:
         - "enhancement"
-        - "feature"
       exclude:
         labels:
           - "dependencies"
+          - "breaking"
     - title: "🐛 Bug Fixes"
       labels:
         - "bug"
-        - "fix"
       exclude:
         labels:
           - "dependencies"
+          - "breaking"
     - title: "📖 Documentation"
       labels:
         - "documentation"
+      exclude:
+        labels:
+          - "breaking"
     - title: "📦 Dependencies"
       labels:
         - "dependencies"
     - title: "🔧 Other Changes"
-      exclude:
-        labels:
-          - "breaking"
-          - "enhancement"
-          - "feature"
-          - "bug"
-          - "fix"
-          - "documentation"
-          - "dependencies"
+      labels:
+        - "*"

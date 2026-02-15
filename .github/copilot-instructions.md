@@ -28,7 +28,7 @@ reportgenerator "-reports:tests/**/TestResults/*.cobertura.xml" "-targetdir:cove
 
 ## Architecture Overview
 
-This is a .NET 10 functional programming library providing monadic types for railway-oriented programming. The solution is composed of three packable libraries and their corresponding test projects. The library targets nullable-enabled C# with strict null reference handling.
+This is a .NET 10 functional programming library providing monadic types for railway-oriented programming. The solution is composed of four packable libraries and their corresponding test projects. The library targets nullable-enabled C# with strict null reference handling.
 
 ### Solution Structure
 
@@ -39,11 +39,13 @@ DarkPeak.Functional/
 ├── src/
 │   ├── DarkPeak.Functional/        # Core library: monadic types and extensions
 │   ├── DarkPeak.Functional.Http/   # HTTP client extensions wrapping HttpClient in Result<T, Error>
-│   └── DarkPeak.Functional.AspNet/ # ASP.NET integration (ToIResult, ProblemDetails)
+│   ├── DarkPeak.Functional.AspNet/ # ASP.NET integration (ToIResult, ProblemDetails)
+│   └── DarkPeak.Functional.Redis/  # Redis distributed cache provider for Memoize
 ├── tests/
 │   ├── DarkPeak.Functional.Tests/
 │   ├── DarkPeak.Functional.Http.Tests/
-│   └── DarkPeak.Functional.AspNet.Tests/
+│   ├── DarkPeak.Functional.AspNet.Tests/
+│   └── DarkPeak.Functional.Redis.Tests/
 └── docs/                           # DocFX API documentation
 ```
 
@@ -52,8 +54,9 @@ DarkPeak.Functional/
 - **DarkPeak.Functional** — No external dependencies. The core library.
 - **DarkPeak.Functional.Http** — Depends on `DarkPeak.Functional`. Provides `HttpClientExtensions` for wrapping `HttpClient` operations in `Result<T, Error>`.
 - **DarkPeak.Functional.AspNet** — Depends on `DarkPeak.Functional`. References `Microsoft.AspNetCore.App` shared framework. Provides `ToIResult()`, `ToCreatedResult()`, `ToNoContentResult()`, and `ToProblemDetails()` extensions.
+- **DarkPeak.Functional.Redis** — Depends on `DarkPeak.Functional` and `StackExchange.Redis`. Provides `RedisCacheProvider<TKey, TValue>` implementing `ICacheProvider<TKey, TValue>` for distributed caching with `Memoize` and `MemoizeResult`. Supports key prefixes, configurable JSON serialization, and TTL.
 
-All three packages are versioned together and released simultaneously via the manual Release workflow.
+All four packages are versioned together and released simultaneously via the manual Release workflow.
 
 ### Core Types (DarkPeak.Functional)
 
@@ -68,6 +71,10 @@ All three packages are versioned together and released simultaneously via the ma
 - **`Memoize`** — Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
 - **`MemoizeResult`** — Function caching for `Result<T, TError>`-returning functions that only caches successful results. Failed results pass through uncached so subsequent calls retry the computation. Entry point: `MemoizeResult.Func()` / `MemoizeResult.FuncAsync()`
 - **`Unit`** — Valueless type representing a successful operation with no return value. Located in the core `DarkPeak.Functional` namespace.
+
+### Redis Cache Provider (DarkPeak.Functional.Redis)
+
+- **`RedisCacheProvider<TKey, TValue>`** — Implements `ICacheProvider<TKey, TValue>` backed by StackExchange.Redis `IDatabase`. Serializes values with `System.Text.Json`, converts keys to strings via `ToString()`. Supports optional key prefix for namespace isolation and custom `JsonSerializerOptions`. Constructor: `RedisCacheProvider(IDatabase database, string? keyPrefix = null, JsonSerializerOptions? jsonOptions = null)`.
 
 ### HTTP Client Extensions (DarkPeak.Functional.Http)
 
@@ -153,7 +160,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) (
 
 - **GitVersion** (TrunkBased mode) derives SemVer from conventional commits
 - **CI workflow** (`ci.yml`) builds, tests, packs, and uploads artifacts on every push to `main` and every PR — but does NOT publish or release
-- **Release workflow** (`release.yml`) is triggered manually via `workflow_dispatch`. It builds, tests, packs all 3 libraries with the same version, publishes to NuGet, creates a git tag, and creates a GitHub Release. A `prerelease` input controls whether the release is marked as a prerelease.
+- **Release workflow** (`release.yml`) is triggered manually via `workflow_dispatch`. It builds, tests, packs all 4 libraries with the same version, publishes to NuGet, creates a git tag, and creates a GitHub Release. A `prerelease` input controls whether the release is marked as a prerelease.
 - **Docs workflow** (`docs.yml`) builds and deploys DocFX API documentation to GitHub Pages
 - **Dependabot** monitors GitHub Actions weekly and NuGet production dependencies (ignoring minor/patch updates for ASP.NET and System.Net.Http)
 - **NuGet** packages published to nuget.org (requires `NUGET_API_KEY` secret)

@@ -23,7 +23,7 @@ public abstract record Error
 }
 
 /// <summary>
-/// Represents a validation error (HTTP 400).
+/// Represents a validation error (HTTP 422).
 /// </summary>
 public sealed record ValidationError : Error
 {

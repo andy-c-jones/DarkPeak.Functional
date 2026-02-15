@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.Redis</PackageId>
+    <Description>Redis distributed cache provider for DarkPeak.Functional. Implements ICacheProvider using StackExchange.Redis for use with Memoize and MemoizeResult.</Description>
+    <PackageTags>functional;redis;cache;distributed-cache;memoize;stackexchange-redis</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+    <PackageReference Include="StackExchange.Redis" Version="2.*" />
+  </ItemGroup>
+
+</Project>

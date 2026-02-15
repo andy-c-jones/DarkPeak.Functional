@@ -57,7 +57,7 @@ jobs:
       - name: Test
         run: >
           dotnet test --configuration Release --no-build
-          --coverage --coverage-output "${{ github.workspace }}/coverage.cobertura.xml" --coverage-output-format cobertura
+          --coverage --coverage-output-format cobertura
           --report-trx --results-directory "${{ github.workspace }}/TestResults"
 
       - name: Pack
