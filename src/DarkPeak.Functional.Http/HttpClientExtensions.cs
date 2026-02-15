@@ -98,6 +98,49 @@ public static class HttpClientExtensions
     }
 
     /// <summary>
+    /// Sends a GET request to the specified URI with custom request configuration and deserializes
+    /// the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the response body to.</typeparam>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> for deserialization.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing either the deserialized response body on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetResultAsync&lt;Order&gt;("/api/orders/123", request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    ///     request.Headers.Add("X-Correlation-Id", correlationId);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<T, Error>> GetResultAsync<T>(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+            return await HandleResponse<T>(response, options, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
     /// Sends a POST request with a JSON-serialized body to the specified URI and deserializes
     /// the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
     /// </summary>
@@ -136,6 +179,53 @@ public static class HttpClientExtensions
     }
 
     /// <summary>
+    /// Sends a POST request with a JSON-serialized body and custom request configuration to the specified URI
+    /// and deserializes the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the response body to.</typeparam>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="content">The object to serialize as JSON for the request body.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> for serialization and deserialization.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing either the deserialized response body on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.PostResultAsync&lt;Order&gt;("/api/orders", newOrder, request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<T, Error>> PostResultAsync<T>(
+        this HttpClient client,
+        string requestUri,
+        object content,
+        Action<HttpRequestMessage> configure,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = JsonContent.Create(content, options: options)
+            };
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+            return await HandleResponse<T>(response, options, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
     /// Sends a PUT request with a JSON-serialized body to the specified URI and deserializes
     /// the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
     /// </summary>
@@ -165,6 +255,53 @@ public static class HttpClientExtensions
         try
         {
             var response = await client.PutAsJsonAsync(requestUri, content, options ?? JsonSerializerOptions.Default, cancellationToken);
+            return await HandleResponse<T>(response, options, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a PUT request with a JSON-serialized body and custom request configuration to the specified URI
+    /// and deserializes the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the response body to.</typeparam>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="content">The object to serialize as JSON for the request body.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> for serialization and deserialization.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing either the deserialized response body on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.PutResultAsync&lt;Order&gt;("/api/orders/123", updated, request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<T, Error>> PutResultAsync<T>(
+        this HttpClient client,
+        string requestUri,
+        object content,
+        Action<HttpRequestMessage> configure,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Put, requestUri)
+            {
+                Content = JsonContent.Create(content, options: options)
+            };
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
             return await HandleResponse<T>(response, options, cancellationToken);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -213,6 +350,53 @@ public static class HttpClientExtensions
     }
 
     /// <summary>
+    /// Sends a PATCH request with a JSON-serialized body and custom request configuration to the specified URI
+    /// and deserializes the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the response body to.</typeparam>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="content">The object to serialize as JSON for the request body.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> for serialization and deserialization.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing either the deserialized response body on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.PatchResultAsync&lt;Order&gt;("/api/orders/123", patch, request =>
+    /// {
+    ///     request.Headers.Add("If-Match", etag);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<T, Error>> PatchResultAsync<T>(
+        this HttpClient client,
+        string requestUri,
+        object content,
+        Action<HttpRequestMessage> configure,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Patch, requestUri)
+            {
+                Content = JsonContent.Create(content, options: options)
+            };
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+            return await HandleResponse<T>(response, options, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
     /// Sends a DELETE request to the specified URI, returning a <see cref="Result{T, TError}"/>
     /// that indicates success or failure without a response body.
     /// </summary>
@@ -249,6 +433,45 @@ public static class HttpClientExtensions
     }
 
     /// <summary>
+    /// Sends a DELETE request with custom request configuration to the specified URI, returning a
+    /// <see cref="Result{T, TError}"/> that indicates success or failure without a response body.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing <see cref="Unit"/> on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.DeleteResultAsync("/api/orders/123", request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<Unit, Error>> DeleteResultAsync(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+            return await HandleResponseNoBody(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
     /// Sends a DELETE request to the specified URI and deserializes the JSON response body
     /// as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
     /// </summary>
@@ -275,6 +498,48 @@ public static class HttpClientExtensions
         try
         {
             var response = await client.DeleteAsync(requestUri, cancellationToken);
+            return await HandleResponse<T>(response, options, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a DELETE request with custom request configuration to the specified URI and deserializes
+    /// the JSON response body as the specified type, returning the result wrapped in a <see cref="Result{T, TError}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize the response body to.</typeparam>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="options">Optional <see cref="JsonSerializerOptions"/> for deserialization.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing either the deserialized response body on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.DeleteResultAsync&lt;DeletionConfirmation&gt;("/api/orders/123", request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<T, Error>> DeleteResultAsync<T>(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
             return await HandleResponse<T>(response, options, cancellationToken);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -353,6 +618,288 @@ public static class HttpClientExtensions
         {
             return CreateRequestError(ex);
         }
+    }
+
+    /// <summary>
+    /// Sends a GET request to the specified URI and returns the response body as a string,
+    /// wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for non-JSON responses such as plain text, XML, or HTML.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a string on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetStringResultAsync("/api/health");
+    /// result.Match(
+    ///     success: body => Console.WriteLine(body),
+    ///     failure: error => Console.WriteLine($"Error: {error.Message}")
+    /// );
+    /// </code>
+    /// </example>
+    public static async Task<Result<string, Error>> GetStringResultAsync(
+        this HttpClient client,
+        string requestUri,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await client.GetAsync(requestUri, cancellationToken);
+            return await HandleStringResponse(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a GET request with custom request configuration to the specified URI and returns the
+    /// response body as a string, wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for non-JSON responses such as plain text, XML, or HTML that require custom headers.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a string on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetStringResultAsync("/api/health", request =>
+    /// {
+    ///     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<string, Error>> GetStringResultAsync(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+            return await HandleStringResponse(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a GET request to the specified URI and returns the response body as a <see cref="Stream"/>,
+    /// wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for large responses or binary data where streaming is preferred over buffering.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a <see cref="Stream"/> on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <remarks>
+    /// The caller is responsible for disposing the returned <see cref="Stream"/>.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetStreamResultAsync("/api/reports/export");
+    /// await result.MatchAsync(
+    ///     success: async stream => { await stream.CopyToAsync(fileStream); },
+    ///     failure: error => { Console.WriteLine($"Error: {error.Message}"); return Task.CompletedTask; }
+    /// );
+    /// </code>
+    /// </example>
+    public static async Task<Result<Stream, Error>> GetStreamResultAsync(
+        this HttpClient client,
+        string requestUri,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                return Result.Success<Stream, Error>(stream);
+            }
+
+            return await CreateResponseError<Stream>(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a GET request with custom request configuration to the specified URI and returns the
+    /// response body as a <see cref="Stream"/>, wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for large responses or binary data that require custom headers.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a <see cref="Stream"/> on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <remarks>
+    /// The caller is responsible for disposing the returned <see cref="Stream"/>.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetStreamResultAsync("/api/reports/export", request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<Stream, Error>> GetStreamResultAsync(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                return Result.Success<Stream, Error>(stream);
+            }
+
+            return await CreateResponseError<Stream>(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a GET request to the specified URI and returns the response body as a byte array,
+    /// wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for binary data such as images, files, or other non-text content.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a byte array on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetBytesResultAsync("/api/images/logo.png");
+    /// result.Match(
+    ///     success: bytes => File.WriteAllBytes("logo.png", bytes),
+    ///     failure: error => Console.WriteLine($"Error: {error.Message}")
+    /// );
+    /// </code>
+    /// </example>
+    public static async Task<Result<byte[], Error>> GetBytesResultAsync(
+        this HttpClient client,
+        string requestUri,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await client.GetAsync(requestUri, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                return Result.Success<byte[], Error>(bytes);
+            }
+
+            return await CreateResponseError<byte[]>(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a GET request with custom request configuration to the specified URI and returns the
+    /// response body as a byte array, wrapped in a <see cref="Result{T, TError}"/>.
+    /// Use this for binary data such as images or files that require custom headers.
+    /// </summary>
+    /// <param name="client">The <see cref="HttpClient"/> to send the request with.</param>
+    /// <param name="requestUri">The URI the request is sent to.</param>
+    /// <param name="configure">An action to configure the <see cref="HttpRequestMessage"/> before sending, such as adding headers or authentication.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>
+    /// A <see cref="Result{T, TError}"/> containing the response body as a byte array on success,
+    /// or a typed <see cref="Error"/> describing what went wrong.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// var result = await httpClient.GetBytesResultAsync("/api/images/logo.png", request =>
+    /// {
+    ///     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    /// });
+    /// </code>
+    /// </example>
+    public static async Task<Result<byte[], Error>> GetBytesResultAsync(
+        this HttpClient client,
+        string requestUri,
+        Action<HttpRequestMessage> configure,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            configure(request);
+            var response = await client.SendAsync(request, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                return Result.Success<byte[], Error>(bytes);
+            }
+
+            return await CreateResponseError<byte[]>(response, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return CreateRequestError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Processes an <see cref="HttpResponseMessage"/> and reads the body as a string on success,
+    /// or maps the status code to a typed error on failure.
+    /// </summary>
+    private static async Task<Result<string, Error>> HandleStringResponse(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            return Result.Success<string, Error>(body);
+        }
+
+        return await CreateResponseError<string>(response, cancellationToken);
     }
 
     /// <summary>

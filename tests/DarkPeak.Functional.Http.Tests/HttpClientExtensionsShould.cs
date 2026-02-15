@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using DarkPeak.Functional;
 using DarkPeak.Functional.Http;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
@@ -23,6 +24,14 @@ public class HttpClientExtensionsShould
     {
         var handler = new FakeHttpMessageHandler(statusCode, content, contentType);
         return new HttpClient(handler) { BaseAddress = new Uri("https://api.example.com") };
+    }
+
+    private static (HttpClient Client, FakeHttpMessageHandler Handler) CreateClientWithHandler(
+        HttpStatusCode statusCode, string? content = null, string contentType = "application/json")
+    {
+        var handler = new FakeHttpMessageHandler(statusCode, content, contentType);
+        var client = new HttpClient(handler) { BaseAddress = new Uri("https://api.example.com") };
+        return (client, handler);
     }
 
     private static HttpClient CreateThrowingClient(Exception exception)
@@ -524,26 +533,299 @@ public class HttpClientExtensionsShould
 
     #endregion
 
-    #region Unit Tests
+    #region GetStringResultAsync Tests
 
     [Test]
-    public async Task Unit_value_is_default()
+    public async Task GetStringResultAsync_returns_success_on_200()
     {
-        var unit = Unit.Value;
+        using var client = CreateClient(HttpStatusCode.OK, "Hello, World!", "text/plain");
 
-        await Assert.That(unit).IsEqualTo(default(Unit));
+        var result = await client.GetStringResultAsync("/api/health");
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var value = result.Match(v => v, _ => null!);
+        await Assert.That(value).IsEqualTo("Hello, World!");
     }
 
     [Test]
-    public async Task Unit_values_are_equal()
+    public async Task GetStringResultAsync_returns_failure_on_404()
     {
-        var unit1 = Unit.Value;
-        var unit2 = Unit.Value;
+        using var client = CreateClient(HttpStatusCode.NotFound, "Not found");
 
-        await Assert.That(unit1).IsEqualTo(unit2);
+        var result = await client.GetStringResultAsync("/api/missing");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<NotFoundError>();
+    }
+
+    [Test]
+    public async Task GetStringResultAsync_returns_HttpRequestError_on_network_failure()
+    {
+        using var client = CreateThrowingClient(new HttpRequestException("Connection refused"));
+
+        var result = await client.GetStringResultAsync("/api/health");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
 
     #endregion
+
+    #region GetStreamResultAsync Tests
+
+    [Test]
+    public async Task GetStreamResultAsync_returns_success_on_200()
+    {
+        using var client = CreateClient(HttpStatusCode.OK, "stream content", "application/octet-stream");
+
+        var result = await client.GetStreamResultAsync("/api/export");
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var stream = result.Match(v => v, _ => null!);
+        using var reader = new StreamReader(stream);
+        var content = await reader.ReadToEndAsync();
+        await Assert.That(content).IsEqualTo("stream content");
+    }
+
+    [Test]
+    public async Task GetStreamResultAsync_returns_failure_on_500()
+    {
+        using var client = CreateClient(HttpStatusCode.InternalServerError, "Server error");
+
+        var result = await client.GetStreamResultAsync("/api/export");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<ExternalServiceError>();
+    }
+
+    [Test]
+    public async Task GetStreamResultAsync_returns_HttpRequestError_on_network_failure()
+    {
+        using var client = CreateThrowingClient(new HttpRequestException("DNS failed"));
+
+        var result = await client.GetStreamResultAsync("/api/export");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<HttpRequestError>();
+    }
+
+    #endregion
+
+    #region GetBytesResultAsync Tests
+
+    [Test]
+    public async Task GetBytesResultAsync_returns_success_on_200()
+    {
+        using var client = CreateClient(HttpStatusCode.OK, "binary data", "application/octet-stream");
+
+        var result = await client.GetBytesResultAsync("/api/images/logo.png");
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var bytes = result.Match(v => v, _ => null!);
+        await Assert.That(bytes.Length).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task GetBytesResultAsync_returns_failure_on_404()
+    {
+        using var client = CreateClient(HttpStatusCode.NotFound, "Not found");
+
+        var result = await client.GetBytesResultAsync("/api/images/missing.png");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<NotFoundError>();
+    }
+
+    [Test]
+    public async Task GetBytesResultAsync_returns_HttpRequestError_on_network_failure()
+    {
+        using var client = CreateThrowingClient(new HttpRequestException("Timeout"));
+
+        var result = await client.GetBytesResultAsync("/api/images/logo.png");
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<HttpRequestError>();
+    }
+
+    #endregion
+
+    #region Configure Overload Tests
+
+    [Test]
+    public async Task GetResultAsync_with_configure_applies_headers()
+    {
+        var json = """{"Id":1,"Name":"Widget"}""";
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, json);
+
+        var result = await client.GetResultAsync<TestPayload>("/api/items/1", request =>
+        {
+            request.Headers.Add("X-Custom", "test-value");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Custom").First()).IsEqualTo("test-value");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task GetResultAsync_with_configure_returns_failure_on_error()
+    {
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.Unauthorized, "Unauthorized");
+
+        var result = await client.GetResultAsync<TestPayload>("/api/items/1", request =>
+        {
+            request.Headers.Add("Authorization", "Bearer expired-token");
+        });
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match(_ => null!, e => e);
+        await Assert.That(error).IsAssignableTo<UnauthorizedError>();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("Authorization").First()).IsEqualTo("Bearer expired-token");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task PostResultAsync_with_configure_applies_headers()
+    {
+        var json = """{"Id":1,"Name":"Created"}""";
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.Created, json);
+
+        var result = await client.PostResultAsync<TestPayload>("/api/items", new TestPayload(0, "New"), request =>
+        {
+            request.Headers.Add("X-Idempotency-Key", "abc-123");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Idempotency-Key").First()).IsEqualTo("abc-123");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task PutResultAsync_with_configure_applies_headers()
+    {
+        var json = """{"Id":1,"Name":"Updated"}""";
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, json);
+
+        var result = await client.PutResultAsync<TestPayload>("/api/items/1", new TestPayload(1, "Updated"), request =>
+        {
+            request.Headers.Add("If-Match", "\"etag-value\"");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("If-Match").First()).IsEqualTo("\"etag-value\"");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task PatchResultAsync_with_configure_applies_headers()
+    {
+        var json = """{"Id":1,"Name":"Patched"}""";
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, json);
+
+        var result = await client.PatchResultAsync<TestPayload>("/api/items/1", new { Name = "Patched" }, request =>
+        {
+            request.Headers.Add("If-Match", "\"etag-value\"");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("If-Match").First()).IsEqualTo("\"etag-value\"");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task DeleteResultAsync_with_configure_applies_headers()
+    {
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.NoContent);
+
+        var result = await client.DeleteResultAsync("/api/items/1", request =>
+        {
+            request.Headers.Add("X-Reason", "cleanup");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Reason").First()).IsEqualTo("cleanup");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task DeleteResultAsync_generic_with_configure_applies_headers()
+    {
+        var json = """{"Id":1,"Name":"Deleted"}""";
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, json);
+
+        var result = await client.DeleteResultAsync<TestPayload>("/api/items/1", request =>
+        {
+            request.Headers.Add("X-Audit", "user-42");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var value = result.Match(v => v, _ => null!);
+        await Assert.That(value.Name).IsEqualTo("Deleted");
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Audit").First()).IsEqualTo("user-42");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task GetStringResultAsync_with_configure_applies_headers()
+    {
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, "Hello, World!", "text/plain");
+
+        var result = await client.GetStringResultAsync("/api/health", request =>
+        {
+            request.Headers.Add("Accept", "text/plain");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var value = result.Match(v => v, _ => null!);
+        await Assert.That(value).IsEqualTo("Hello, World!");
+        await Assert.That(handler.LastRequest!.Headers.GetValues("Accept").First()).IsEqualTo("text/plain");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task GetStreamResultAsync_with_configure_applies_headers()
+    {
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, "stream content", "application/octet-stream");
+
+        var result = await client.GetStreamResultAsync("/api/export", request =>
+        {
+            request.Headers.Add("X-Download-Token", "token-xyz");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var stream = result.Match(v => v, _ => null!);
+        using var reader = new StreamReader(stream);
+        var content = await reader.ReadToEndAsync();
+        await Assert.That(content).IsEqualTo("stream content");
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Download-Token").First()).IsEqualTo("token-xyz");
+        client.Dispose();
+    }
+
+    [Test]
+    public async Task GetBytesResultAsync_with_configure_applies_headers()
+    {
+        var (client, handler) = CreateClientWithHandler(HttpStatusCode.OK, "binary data", "application/octet-stream");
+
+        var result = await client.GetBytesResultAsync("/api/images/logo.png", request =>
+        {
+            request.Headers.Add("X-Api-Key", "key-abc");
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var bytes = result.Match(v => v, _ => null!);
+        await Assert.That(bytes.Length).IsGreaterThan(0);
+        await Assert.That(handler.LastRequest!.Headers.GetValues("X-Api-Key").First()).IsEqualTo("key-abc");
+        client.Dispose();
+    }
+
+    #endregion
+
 }
 
 /// <summary>
@@ -556,6 +838,11 @@ internal class FakeHttpMessageHandler : HttpMessageHandler
     private readonly string? _content;
     private readonly string _contentType;
 
+    /// <summary>
+    /// Gets the last <see cref="HttpRequestMessage"/> that was sent through this handler.
+    /// </summary>
+    public HttpRequestMessage? LastRequest { get; private set; }
+
     public FakeHttpMessageHandler(HttpStatusCode statusCode, string? content = null,
         string contentType = "application/json")
     {
@@ -567,6 +854,7 @@ internal class FakeHttpMessageHandler : HttpMessageHandler
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        LastRequest = request;
         var response = new HttpResponseMessage(_statusCode);
 
         if (_content is not null)

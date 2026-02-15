@@ -326,6 +326,67 @@ internal sealed class MemoizeCache<TKey, TValue> where TKey : notnull
         return value;
     }
 
+    /// <summary>
+    /// Attempts to retrieve a value from the cache without computing it.
+    /// Checks L1 (in-memory) and L2 (provider) caches.
+    /// </summary>
+    internal Option<TValue> TryGet(TKey key)
+    {
+        lock (_lock)
+        {
+            if (_options.UseMemoryCache && _cache.TryGetValue(key, out var existing))
+            {
+                if (_options.Expiration is null ||
+                    existing.CreatedAt + _options.Expiration.Value > DateTimeOffset.UtcNow)
+                {
+                    TouchAccessOrder(key);
+                    return Option.Some(existing.Value);
+                }
+
+                RemoveFromMemory(key);
+            }
+        }
+
+        if (_provider is not null)
+        {
+            var fromProvider = _provider.Get(key);
+            if (fromProvider is Some<TValue> some)
+            {
+                lock (_lock)
+                {
+                    if (_options.UseMemoryCache)
+                    {
+                        _cache[key] = new CacheEntry(some.Value, DateTimeOffset.UtcNow);
+                        TouchAccessOrder(key);
+                        EvictIfNeeded();
+                    }
+                }
+
+                return fromProvider;
+            }
+        }
+
+        return Option.None<TValue>();
+    }
+
+    /// <summary>
+    /// Adds a value to the cache unconditionally, writing to both L1 and L2.
+    /// </summary>
+    internal void Add(TKey key, TValue value)
+    {
+        lock (_lock)
+        {
+            if (_options.UseMemoryCache)
+            {
+                _cache[key] = new CacheEntry(value, DateTimeOffset.UtcNow);
+                TouchAccessOrder(key);
+                EvictIfNeeded();
+            }
+        }
+
+        _provider?.Set(key, value, _options.Expiration);
+    }
+
     private void TouchAccessOrder(TKey key)
     {
         if (_nodes.TryGetValue(key, out var node))

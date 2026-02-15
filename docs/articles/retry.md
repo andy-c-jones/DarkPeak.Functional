@@ -87,27 +87,56 @@ var result = await Retry.WithMaxAttempts(3)
 
 ## Real-World Example
 
+Using the `DarkPeak.Functional.Http` extensions, HTTP calls already return `Result<T, Error>` — no manual mapping needed:
+
 ```csharp
-var policy = Retry
+var result = await Retry
     .WithMaxAttempts(5)
     .WithBackoff(Backoff.Exponential(
         TimeSpan.FromMilliseconds(200),
         multiplier: 2.0,
         maxDelay: TimeSpan.FromSeconds(10)))
-    .WithRetryWhen(error => error is ExternalServiceError)
+    .WithRetryWhen(error => error is ExternalServiceError or HttpRequestError)
     .OnRetry((attempt, error) =>
         logger.LogWarning(
             "API call failed (attempt {Attempt}): {Error}",
-            attempt, error.Message));
+            attempt, error.Message))
+    .ExecuteAsync(() =>
+        httpClient.GetResultAsync<Data>("/api/data"));
+```
 
-var result = await policy.ExecuteAsync(async () =>
-{
-    var response = await httpClient.GetAsync("/api/data");
+## Composition with Circuit Breaker
 
-    return response.IsSuccessStatusCode
-        ? Result.Success<Data, ExternalServiceError>(
-            await response.Content.ReadFromJsonAsync<Data>()!)
-        : Result.Failure<Data, ExternalServiceError>(
-            new ExternalServiceError { Message = $"HTTP {response.StatusCode}" });
-});
+Place a circuit breaker inside the retry to protect against sustained failures:
+
+```csharp
+var breaker = CircuitBreaker
+    .WithFailureThreshold(3)
+    .WithResetTimeout(TimeSpan.FromSeconds(30))
+    .WithBreakWhen(error => error is ExternalServiceError);
+
+var result = await Retry
+    .WithMaxAttempts(5)
+    .WithBackoff(Backoff.Exponential(TimeSpan.FromMilliseconds(500)))
+    .WithRetryWhen(error =>
+        error is ExternalServiceError or CircuitBreakerOpenError)
+    .ExecuteAsync(() =>
+        breaker.ExecuteAsync(
+            () => httpClient.GetResultAsync<Data>("/api/data")));
+```
+
+## Composition with MemoizeResult
+
+Cache successful results so retries only happen on the first call:
+
+```csharp
+var cachedFetch = MemoizeResult.FuncAsync<string, Data, Error>(
+    endpoint => Retry
+        .WithMaxAttempts(3)
+        .WithBackoff(Backoff.Exponential(TimeSpan.FromMilliseconds(200)))
+        .ExecuteAsync(() =>
+            httpClient.GetResultAsync<Data>(endpoint)),
+    opts => opts.WithExpiration(TimeSpan.FromMinutes(5)));
+
+var result = await cachedFetch("/api/data");
 ```
