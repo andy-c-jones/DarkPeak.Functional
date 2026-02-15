@@ -8,7 +8,9 @@
             "src/DarkPeak.Functional/**/*.csproj",
             "src/DarkPeak.Functional.Http/**/*.csproj",
             "src/DarkPeak.Functional.AspNet/**/*.csproj",
-            "src/DarkPeak.Functional.Redis/**/*.csproj"
+            "src/DarkPeak.Functional.Redis/**/*.csproj",
+            "src/DarkPeak.Functional.Dapper/**/*.csproj",
+            "src/DarkPeak.Functional.EntityFramework/**/*.csproj"
           ]
         }
       ],
