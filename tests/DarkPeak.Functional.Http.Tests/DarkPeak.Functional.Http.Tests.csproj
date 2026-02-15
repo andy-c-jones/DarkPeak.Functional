@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.*" />
-    <ProjectReference Include="..\..\src\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+    <ProjectReference Include="..\..\src\DarkPeak.Functional.Http\DarkPeak.Functional.Http.csproj" />
   </ItemGroup>
 
 </Project>

@@ -171,47 +171,63 @@ public abstract record Option<T> : IEnumerable<T>
 /// <typeparam name="T">The type of the value.</typeparam>
 public sealed record Some<T>(T Value) : Option<T>
 {
+    /// <inheritdoc />
     public override bool IsSome => true;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none) =>
         some(Value);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> some, Func<Task<TResult>> none) =>
         await some(Value);
 
+    /// <inheritdoc />
     public override Option<TResult> Map<TResult>(Func<T, TResult> mapper) =>
         new Some<TResult>(mapper(Value));
 
+    /// <inheritdoc />
     public override async Task<Option<TResult>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         new Some<TResult>(await mapper(Value));
 
+    /// <inheritdoc />
     public override Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder) =>
         binder(Value);
 
+    /// <inheritdoc />
     public override async Task<Option<TResult>> BindAsync<TResult>(Func<T, Task<Option<TResult>>> binder) =>
         await binder(Value);
 
+    /// <inheritdoc />
     public override Option<T> Filter(Func<T, bool> predicate) =>
         predicate(Value) ? this : new None<T>();
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() => Value;
 
+    /// <inheritdoc />
     public override Option<T> OrElse(Option<T> alternative) => this;
 
+    /// <inheritdoc />
     public override Option<T> OrElse(Func<Option<T>> alternativeFactory) => this;
 
+    /// <inheritdoc />
     public override Option<T> Tap(Action<T> action)
     {
         action(Value);
         return this;
     }
 
+    /// <inheritdoc />
     public override Option<T> TapNone(Action action) => this;
 
+    /// <inheritdoc />
     public override IEnumerator<T> GetEnumerator()
     {
         yield return Value;
@@ -224,47 +240,63 @@ public sealed record Some<T>(T Value) : Option<T>
 /// <typeparam name="T">The type parameter.</typeparam>
 public sealed record None<T> : Option<T>
 {
+    /// <inheritdoc />
     public override bool IsSome => false;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> some, Func<TResult> none) =>
         none();
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> some, Func<Task<TResult>> none) =>
         await none();
 
+    /// <inheritdoc />
     public override Option<TResult> Map<TResult>(Func<T, TResult> mapper) =>
         new None<TResult>();
 
+    /// <inheritdoc />
     public override Task<Option<TResult>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         Task.FromResult<Option<TResult>>(new None<TResult>());
 
+    /// <inheritdoc />
     public override Option<TResult> Bind<TResult>(Func<T, Option<TResult>> binder) =>
         new None<TResult>();
 
+    /// <inheritdoc />
     public override Task<Option<TResult>> BindAsync<TResult>(Func<T, Task<Option<TResult>>> binder) =>
         Task.FromResult<Option<TResult>>(new None<TResult>());
 
+    /// <inheritdoc />
     public override Option<T> Filter(Func<T, bool> predicate) => this;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => defaultValue;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => defaultFactory();
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() =>
         throw new InvalidOperationException("Cannot get value from None.");
 
+    /// <inheritdoc />
     public override Option<T> OrElse(Option<T> alternative) => alternative;
 
+    /// <inheritdoc />
     public override Option<T> OrElse(Func<Option<T>> alternativeFactory) => alternativeFactory();
 
+    /// <inheritdoc />
     public override Option<T> Tap(Action<T> action) => this;
 
+    /// <inheritdoc />
     public override Option<T> TapNone(Action action)
     {
         action();
         return this;
     }
 
+    /// <inheritdoc />
     public override IEnumerator<T> GetEnumerator()
     {
         yield break;

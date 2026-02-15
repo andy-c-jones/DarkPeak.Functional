@@ -4,7 +4,11 @@
       "src": [
         {
           "src": "../",
-          "files": [ "src/DarkPeak.Functional/**/*.csproj" ]
+          "files": [
+            "src/DarkPeak.Functional/**/*.csproj",
+            "src/DarkPeak.Functional.Http/**/*.csproj",
+            "src/DarkPeak.Functional.AspNet/**/*.csproj"
+          ]
         }
       ],
       "dest": "api"

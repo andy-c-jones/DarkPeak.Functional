@@ -3,40 +3,103 @@
 ## Build and Test Commands
 
 ```bash
-# Build
+# Build all projects
 dotnet build
 
 # Run all tests
-dotnet test
+dotnet test --solution DarkPeak.Functional.slnx
+
+# Run tests for a single project
+dotnet test --solution DarkPeak.Functional.slnx --filter "DarkPeak.Functional.Tests"
 
 # Run a single test by name
-dotnet test --filter "FullyQualifiedName~OptionShould.Map_transforms_some_value"
+dotnet test --solution DarkPeak.Functional.slnx -- --treenode-filter "/*/*/OptionShould/Map_transforms_some_value"
 
-# Run tests in a specific class
-dotnet test --filter "FullyQualifiedName~OptionShould"
+# Run all tests with code coverage (cobertura XML output)
+dotnet test --solution DarkPeak.Functional.slnx -- --coverage --coverage-output-format cobertura
+
+# Generate a human-readable coverage report (requires dotnet-reportgenerator-globaltool)
+reportgenerator "-reports:tests/**/TestResults/*.cobertura.xml" "-targetdir:coverage-report" "-reporttypes:TextSummary"
+cat coverage-report/Summary.txt
+
+# Generate an HTML coverage report for detailed exploration
+reportgenerator "-reports:tests/**/TestResults/*.cobertura.xml" "-targetdir:coverage-report" "-reporttypes:Html"
 ```
 
 ## Architecture Overview
 
-This is a .NET 10 functional programming library providing monadic types for railway-oriented programming. The library targets nullable-enabled C# with strict null reference handling.
+This is a .NET 10 functional programming library providing monadic types for railway-oriented programming. The solution is composed of three packable libraries and their corresponding test projects. The library targets nullable-enabled C# with strict null reference handling.
 
-### Core Types
+### Solution Structure
 
-- **`Option<T>`** - Represents a value that may or may not exist (alternative to null). Implementations: `Some<T>`, `None<T>`
-- **`Result<T, TError>`** - Represents an operation that can succeed with a value or fail with a typed error. Implementations: `Success<T, TError>`, `Failure<T, TError>`
-- **`Either<TLeft, TRight>`** - Represents a value that can be one of two types (both valid states, not success/failure). Implementations: `Left<TLeft, TRight>`, `Right<TLeft, TRight>`
-- **`Validation<T, TError>`** - Accumulates multiple errors instead of short-circuiting. Implementations: `Valid<T, TError>`, `Invalid<T, TError>`
-- **`Error`** - Abstract base record for typed errors with HTTP-mapped subtypes (ValidationError, NotFoundError, UnauthorizedError, etc.)
-- **`RetryPolicy`** - Configurable retry with backoff strategies (None, Constant, Linear, Exponential). Entry point: `Retry.WithMaxAttempts()`
-- **`Memoize`** - Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
+```
+DarkPeak.Functional/
+├── Directory.Build.props           # Shared build properties (TFM, nullable, NuGet metadata)
+├── GitVersion.yml                  # Version calculation from conventional commits
+├── src/
+│   ├── DarkPeak.Functional/        # Core library: monadic types and extensions
+│   ├── DarkPeak.Functional.Http/   # HTTP client extensions wrapping HttpClient in Result<T, Error>
+│   └── DarkPeak.Functional.AspNet/ # ASP.NET integration (ToIResult, ProblemDetails)
+├── tests/
+│   ├── DarkPeak.Functional.Tests/
+│   ├── DarkPeak.Functional.Http.Tests/
+│   └── DarkPeak.Functional.AspNet.Tests/
+└── docs/                           # DocFX API documentation
+```
+
+### Package Dependencies
+
+- **DarkPeak.Functional** — No external dependencies. The core library.
+- **DarkPeak.Functional.Http** — Depends on `DarkPeak.Functional`. Provides `HttpClientExtensions` for wrapping `HttpClient` operations in `Result<T, Error>`.
+- **DarkPeak.Functional.AspNet** — Depends on `DarkPeak.Functional`. References `Microsoft.AspNetCore.App` shared framework. Provides `ToIResult()`, `ToCreatedResult()`, `ToNoContentResult()`, and `ToProblemDetails()` extensions.
+
+All three packages are versioned together and released simultaneously via the manual Release workflow.
+
+### Core Types (DarkPeak.Functional)
+
+- **`Option<T>`** — Represents a value that may or may not exist (alternative to null). Implementations: `Some<T>`, `None<T>`
+- **`Result<T, TError>`** — Represents an operation that can succeed with a value or fail with a typed error. Implementations: `Success<T, TError>`, `Failure<T, TError>`
+- **`Either<TLeft, TRight>`** — Represents a value that can be one of two types (both valid states, not success/failure). Implementations: `Left<TLeft, TRight>`, `Right<TLeft, TRight>`
+- **`Validation<T, TError>`** — Accumulates multiple errors instead of short-circuiting. Implementations: `Valid<T, TError>`, `Invalid<T, TError>`
+- **`Error`** — Abstract base record for typed errors with HTTP-mapped subtypes (ValidationError, NotFoundError, UnauthorizedError, etc.)
+- **`RetryPolicy`** — Configurable retry with backoff strategies (None, Constant, Linear, Exponential). Entry point: `Retry.WithMaxAttempts()`
+- **`Memoize`** — Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
+
+### HTTP Client Extensions (DarkPeak.Functional.Http)
+
+- **`HttpClientExtensions`** — Extension methods on `HttpClient` that wrap HTTP operations in `Result<T, Error>`:
+  - `GetResultAsync<T>()` — GET with JSON deserialization
+  - `PostResultAsync<T>()` — POST with JSON body
+  - `PutResultAsync<T>()` — PUT with JSON body
+  - `PatchResultAsync<T>()` — PATCH with JSON body
+  - `DeleteResultAsync()` — DELETE returning `Result<Unit, Error>`
+  - `DeleteResultAsync<T>()` — DELETE with JSON response body
+  - `SendResultAsync<T>()` — Custom `HttpRequestMessage` with JSON response
+  - `SendResultAsync()` — Custom `HttpRequestMessage` without response body
+- **`HttpError`** — Error type for HTTP responses with `StatusCode`, `ReasonPhrase`, `ResponseBody`
+- **`HttpRequestError`** — Error type for transport-level failures (network errors, timeouts)
+- **`Unit`** — Valueless success type for operations without a response body
+- **Status code mapping**: 400→BadRequestError, 401→UnauthorizedError, 403→ForbiddenError, 404→NotFoundError, 409→ConflictError, 422→ValidationError, 5xx→ExternalServiceError, other→HttpError
+
+### ASP.NET Integration (DarkPeak.Functional.AspNet)
+
+- **`ResultExtensions`** — Extension methods for converting `Result<T, Error>` to ASP.NET `IResult`:
+  - `ToIResult()` — Maps success to `200 OK`, errors to typed HTTP responses
+  - `ToCreatedResult()` — Maps success to `201 Created` with location header
+  - `ToNoContentResult()` — Maps success to `204 No Content`
+  - Async overloads for all methods accepting `Task<Result<T, Error>>`
+- **`ProblemDetailsExtensions`** — Extension methods for converting `Error` to RFC 9457 ProblemDetails:
+  - `ToProblemDetails()` — Converts any `Error` to `ProblemDetails` with correct status code
+  - `ToValidationProblemDetails()` — Converts `ValidationError` to `HttpValidationProblemDetails` preserving field errors
+  - Metadata and error codes are included in `ProblemDetails.Extensions`
 
 ### Extensions Namespace (`DarkPeak.Functional.Extensions`)
 
-- **`TypeConversionExtensions`** - Cross-type conversions (Option↔Result↔Either)
-- **`TaskOptionExtensions`** / **`TaskResultExtensions`** - Fluent async chaining on `Task<Option<T>>` and `Task<Result<T, TError>>`
-- **`EitherExtensions`** - GetLeftOrDefault, GetRightOrDefault, Flatten, Merge, Partition
-- **`ValidationExtensions`** - Apply (error accumulation), Combine, Sequence, ToResult/ToValidation interop
-- **`OptionExtensions`** / **`ResultExtensions`** - Collection operations (Choose, Partition, etc.)
+- **`TypeConversionExtensions`** — Cross-type conversions (Option↔Result↔Either)
+- **`TaskOptionExtensions`** / **`TaskResultExtensions`** — Fluent async chaining on `Task<Option<T>>` and `Task<Result<T, TError>>`
+- **`EitherExtensions`** — GetLeftOrDefault, GetRightOrDefault, Flatten, Merge, Partition
+- **`ValidationExtensions`** — Apply (error accumulation), Combine, Sequence, ToResult/ToValidation interop
+- **`OptionExtensions`** / **`ResultExtensions`** — Collection operations (Choose, Partition, etc.)
 
 ### Type Hierarchy Pattern
 
@@ -73,14 +136,17 @@ var result = from x in option
 All operations have async counterparts suffixed with `Async` (e.g., `Map` → `MapAsync`, `Bind` → `BindAsync`).
 
 ### Testing Framework
-Tests use TUnit (`[Test]` attribute) with async assertions (`await Assert.That(...)`).
+Tests use TUnit (`[Test]` attribute) with async assertions (`await Assert.That(...)`). The solution uses Microsoft.Testing.Platform via `global.json` opt-in, so tests are run with `dotnet test --solution DarkPeak.Functional.slnx`. Code coverage is collected via the built-in `Microsoft.Testing.Extensions.CodeCoverage` (transitive from TUnit) using the `--coverage` flag.
 
 ### Commit Messages
 This project uses [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`, `docs:`, `test:`, `chore:`). Versions are derived automatically by GitVersion.
 
 ## CI/CD
 
-- **GitVersion** (Mainline mode) derives SemVer from conventional commits
-- **GitHub Actions** builds, tests, packs, and publishes on push to `main` (pre-release) and tag push (stable release)
-- **Dependabot** monitors GitHub Actions and NuGet dependencies weekly
-- **NuGet** package published to nuget.org (requires `NUGET_API_KEY` secret)
+- **GitVersion** (TrunkBased mode) derives SemVer from conventional commits
+- **CI workflow** (`ci.yml`) builds, tests, packs, and uploads artifacts on every push to `main` and every PR — but does NOT publish or release
+- **Release workflow** (`release.yml`) is triggered manually via `workflow_dispatch`. It builds, tests, packs all 3 libraries with the same version, publishes to NuGet, creates a git tag, and creates a GitHub Release. A `prerelease` input controls whether the release is marked as a prerelease.
+- **Docs workflow** (`docs.yml`) builds and deploys DocFX API documentation to GitHub Pages
+- **Dependabot** monitors GitHub Actions weekly and NuGet production dependencies (ignoring minor/patch updates for ASP.NET and System.Net.Http)
+- **NuGet** packages published to nuget.org (requires `NUGET_API_KEY` secret)
+- **Directory.Build.props** at the repo root provides shared build configuration (target framework, nullable, NuGet metadata) for all projects

@@ -89,40 +89,52 @@ public abstract record Validation<T, TError> where TError : Error
 /// </summary>
 public sealed record Valid<T, TError>(T Value) : Validation<T, TError> where TError : Error
 {
+    /// <inheritdoc />
     public override bool IsValid => true;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> valid, Func<IReadOnlyList<TError>, TResult> invalid) =>
         valid(Value);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(
         Func<T, Task<TResult>> valid, Func<IReadOnlyList<TError>, Task<TResult>> invalid) =>
         await valid(Value);
 
+    /// <inheritdoc />
     public override Validation<TResult, TError> Map<TResult>(Func<T, TResult> mapper) =>
         new Valid<TResult, TError>(mapper(Value));
 
+    /// <inheritdoc />
     public override async Task<Validation<TResult, TError>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         new Valid<TResult, TError>(await mapper(Value));
 
+    /// <inheritdoc />
     public override Validation<TResult, TError> Bind<TResult>(Func<T, Validation<TResult, TError>> binder) =>
         binder(Value);
 
+    /// <inheritdoc />
     public override async Task<Validation<TResult, TError>> BindAsync<TResult>(
         Func<T, Task<Validation<TResult, TError>>> binder) =>
         await binder(Value);
 
+    /// <inheritdoc />
     public override Validation<T, TError> Tap(Action<T> action)
     {
         action(Value);
         return this;
     }
 
+    /// <inheritdoc />
     public override Validation<T, TError> TapInvalid(Action<IReadOnlyList<TError>> action) => this;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() => Value;
 }
 
@@ -131,40 +143,52 @@ public sealed record Valid<T, TError>(T Value) : Validation<T, TError> where TEr
 /// </summary>
 public sealed record Invalid<T, TError>(IReadOnlyList<TError> Errors) : Validation<T, TError> where TError : Error
 {
+    /// <inheritdoc />
     public override bool IsValid => false;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> valid, Func<IReadOnlyList<TError>, TResult> invalid) =>
         invalid(Errors);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(
         Func<T, Task<TResult>> valid, Func<IReadOnlyList<TError>, Task<TResult>> invalid) =>
         await invalid(Errors);
 
+    /// <inheritdoc />
     public override Validation<TResult, TError> Map<TResult>(Func<T, TResult> mapper) =>
         new Invalid<TResult, TError>(Errors);
 
+    /// <inheritdoc />
     public override Task<Validation<TResult, TError>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         Task.FromResult<Validation<TResult, TError>>(new Invalid<TResult, TError>(Errors));
 
+    /// <inheritdoc />
     public override Validation<TResult, TError> Bind<TResult>(Func<T, Validation<TResult, TError>> binder) =>
         new Invalid<TResult, TError>(Errors);
 
+    /// <inheritdoc />
     public override Task<Validation<TResult, TError>> BindAsync<TResult>(
         Func<T, Task<Validation<TResult, TError>>> binder) =>
         Task.FromResult<Validation<TResult, TError>>(new Invalid<TResult, TError>(Errors));
 
+    /// <inheritdoc />
     public override Validation<T, TError> Tap(Action<T> action) => this;
 
+    /// <inheritdoc />
     public override Validation<T, TError> TapInvalid(Action<IReadOnlyList<TError>> action)
     {
         action(Errors);
         return this;
     }
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => defaultValue;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => defaultFactory();
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() =>
         throw new InvalidOperationException(
             $"Cannot get value from an invalid validation. Errors: {string.Join(", ", Errors.Select(e => e.Message))}");
