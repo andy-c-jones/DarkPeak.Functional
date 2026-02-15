@@ -55,13 +55,10 @@ jobs:
         run: dotnet build --configuration Release /p:Version=${{ steps.release_version.outputs.version }}
 
       - name: Test
-        run: |
-          for proj in tests/*/; do
-            proj_name=$(basename "$proj")
-            dotnet run --project "$proj" --configuration Release --no-build -- \
-              --coverage --coverage-output "${{ github.workspace }}/coverage-${proj_name}.cobertura.xml" --coverage-output-format cobertura \
-              --report-trx --report-trx-filename "${proj_name}.trx" --results-directory "${{ github.workspace }}/TestResults"
-          done
+        run: >
+          dotnet test --configuration Release --no-build
+          --coverage --coverage-output "${{ github.workspace }}/coverage.cobertura.xml" --coverage-output-format cobertura
+          --report-trx --results-directory "${{ github.workspace }}/TestResults"
 
       - name: Pack
         run: |
