@@ -60,7 +60,7 @@ jobs:
         if: success() || failure()
         run: |
           dotnet tool install --global dotnet-coverage
-          dotnet-coverage merge ${{ github.workspace }}/TestResults/**/coverage.cobertura.xml \
+          dotnet-coverage merge ${{ github.workspace }}/TestResults/**/*.cobertura.xml \
             --output ${{ github.workspace }}/coverage.cobertura.xml \
             --output-format cobertura
 
