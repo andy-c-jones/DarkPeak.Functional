@@ -7,6 +7,7 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<ConcurrentProduct> ConcurrentProducts => Set<ConcurrentProduct>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +32,14 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Balance).HasPrecision(10, 2);
         });
+
+        modelBuilder.Entity<ConcurrentProduct>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired();
+            entity.Property(e => e.Price).HasPrecision(10, 2);
+            entity.Property(e => e.Version).IsConcurrencyToken();
+        });
     }
 }
 
@@ -53,4 +62,12 @@ public class Account
     public int Id { get; set; }
     public required string Name { get; set; }
     public decimal Balance { get; set; }
+}
+
+public class ConcurrentProduct
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public decimal Price { get; set; }
+    public int Version { get; set; }
 }

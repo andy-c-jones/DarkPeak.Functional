@@ -1,61 +1,18 @@
 using DarkPeak.Functional.EntityFramework;
 using Microsoft.EntityFrameworkCore;
-using Testcontainers.PostgreSql;
 
 namespace DarkPeak.Functional.EntityFramework.Tests;
 
-public class DbContextTransactionExtensionsShould : IAsyncDisposable
+[ClassDataSource<PostgresFixture>(Shared = SharedType.PerClass)]
+[NotInParallel]
+public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
 {
-    private readonly PostgreSqlContainer _container;
-    private string? _connectionString;
-
-    public DbContextTransactionExtensionsShould()
-    {
-        _container = new PostgreSqlBuilder("postgres:17-alpine")
-            .Build();
-    }
-
-    private async Task<TestDbContext> GetDbContextAsync()
-    {
-        if (_connectionString is null)
-        {
-            await _container.StartAsync();
-            _connectionString = _container.GetConnectionString();
-
-            // Create schema and seed once
-            var options = new DbContextOptionsBuilder<TestDbContext>()
-                .UseNpgsql(_connectionString)
-                .Options;
-
-            await using var seedContext = new TestDbContext(options);
-            await seedContext.Database.EnsureCreatedAsync();
-
-            seedContext.Accounts.AddRange(
-                new Account { Name = "Alice", Balance = 100.00m },
-                new Account { Name = "Bob", Balance = 50.00m });
-
-            await seedContext.SaveChangesAsync();
-        }
-
-        // Return a fresh context each time so tests don't share change tracker state
-        var freshOptions = new DbContextOptionsBuilder<TestDbContext>()
-            .UseNpgsql(_connectionString)
-            .Options;
-
-        return new TestDbContext(freshOptions);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _container.DisposeAsync();
-    }
-
     // --- Commit on success ---
 
     [Test]
     public async Task Commit_transaction_on_success()
     {
-        await using var db = await GetDbContextAsync();
+        await using var db = fixture.CreateDbContext();
 
         var result = await db.ExecuteInTransactionAsync(async ctx =>
         {
@@ -75,7 +32,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
         await Assert.That(result.IsSuccess).IsTrue();
 
         // Verify with fresh context
-        await using var verifyDb = await GetDbContextAsync();
+        await using var verifyDb = fixture.CreateDbContext();
         var aliceBalance = await verifyDb.Set<Account>()
             .Where(a => a.Name == "Alice")
             .Select(a => a.Balance)
@@ -94,7 +51,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Rollback_transaction_on_failure()
     {
-        await using var db = await GetDbContextAsync();
+        await using var db = fixture.CreateDbContext();
 
         // Record balance before the test
         var balanceBefore = await db.Set<Account>()
@@ -121,7 +78,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
         await Assert.That(result.IsFailure).IsTrue();
 
         // Verify the debit was rolled back
-        await using var verifyDb = await GetDbContextAsync();
+        await using var verifyDb = fixture.CreateDbContext();
         var aliceBalance = await verifyDb.Set<Account>()
             .Where(a => a.Name == "Alice")
             .Select(a => a.Balance)
@@ -134,7 +91,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Rollback_transaction_on_exception()
     {
-        await using var db = await GetDbContextAsync();
+        await using var db = fixture.CreateDbContext();
 
         // Record current balance before this test
         var balanceBefore = await db.Set<Account>()
@@ -151,8 +108,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
             alice.Balance -= 10;
             await ctx.SaveChangesAsync();
 
-            // Force an exception by adding a duplicate unique constraint violation
-            // But first we need to throw an exception inside the delegate
+            // Force an exception inside the delegate
             throw new InvalidOperationException("Simulated failure");
 
 #pragma warning disable CS0162 // Unreachable code
@@ -163,7 +119,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
         await Assert.That(result.IsFailure).IsTrue();
 
         // Verify the debit was rolled back
-        await using var verifyDb = await GetDbContextAsync();
+        await using var verifyDb = fixture.CreateDbContext();
         var aliceBalance = await verifyDb.Set<Account>()
             .Where(a => a.Name == "Alice")
             .Select(a => a.Balance)
@@ -176,7 +132,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Support_unit_overload_for_void_operations()
     {
-        await using var db = await GetDbContextAsync();
+        await using var db = fixture.CreateDbContext();
 
         var result = await db.ExecuteInTransactionAsync(async ctx =>
         {
@@ -188,7 +144,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
         await Assert.That(result.IsSuccess).IsTrue();
 
         // Verify with fresh context
-        await using var verifyDb = await GetDbContextAsync();
+        await using var verifyDb = fixture.CreateDbContext();
         var charlie = await verifyDb.Set<Account>()
             .Where(a => a.Name == "Charlie")
             .SingleOrDefaultResultAsync();
@@ -203,7 +159,7 @@ public class DbContextTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Support_chained_bind_operations_in_transaction()
     {
-        await using var db = await GetDbContextAsync();
+        await using var db = fixture.CreateDbContext();
 
         var result = await db.ExecuteInTransactionAsync(async ctx =>
         {

@@ -1,57 +1,18 @@
+using System.Data;
 using DarkPeak.Functional.Dapper;
-using Npgsql;
-using Testcontainers.PostgreSql;
 
 namespace DarkPeak.Functional.Dapper.Tests;
 
-public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
+[ClassDataSource<PostgresFixture>(Shared = SharedType.PerClass)]
+[NotInParallel]
+public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
 {
-    private readonly PostgreSqlContainer _container;
-    private NpgsqlConnection? _connection;
-
-    public DbConnectionTransactionExtensionsShould()
-    {
-        _container = new PostgreSqlBuilder("postgres:17-alpine")
-            .Build();
-    }
-
-    private async Task<NpgsqlConnection> GetConnectionAsync()
-    {
-        if (_connection is not null) return _connection;
-
-        await _container.StartAsync();
-        _connection = new NpgsqlConnection(_container.GetConnectionString());
-        await _connection.OpenAsync();
-
-        await using var cmd = _connection.CreateCommand();
-        cmd.CommandText = """
-            CREATE TABLE accounts (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                balance NUMERIC(10,2) NOT NULL DEFAULT 0
-            );
-
-            INSERT INTO accounts (name, balance) VALUES
-                ('Alice', 100.00),
-                ('Bob', 50.00);
-            """;
-        await cmd.ExecuteNonQueryAsync();
-
-        return _connection;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_connection is not null) await _connection.DisposeAsync();
-        await _container.DisposeAsync();
-    }
-
     // --- Commit on success ---
 
     [Test]
     public async Task Commit_transaction_on_success()
     {
-        var conn = await GetConnectionAsync();
+        await using var conn = await fixture.OpenConnectionAsync();
 
         var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
         {
@@ -73,6 +34,10 @@ public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
 
         await Assert.That(alice.GetValueOrThrow()).IsEqualTo(75.00m);
         await Assert.That(bob.GetValueOrThrow()).IsEqualTo(75.00m);
+
+        // Reset balances for other tests
+        await conn.ExecuteResultAsync("UPDATE accounts SET balance = 100.00 WHERE id = 1");
+        await conn.ExecuteResultAsync("UPDATE accounts SET balance = 50.00 WHERE id = 2");
     }
 
     // --- Rollback on failure ---
@@ -80,7 +45,7 @@ public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Rollback_transaction_on_failure()
     {
-        var conn = await GetConnectionAsync();
+        await using var conn = await fixture.OpenConnectionAsync();
 
         var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
         {
@@ -107,7 +72,7 @@ public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Rollback_transaction_on_exception()
     {
-        var conn = await GetConnectionAsync();
+        await using var conn = await fixture.OpenConnectionAsync();
 
         var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
         {
@@ -126,12 +91,45 @@ public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
         await Assert.That(alice.GetValueOrThrow()).IsEqualTo(100.00m);
     }
 
+    // --- Connection auto-open ---
+
+    [Test]
+    public async Task Auto_open_closed_connection_for_transaction()
+    {
+        await using var closedConnection = fixture.CreateClosedConnection();
+        // Connection is in Closed state — ExecuteInTransactionAsync should open it
+
+        var result = await closedConnection.ExecuteInTransactionAsync(async (c, tx) =>
+        {
+            return await c.QuerySingleResultAsync<decimal>(
+                "SELECT balance FROM accounts WHERE id = 1", transaction: tx);
+        });
+
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    // --- Isolation level ---
+
+    [Test]
+    public async Task Accept_custom_isolation_level()
+    {
+        await using var conn = await fixture.OpenConnectionAsync();
+
+        var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
+        {
+            return await c.QuerySingleResultAsync<decimal>(
+                "SELECT balance FROM accounts WHERE id = 1", transaction: tx);
+        }, IsolationLevel.Serializable);
+
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
     // --- Unit overload ---
 
     [Test]
     public async Task Support_unit_overload_for_void_operations()
     {
-        var conn = await GetConnectionAsync();
+        await using var conn = await fixture.OpenConnectionAsync();
 
         var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
         {
@@ -156,7 +154,7 @@ public class DbConnectionTransactionExtensionsShould : IAsyncDisposable
     [Test]
     public async Task Support_chained_bind_operations_in_transaction()
     {
-        var conn = await GetConnectionAsync();
+        await using var conn = await fixture.OpenConnectionAsync();
 
         var result = await conn.ExecuteInTransactionAsync(async (c, tx) =>
         {
