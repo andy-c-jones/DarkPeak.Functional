@@ -166,4 +166,20 @@ public static class TaskOptionExtensions
     public static async Task<Option<T>> OrElse<T>(
         this Task<Option<T>> task, Func<Option<T>> alternativeFactory) =>
         (await task).OrElse(alternativeFactory);
+
+    /// <summary>
+    /// Asynchronously combines two independent Option-producing tasks into a tuple.
+    /// Both tasks are awaited concurrently. Returns Some only if both are Some, otherwise None.
+    /// </summary>
+    /// <typeparam name="T1">The first value type.</typeparam>
+    /// <typeparam name="T2">The second value type.</typeparam>
+    /// <param name="first">The first task producing an option.</param>
+    /// <param name="second">The second task producing an option.</param>
+    /// <returns>Some with a tuple of both values, or None.</returns>
+    public static async Task<Option<(T1, T2)>> Join<T1, T2>(
+        this Task<Option<T1>> first, Task<Option<T2>> second)
+    {
+        await Task.WhenAll(first, second);
+        return first.Result.Join(second.Result);
+    }
 }

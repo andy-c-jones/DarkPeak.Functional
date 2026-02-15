@@ -56,22 +56,22 @@ var result = Validation.Valid<Func<string, int, User>, ValidationError>(
 // Invalid([{ Message = "Name is required" }, { Message = "Age must be 0-150" }])
 ```
 
-## Combine
+## ZipWith
 
 Combine multiple validations with a projection function:
 
 ```csharp
-var result = ValidationExtensions.Combine(
-    ValidateName(dto.Name),
-    ValidateAge(dto.Age),
-    (name, age) => new User(name, age));
+var result = ValidateName(dto.Name)
+    .ZipWith(
+        ValidateAge(dto.Age),
+        (name, age) => new User(name, age));
 
 // Three-way combine
-var result = ValidationExtensions.Combine(
-    ValidateName(dto.Name),
-    ValidateAge(dto.Age),
-    ValidateEmail(dto.Email),
-    (name, age, email) => new User(name, age, email));
+var result = ValidateName(dto.Name)
+    .ZipWith(
+        ValidateAge(dto.Age),
+        ValidateEmail(dto.Email),
+        (name, age, email) => new User(name, age, email));
 ```
 
 ## Sequence

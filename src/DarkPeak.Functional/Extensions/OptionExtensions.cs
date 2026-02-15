@@ -247,4 +247,197 @@ public static class OptionExtensions
         }
         return results;
     }
+
+    // --- Sequence ---
+
+    /// <summary>
+    /// Converts a sequence of Options into an Option of a sequence.
+    /// Returns Some with all values if ALL are Some, or None if ANY is None.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <param name="source">The sequence of options.</param>
+    /// <returns>Some with all values, or None if any option is None.</returns>
+    public static Option<IEnumerable<T>> Sequence<T>(this IEnumerable<Option<T>> source)
+    {
+        var values = new List<T>();
+
+        foreach (var option in source)
+        {
+            if (option.IsSome)
+            {
+                foreach (var value in option)
+                {
+                    values.Add(value);
+                }
+            }
+            else
+            {
+                return Option.None<IEnumerable<T>>();
+            }
+        }
+
+        return Option.Some<IEnumerable<T>>(values);
+    }
+
+    // --- Traverse ---
+
+    /// <summary>
+    /// Applies an Option-returning function to each element, then sequences the results.
+    /// Returns Some with all mapped values if all return Some, or None if any returns None.
+    /// </summary>
+    /// <typeparam name="T">The source element type.</typeparam>
+    /// <typeparam name="TResult">The mapped value type.</typeparam>
+    /// <param name="source">The source sequence.</param>
+    /// <param name="func">A function that returns an Option for each element.</param>
+    /// <returns>Some with all mapped values, or None.</returns>
+    public static Option<IEnumerable<TResult>> Traverse<T, TResult>(
+        this IEnumerable<T> source, Func<T, Option<TResult>> func)
+    {
+        var values = new List<TResult>();
+
+        foreach (var item in source)
+        {
+            var option = func(item);
+            if (option.IsSome)
+            {
+                foreach (var value in option)
+                {
+                    values.Add(value);
+                }
+            }
+            else
+            {
+                return Option.None<IEnumerable<TResult>>();
+            }
+        }
+
+        return Option.Some<IEnumerable<TResult>>(values);
+    }
+
+    // --- Join ---
+
+    /// <summary>
+    /// Combines two independent Options into a tuple.
+    /// Returns Some only if both are Some, otherwise None.
+    /// </summary>
+    /// <typeparam name="T1">The first value type.</typeparam>
+    /// <typeparam name="T2">The second value type.</typeparam>
+    /// <param name="first">The first option.</param>
+    /// <param name="second">The second option.</param>
+    /// <returns>Some with a tuple of both values, or None.</returns>
+    public static Option<(T1, T2)> Join<T1, T2>(this Option<T1> first, Option<T2> second) =>
+        first.Bind(v1 => second.Map(v2 => (v1, v2)));
+
+    /// <summary>
+    /// Combines three independent Options into a tuple.
+    /// Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    /// <typeparam name="T1">The first value type.</typeparam>
+    /// <typeparam name="T2">The second value type.</typeparam>
+    /// <typeparam name="T3">The third value type.</typeparam>
+    /// <param name="first">The first option.</param>
+    /// <param name="second">The second option.</param>
+    /// <param name="third">The third option.</param>
+    /// <returns>Some with a tuple of all values, or None.</returns>
+    public static Option<(T1, T2, T3)> Join<T1, T2, T3>(
+        this Option<T1> first, Option<T2> second, Option<T3> third) =>
+        first.Bind(v1 => second.Bind(v2 => third.Map(v3 => (v1, v2, v3))));
+
+    // --- Async Sequential ---
+
+    /// <summary>
+    /// Awaits a sequence of tasks producing Options one by one.
+    /// Returns Some with all values if all are Some, or None if any is None (fail-fast, sequential).
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <param name="tasks">The tasks producing options.</param>
+    /// <returns>Some with all values, or None.</returns>
+    public static async Task<Option<IEnumerable<T>>> SequenceAsync<T>(
+        this IEnumerable<Task<Option<T>>> tasks)
+    {
+        var values = new List<T>();
+
+        foreach (var task in tasks)
+        {
+            var option = await task;
+            if (option.IsSome)
+            {
+                foreach (var value in option)
+                {
+                    values.Add(value);
+                }
+            }
+            else
+            {
+                return Option.None<IEnumerable<T>>();
+            }
+        }
+
+        return Option.Some<IEnumerable<T>>(values);
+    }
+
+    /// <summary>
+    /// Applies an async Option-returning function to each element sequentially, then sequences the results.
+    /// Returns Some with all mapped values if all return Some, or None if any returns None (sequential).
+    /// </summary>
+    /// <typeparam name="T">The source element type.</typeparam>
+    /// <typeparam name="TResult">The mapped value type.</typeparam>
+    /// <param name="source">The source sequence.</param>
+    /// <param name="func">An async function that returns an Option for each element.</param>
+    /// <returns>Some with all mapped values, or None.</returns>
+    public static async Task<Option<IEnumerable<TResult>>> TraverseAsync<T, TResult>(
+        this IEnumerable<T> source, Func<T, Task<Option<TResult>>> func)
+    {
+        var values = new List<TResult>();
+
+        foreach (var item in source)
+        {
+            var option = await func(item);
+            if (option.IsSome)
+            {
+                foreach (var value in option)
+                {
+                    values.Add(value);
+                }
+            }
+            else
+            {
+                return Option.None<IEnumerable<TResult>>();
+            }
+        }
+
+        return Option.Some<IEnumerable<TResult>>(values);
+    }
+
+    // --- Async Parallel ---
+
+    /// <summary>
+    /// Awaits all tasks concurrently, then sequences the results.
+    /// Returns Some with all values if all are Some, or None if any is None.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <param name="tasks">The tasks producing options.</param>
+    /// <returns>Some with all values, or None.</returns>
+    public static async Task<Option<IEnumerable<T>>> SequenceParallel<T>(
+        this IEnumerable<Task<Option<T>>> tasks)
+    {
+        var results = await Task.WhenAll(tasks);
+        return results.Sequence();
+    }
+
+    /// <summary>
+    /// Applies an async Option-returning function to all elements concurrently, then sequences the results.
+    /// Returns Some with all mapped values if all return Some, or None if any returns None.
+    /// </summary>
+    /// <typeparam name="T">The source element type.</typeparam>
+    /// <typeparam name="TResult">The mapped value type.</typeparam>
+    /// <param name="source">The source sequence.</param>
+    /// <param name="func">An async function that returns an Option for each element.</param>
+    /// <returns>Some with all mapped values, or None.</returns>
+    public static async Task<Option<IEnumerable<TResult>>> TraverseParallel<T, TResult>(
+        this IEnumerable<T> source, Func<T, Task<Option<TResult>>> func)
+    {
+        var results = await Task.WhenAll(source.Select(func));
+        return results.Sequence();
+    }
 }

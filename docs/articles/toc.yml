@@ -8,6 +8,12 @@
   href: either.md
 - name: Validation
   href: validation.md
+- name: Pipeline & Composition
+  href: pipeline.md
+- name: Sequence & Traverse
+  href: sequence-traverse.md
+- name: Join
+  href: join.md
 - name: Retry
   href: retry.md
 - name: Memoize

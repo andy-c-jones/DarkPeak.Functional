@@ -31,10 +31,10 @@ public static class ValidationExtensions
         };
 
     /// <summary>
-    /// Combines two validations, accumulating errors from both if either fails.
+    /// Combines two validations with a projection function, accumulating errors from both if either fails.
     /// If both succeed, applies the combiner function to produce the result.
     /// </summary>
-    public static Validation<TResult, TError> Combine<T1, T2, TResult, TError>(
+    public static Validation<TResult, TError> ZipWith<T1, T2, TResult, TError>(
         this Validation<T1, TError> first,
         Validation<T2, TError> second,
         Func<T1, T2, TResult> combiner)
@@ -42,9 +42,9 @@ public static class ValidationExtensions
         first.Map<Func<T2, TResult>>(a => b => combiner(a, b)).Apply(second);
 
     /// <summary>
-    /// Combines three validations, accumulating errors from all.
+    /// Combines three validations with a projection function, accumulating errors from all.
     /// </summary>
-    public static Validation<TResult, TError> Combine<T1, T2, T3, TResult, TError>(
+    public static Validation<TResult, TError> ZipWith<T1, T2, T3, TResult, TError>(
         this Validation<T1, TError> first,
         Validation<T2, TError> second,
         Validation<T3, TError> third,
@@ -56,10 +56,10 @@ public static class ValidationExtensions
             .Apply(third);
 
     /// <summary>
-    /// Combines a sequence of validations, accumulating all errors.
+    /// Converts a sequence of validations into a single validation containing all values, accumulating all errors.
     /// Returns Valid with all values if all succeed, or Invalid with all collected errors.
     /// </summary>
-    public static Validation<IEnumerable<T>, TError> Combine<T, TError>(
+    public static Validation<IEnumerable<T>, TError> Sequence<T, TError>(
         this IEnumerable<Validation<T, TError>> validations)
         where TError : Error
     {
@@ -98,4 +98,69 @@ public static class ValidationExtensions
             success: value => new Valid<T, TError>(value),
             failure: error => new Invalid<T, TError>([error])
         );
+
+    // --- Traverse ---
+
+    /// <summary>
+    /// Applies a Validation-returning function to each element, then sequences the results.
+    /// Returns Valid with all mapped values if all succeed, or Invalid with all accumulated errors.
+    /// </summary>
+    /// <typeparam name="T">The source element type.</typeparam>
+    /// <typeparam name="TResult">The mapped valid type.</typeparam>
+    /// <typeparam name="TError">The error type.</typeparam>
+    /// <param name="source">The source sequence.</param>
+    /// <param name="func">A function that returns a Validation for each element.</param>
+    /// <returns>Valid with all mapped values, or Invalid with all accumulated errors.</returns>
+    public static Validation<IEnumerable<TResult>, TError> Traverse<T, TResult, TError>(
+        this IEnumerable<T> source, Func<T, Validation<TResult, TError>> func)
+        where TError : Error
+    {
+        var values = new List<TResult>();
+        var errors = new List<TError>();
+
+        foreach (var item in source)
+        {
+            var validation = func(item);
+            validation.Match<object?>(
+                valid: v => { values.Add(v); return null; },
+                invalid: errs => { errors.AddRange(errs); return null; }
+            );
+        }
+
+        return errors.Count > 0
+            ? new Invalid<IEnumerable<TResult>, TError>(errors.AsReadOnly())
+            : new Valid<IEnumerable<TResult>, TError>(values);
+    }
+
+    // --- Join ---
+
+    /// <summary>
+    /// Combines two independent Validations into a tuple, accumulating all errors from both.
+    /// </summary>
+    /// <typeparam name="T1">The first valid type.</typeparam>
+    /// <typeparam name="T2">The second valid type.</typeparam>
+    /// <typeparam name="TError">The error type.</typeparam>
+    /// <param name="first">The first validation.</param>
+    /// <param name="second">The second validation.</param>
+    /// <returns>Valid with a tuple of both values, or Invalid with all accumulated errors.</returns>
+    public static Validation<(T1, T2), TError> Join<T1, T2, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second)
+        where TError : Error =>
+        first.ZipWith(second, (v1, v2) => (v1, v2));
+
+    /// <summary>
+    /// Combines three independent Validations into a tuple, accumulating all errors from all.
+    /// </summary>
+    /// <typeparam name="T1">The first valid type.</typeparam>
+    /// <typeparam name="T2">The second valid type.</typeparam>
+    /// <typeparam name="T3">The third valid type.</typeparam>
+    /// <typeparam name="TError">The error type.</typeparam>
+    /// <param name="first">The first validation.</param>
+    /// <param name="second">The second validation.</param>
+    /// <param name="third">The third validation.</param>
+    /// <returns>Valid with a tuple of all values, or Invalid with all accumulated errors.</returns>
+    public static Validation<(T1, T2, T3), TError> Join<T1, T2, T3, TError>(
+        this Validation<T1, TError> first, Validation<T2, TError> second, Validation<T3, TError> third)
+        where TError : Error =>
+        first.ZipWith(second, third, (v1, v2, v3) => (v1, v2, v3));
 }

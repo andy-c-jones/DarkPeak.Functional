@@ -293,4 +293,285 @@ public class OptionExtensionsShould
         await Assert.That(result[0]).IsEqualTo(20);
         await Assert.That(result[1]).IsEqualTo(40);
     }
+
+    // Sequence
+
+    [Test]
+    public async Task Sequence_all_some_returns_some_with_all_values()
+    {
+        var options = new[]
+        {
+            Option.Some(1),
+            Option.Some(2),
+            Option.Some(3)
+        };
+
+        var result = options.Sequence();
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+        await Assert.That(values[0]).IsEqualTo(1);
+        await Assert.That(values[1]).IsEqualTo(2);
+        await Assert.That(values[2]).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Sequence_with_none_returns_none()
+    {
+        var options = new[]
+        {
+            Option.Some(1),
+            Option.None<int>(),
+            Option.Some(3)
+        };
+
+        var result = options.Sequence();
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Sequence_empty_returns_some_empty()
+    {
+        var options = Array.Empty<Option<int>>();
+
+        var result = options.Sequence();
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(0);
+    }
+
+    // Traverse
+
+    [Test]
+    public async Task Traverse_all_some_returns_mapped_values()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = source.Traverse(x => Option.Some($"v{x}"));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+        await Assert.That(values[0]).IsEqualTo("v1");
+        await Assert.That(values[1]).IsEqualTo("v2");
+        await Assert.That(values[2]).IsEqualTo("v3");
+    }
+
+    [Test]
+    public async Task Traverse_with_none_returns_none()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = source.Traverse(x =>
+            x == 2 ? Option.None<string>() : Option.Some($"v{x}"));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // Join (2-arity)
+
+    [Test]
+    public async Task Join_two_some_returns_tuple()
+    {
+        var first = Option.Some(1);
+        var second = Option.Some("two");
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsSome).IsTrue();
+        var (v1, v2) = joined.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Join_two_first_none_returns_none()
+    {
+        var first = Option.None<int>();
+        var second = Option.Some("two");
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_two_second_none_returns_none()
+    {
+        var first = Option.Some(1);
+        var second = Option.None<string>();
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsNone).IsTrue();
+    }
+
+    // Join (3-arity)
+
+    [Test]
+    public async Task Join_three_some_returns_tuple()
+    {
+        var first = Option.Some(1);
+        var second = Option.Some("two");
+        var third = Option.Some(true);
+
+        var joined = first.Join(second, third);
+
+        await Assert.That(joined.IsSome).IsTrue();
+        var (v1, v2, v3) = joined.Match(v => v, () => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_three_any_none_returns_none()
+    {
+        var first = Option.Some(1);
+        var second = Option.None<string>();
+        var third = Option.Some(true);
+
+        var joined = first.Join(second, third);
+
+        await Assert.That(joined.IsNone).IsTrue();
+    }
+
+    // SequenceAsync (sequential)
+
+    [Test]
+    public async Task SequenceAsync_all_some_returns_values()
+    {
+        var tasks = new[]
+        {
+            Task.FromResult(Option.Some(1)),
+            Task.FromResult(Option.Some(2)),
+            Task.FromResult(Option.Some(3))
+        };
+
+        var result = await tasks.SequenceAsync();
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+        await Assert.That(values[0]).IsEqualTo(1);
+        await Assert.That(values[1]).IsEqualTo(2);
+        await Assert.That(values[2]).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task SequenceAsync_with_none_returns_none()
+    {
+        var tasks = new[]
+        {
+            Task.FromResult(Option.Some(1)),
+            Task.FromResult(Option.None<int>()),
+            Task.FromResult(Option.Some(3))
+        };
+
+        var result = await tasks.SequenceAsync();
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // TraverseAsync (sequential)
+
+    [Test]
+    public async Task TraverseAsync_all_some_returns_mapped_values()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = await source.TraverseAsync(async x =>
+        {
+            await Task.Yield();
+            return Option.Some($"v{x}");
+        });
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+        await Assert.That(values[0]).IsEqualTo("v1");
+    }
+
+    [Test]
+    public async Task TraverseAsync_with_none_returns_none()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = await source.TraverseAsync(async x =>
+        {
+            await Task.Yield();
+            return x == 2 ? Option.None<string>() : Option.Some($"v{x}");
+        });
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // SequenceParallel
+
+    [Test]
+    public async Task SequenceParallel_all_some_returns_values()
+    {
+        var tasks = new[]
+        {
+            Task.FromResult(Option.Some(1)),
+            Task.FromResult(Option.Some(2)),
+            Task.FromResult(Option.Some(3))
+        };
+
+        var result = await tasks.SequenceParallel();
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task SequenceParallel_with_none_returns_none()
+    {
+        var tasks = new[]
+        {
+            Task.FromResult(Option.Some(1)),
+            Task.FromResult(Option.None<int>()),
+            Task.FromResult(Option.Some(3))
+        };
+
+        var result = await tasks.SequenceParallel();
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    // TraverseParallel
+
+    [Test]
+    public async Task TraverseParallel_all_some_returns_mapped_values()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = await source.TraverseParallel(async x =>
+        {
+            await Task.Yield();
+            return Option.Some($"v{x}");
+        });
+
+        await Assert.That(result.IsSome).IsTrue();
+        var values = result.Match(v => v.ToList(), () => []);
+        await Assert.That(values).Count().IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task TraverseParallel_with_none_returns_none()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = await source.TraverseParallel(async x =>
+        {
+            await Task.Yield();
+            return x == 2 ? Option.None<string>() : Option.Some($"v{x}");
+        });
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
 }

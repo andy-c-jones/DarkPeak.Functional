@@ -297,4 +297,60 @@ public class TaskOptionExtensionsShould
     }
 
     #endregion
+
+    #region Join
+
+    [Test]
+    public async Task Join_two_some_returns_tuple()
+    {
+        var result = await SomeAsync(1).Join(SomeAsync("two"));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Join_first_none_returns_none()
+    {
+        var result = await NoneAsync<int>().Join(SomeAsync("two"));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_second_none_returns_none()
+    {
+        var result = await SomeAsync(1).Join(NoneAsync<string>());
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var first = Task.Run(async () =>
+        {
+            task1Started.SetResult();
+            await task2Started.Task;
+            return Option.Some(1);
+        });
+
+        var second = Task.Run(async () =>
+        {
+            task2Started.SetResult();
+            await task1Started.Task;
+            return Option.Some("two");
+        });
+
+        var result = await first.Join(second);
+
+        await Assert.That(result.IsSome).IsTrue();
+    }
+
+    #endregion
 }

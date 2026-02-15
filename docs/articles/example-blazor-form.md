@@ -126,7 +126,7 @@ public static class UserValidation
 {
     public static Validation<User, ValidationError> Validate(CreateUserRequest request) =>
         ValidateName(request.Name)
-            .Combine(
+            .ZipWith(
                 ValidateEmail(request.Email),
                 ValidateAge(request.Age),
                 (name, email, age) => new User(name, email, age, Guid.NewGuid()));
@@ -223,7 +223,7 @@ public class UserService : IUserService
 ## How It Works
 
 1. User fills in the form and clicks **Create User**
-2. `UserValidation.Validate()` runs all three validators via `Combine` — errors are **accumulated**, not short-circuited
+2. `UserValidation.Validate()` runs all three validators via `ZipWith` — errors are **accumulated**, not short-circuited
 3. On **invalid**: the `ValidationError.Code` (e.g. `"name"`, `"email"`, `"age"`) maps errors to the correct field in the UI
 4. On **valid**: the `UserService` is called, returning a `Result`. `Tap` sets the success message; `TapError` sets the error message
 5. The component re-renders with either field errors, a success banner, or a general error

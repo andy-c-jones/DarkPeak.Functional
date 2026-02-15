@@ -113,8 +113,9 @@ All four packages are versioned together and released simultaneously via the man
 - **`TypeConversionExtensions`** — Cross-type conversions (Option↔Result↔Either)
 - **`TaskOptionExtensions`** / **`TaskResultExtensions`** — Fluent async chaining on `Task<Option<T>>` and `Task<Result<T, TError>>`
 - **`EitherExtensions`** — GetLeftOrDefault, GetRightOrDefault, Flatten, Merge, Partition
-- **`ValidationExtensions`** — Apply (error accumulation), Combine, Sequence, ToResult/ToValidation interop
-- **`OptionExtensions`** / **`ResultExtensions`** — Collection operations (Choose, Partition, etc.)
+- **`ValidationExtensions`** — Apply (error accumulation), ZipWith (applicative combinator), Sequence, Traverse, Join (error-accumulating), ToResult/ToValidation interop
+- **`OptionExtensions`** / **`ResultExtensions`** — Collection operations (Choose, Partition, Sequence, Traverse, Join), async variants (SequenceAsync, TraverseAsync, PartitionAsync, ChooseAsync), parallel variants (SequenceParallel, TraverseParallel, PartitionParallel, ChooseParallel)
+- **`Pipeline`** — Pipe/Compose extensions for ad-hoc function composition, fluent `Pipeline.Create<TInput, TError>()` builder for reusable workflows with sync/async steps
 
 ### Type Hierarchy Pattern
 

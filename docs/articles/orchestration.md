@@ -57,7 +57,7 @@ Result<User, ValidationError> RegisterUser(CreateUserRequest request)
 {
     // Step 1: Validate — all errors are accumulated
     var validated = ValidateName(request.Name)
-        .Combine(
+        .ZipWith(
             ValidateEmail(request.Email),
             ValidateAge(request.Age),
             (name, email, age) => new User(name, email, age, Guid.NewGuid()));
@@ -106,7 +106,7 @@ using DarkPeak.Functional.Extensions;
 async Task<Result<User, ValidationError>> RegisterUserAsync(CreateUserRequest request)
 {
     var validated = ValidateName(request.Name)
-        .Combine(
+        .ZipWith(
             ValidateEmail(request.Email),
             ValidateAge(request.Age),
             (name, email, age) => new User(name, email, age, Guid.NewGuid()));
@@ -125,7 +125,7 @@ If you need **all** errors at the end (e.g. to return a 400 response with every 
 
 ```csharp
 var validated = ValidateName(request.Name)
-    .Combine(
+    .ZipWith(
         ValidateEmail(request.Email),
         ValidateAge(request.Age),
         (name, email, age) => new User(name, email, age, Guid.NewGuid()));

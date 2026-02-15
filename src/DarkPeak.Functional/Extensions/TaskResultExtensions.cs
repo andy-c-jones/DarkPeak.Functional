@@ -182,4 +182,21 @@ public static class TaskResultExtensions
     public static async Task<Result<T, TError>> OrElse<T, TError>(
         this Task<Result<T, TError>> task, Func<Result<T, TError>> alternativeFactory) where TError : Error =>
         (await task).OrElse(alternativeFactory);
+
+    /// <summary>
+    /// Asynchronously combines two independent Result-producing tasks into a tuple.
+    /// Both tasks are awaited concurrently. Fails fast on the first failure.
+    /// </summary>
+    /// <typeparam name="T1">The first success type.</typeparam>
+    /// <typeparam name="T2">The second success type.</typeparam>
+    /// <typeparam name="TError">The error type.</typeparam>
+    /// <param name="first">The first task producing a result.</param>
+    /// <param name="second">The second task producing a result.</param>
+    /// <returns>Success with a tuple of both values, or the first Failure.</returns>
+    public static async Task<Result<(T1, T2), TError>> Join<T1, T2, TError>(
+        this Task<Result<T1, TError>> first, Task<Result<T2, TError>> second) where TError : Error
+    {
+        await Task.WhenAll(first, second);
+        return first.Result.Join(second.Result);
+    }
 }

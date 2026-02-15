@@ -140,7 +140,7 @@ var app = builder.Build();
 
 app.MapPost("/users", (CreateUserRequest request, IUserRepository repo) =>
     ValidateName(request.Name)
-        .Combine(
+        .ZipWith(
             ValidateEmail(request.Email),
             ValidateAge(request.Age),
             (name, email, age) => new User(name, email, age, Guid.NewGuid()))

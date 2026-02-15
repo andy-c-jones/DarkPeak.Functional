@@ -317,4 +317,66 @@ public class TaskResultExtensionsShould
     }
 
     #endregion
+
+    #region Join
+
+    [Test]
+    public async Task Join_two_successes_returns_tuple()
+    {
+        var result = await SuccessAsync<int, Error>(1).Join(SuccessAsync<string, Error>("two"));
+
+        await Assert.That(result.IsSuccess).IsTrue();
+        var (v1, v2) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Join_first_failure_returns_failure()
+    {
+        var result = await FailureAsync<int, Error>(new ValidationError { Message = "err1" })
+            .Join(SuccessAsync<string, Error>("two"));
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(error).IsEqualTo("err1");
+    }
+
+    [Test]
+    public async Task Join_second_failure_returns_failure()
+    {
+        var result = await SuccessAsync<int, Error>(1)
+            .Join(FailureAsync<string, Error>(new ValidationError { Message = "err2" }));
+
+        await Assert.That(result.IsFailure).IsTrue();
+        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(error).IsEqualTo("err2");
+    }
+
+    [Test]
+    public async Task Join_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var first = Task.Run(async () =>
+        {
+            task1Started.SetResult();
+            await task2Started.Task; // Wait for task2 to have started
+            return Result.Success<int, Error>(1);
+        });
+
+        var second = Task.Run(async () =>
+        {
+            task2Started.SetResult();
+            await task1Started.Task; // Wait for task1 to have started
+            return Result.Success<string, Error>("two");
+        });
+
+        var result = await first.Join(second);
+
+        await Assert.That(result.IsSuccess).IsTrue();
+    }
+
+    #endregion
 }
