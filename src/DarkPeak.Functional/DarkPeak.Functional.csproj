@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <PackageId>DarkPeak.Functional</PackageId>
-    <Description>A functional programming library for .NET providing monadic types (Option, Result, Either, Validation) with railway-oriented programming, retry policies, and memoization.</Description>
-    <PackageTags>functional;monad;option;result;either;validation;railway;retry;memoize</PackageTags>
+    <Description>A functional programming library for .NET providing monadic types (Option, Result, Either, Validation) with railway-oriented programming, retry policies, circuit breaker, memoization, and MemoizeResult for caching successful results.</Description>
+    <PackageTags>functional;monad;option;result;either;validation;railway;retry;memoize;circuit-breaker;memoize-result</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

@@ -63,7 +63,11 @@ All three packages are versioned together and released simultaneously via the ma
 - **`Validation<T, TError>`** — Accumulates multiple errors instead of short-circuiting. Implementations: `Valid<T, TError>`, `Invalid<T, TError>`
 - **`Error`** — Abstract base record for typed errors with HTTP-mapped subtypes (ValidationError, NotFoundError, UnauthorizedError, etc.)
 - **`RetryPolicy`** — Configurable retry with backoff strategies (None, Constant, Linear, Exponential). Entry point: `Retry.WithMaxAttempts()`
+- **`CircuitBreakerPolicy`** — Circuit breaker that tracks consecutive failures and transitions between Closed, Open, and HalfOpen states to prevent cascading failures. Entry point: `CircuitBreaker.WithFailureThreshold()`. Uses a shared `CircuitBreakerStateTracker` for mutable state with `Lock`-based thread safety.
+- **`CircuitBreakerOpenError`** — Error returned when the circuit is open, with a `RetryAfter` property indicating time until half-open.
 - **`Memoize`** — Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
+- **`MemoizeResult`** — Function caching for `Result<T, TError>`-returning functions that only caches successful results. Failed results pass through uncached so subsequent calls retry the computation. Entry point: `MemoizeResult.Func()` / `MemoizeResult.FuncAsync()`
+- **`Unit`** — Valueless type representing a successful operation with no return value. Located in the core `DarkPeak.Functional` namespace.
 
 ### HTTP Client Extensions (DarkPeak.Functional.Http)
 
@@ -76,9 +80,13 @@ All three packages are versioned together and released simultaneously via the ma
   - `DeleteResultAsync<T>()` — DELETE with JSON response body
   - `SendResultAsync<T>()` — Custom `HttpRequestMessage` with JSON response
   - `SendResultAsync()` — Custom `HttpRequestMessage` without response body
+  - `GetStringResultAsync()` — GET returning `Result<string, Error>` for plain text/XML/HTML
+  - `GetStreamResultAsync()` — GET returning `Result<Stream, Error>` with `ResponseHeadersRead` for streaming
+  - `GetBytesResultAsync()` — GET returning `Result<byte[], Error>` for binary data
+  - All methods above (except `SendResultAsync`) have an overload accepting `Action<HttpRequestMessage> configure` for per-request header/auth customization
 - **`HttpError`** — Error type for HTTP responses with `StatusCode`, `ReasonPhrase`, `ResponseBody`
 - **`HttpRequestError`** — Error type for transport-level failures (network errors, timeouts)
-- **`Unit`** — Valueless success type for operations without a response body
+- **`Unit`** — Now located in the core `DarkPeak.Functional` namespace (moved from Http)
 - **Status code mapping**: 400→BadRequestError, 401→UnauthorizedError, 403→ForbiddenError, 404→NotFoundError, 409→ConflictError, 422→ValidationError, 5xx→ExternalServiceError, other→HttpError
 
 ### ASP.NET Integration (DarkPeak.Functional.AspNet)

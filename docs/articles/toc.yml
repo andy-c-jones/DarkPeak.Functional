@@ -12,6 +12,10 @@
   href: retry.md
 - name: Memoize
   href: memoize.md
+- name: Circuit Breaker
+  href: circuit-breaker.md
+- name: Http
+  href: http.md
 - name: Orchestration
   href: orchestration.md
 - name: "Example: Minimal Web API"
