@@ -10,6 +10,8 @@
   href: validation.md
 - name: Pipeline & Composition
   href: pipeline.md
+- name: Validation Pipeline
+  href: validation-pipeline.md
 - name: Sequence & Traverse
   href: sequence-traverse.md
 - name: Join
