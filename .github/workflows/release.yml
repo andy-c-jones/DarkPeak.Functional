@@ -38,24 +38,32 @@ jobs:
         id: version
         uses: gittools/actions/gitversion/execute@v4
         with:
-          useConfigFile: true
+          configFilePath: GitVersion.yml
+
+      - name: Compute release version
+        id: release_version
+        run: |
+          BASE_VERSION="${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}"
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          if [ "${{ inputs.prerelease }}" = "true" ]; then
+            echo "version=${BASE_VERSION}-prerelease-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${BASE_VERSION}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build
-        run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.semVer }}
+        run: dotnet build --configuration Release /p:Version=${{ steps.release_version.outputs.version }}
 
       - name: Test
-        run: |
-          for proj in tests/*/; do
-            proj_name=$(basename "$proj")
-            dotnet run --project "$proj" --configuration Release --no-build -- \
-              --coverage --coverage-output "${{ github.workspace }}/coverage-${proj_name}.cobertura.xml" --coverage-output-format cobertura \
-              --report-trx --report-trx-filename "${proj_name}.trx" --results-directory "${{ github.workspace }}/TestResults"
-          done
+        run: >
+          dotnet test --configuration Release --no-build
+          --coverage --coverage-output "${{ github.workspace }}/coverage.cobertura.xml" --coverage-output-format cobertura
+          --report-trx --results-directory "${{ github.workspace }}/TestResults"
 
       - name: Pack
         run: |
           for proj in src/*/; do
-            dotnet pack "$proj" --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.version.outputs.semVer }}
+            dotnet pack "$proj" --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.release_version.outputs.version }}
           done
 
       - name: Publish to NuGet
@@ -63,14 +71,14 @@ jobs:
 
       - name: Create tag
         run: |
-          git tag "v${{ steps.version.outputs.semVer }}"
-          git push origin "v${{ steps.version.outputs.semVer }}"
+          git tag "v${{ steps.release_version.outputs.version }}"
+          git push origin "v${{ steps.release_version.outputs.version }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.semVer }}
-          name: v${{ steps.version.outputs.semVer }}
+          tag_name: v${{ steps.release_version.outputs.version }}
+          name: v${{ steps.release_version.outputs.version }}
           generate_release_notes: true
           prerelease: ${{ inputs.prerelease }}
           files: ./nupkg/*.nupkg

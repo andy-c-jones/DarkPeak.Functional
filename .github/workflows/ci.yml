@@ -39,19 +39,16 @@ jobs:
         id: version
         uses: gittools/actions/gitversion/execute@v4
         with:
-          useConfigFile: true
+          configFilePath: GitVersion.yml
 
       - name: Build
         run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.semVer }}
 
       - name: Test
-        run: |
-          for proj in tests/*/; do
-            proj_name=$(basename "$proj")
-            dotnet run --project "$proj" --configuration Release --no-build -- \
-              --coverage --coverage-output "${{ github.workspace }}/coverage-${proj_name}.cobertura.xml" --coverage-output-format cobertura \
-              --report-trx --report-trx-filename "${proj_name}.trx" --results-directory "${{ github.workspace }}/TestResults"
-          done
+        run: >
+          dotnet test --configuration Release --no-build
+          --coverage --coverage-output "${{ github.workspace }}/coverage.cobertura.xml" --coverage-output-format cobertura
+          --report-trx --results-directory "${{ github.workspace }}/TestResults"
 
       - name: Publish test results
         if: always()
@@ -60,10 +57,10 @@ jobs:
           files: ${{ github.workspace }}/TestResults/*.trx
 
       - name: Coverage summary
-        if: (success() || failure()) && hashFiles('coverage-*.cobertura.xml') != ''
+        if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: coverage-*.cobertura.xml
+          filename: coverage.cobertura.xml
           badge: true
           format: markdown
           output: both
@@ -81,11 +78,11 @@ jobs:
           path: code-coverage-results.md
 
       - name: Upload coverage artifact
-        if: (success() || failure()) && hashFiles('coverage-*.cobertura.xml') != ''
+        if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
         uses: actions/upload-artifact@v6
         with:
           name: coverage-report
-          path: coverage-*.cobertura.xml
+          path: coverage.cobertura.xml
 
       - name: Pack
         run: |
