@@ -297,4 +297,221 @@ public class TaskOptionExtensionsShould
     }
 
     #endregion
+
+    #region Join
+
+    [Test]
+    public async Task Join_two_some_returns_tuple()
+    {
+        var result = await SomeAsync(1).Join(SomeAsync("two"));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Join_first_none_returns_none()
+    {
+        var result = await NoneAsync<int>().Join(SomeAsync("two"));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_second_none_returns_none()
+    {
+        var result = await SomeAsync(1).Join(NoneAsync<string>());
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+
+        var first = Task.Run(async () =>
+        {
+            task1Started.SetResult();
+            await task2Started.Task;
+            return Option.Some(1);
+        });
+
+        var second = Task.Run(async () =>
+        {
+            task2Started.SetResult();
+            await task1Started.Task;
+            return Option.Some("two");
+        });
+
+        var result = await first.Join(second);
+
+        await Assert.That(result.IsSome).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_three_some_returns_tuple()
+    {
+        var result = await SomeAsync(1).Join(SomeAsync("two"), SomeAsync(true));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_three_any_none_returns_none()
+    {
+        var result = await SomeAsync(1).Join(NoneAsync<string>(), SomeAsync(true));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_four_some_returns_tuple()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v4).IsEqualTo(4.0);
+    }
+
+    [Test]
+    public async Task Join_four_any_none_returns_none()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), NoneAsync<bool>(), SomeAsync(4.0));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_five_some_returns_tuple()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v5).IsEqualTo('e');
+    }
+
+    [Test]
+    public async Task Join_five_any_none_returns_none()
+    {
+        var result = await NoneAsync<int>()
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_six_some_returns_tuple()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v6).IsEqualTo(6L);
+    }
+
+    [Test]
+    public async Task Join_six_any_none_returns_none()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), NoneAsync<long>());
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_seven_some_returns_tuple()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v7).IsEqualTo(7.0f);
+    }
+
+    [Test]
+    public async Task Join_seven_any_none_returns_none()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), NoneAsync<bool>(), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_eight_some_returns_tuple()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f), SomeAsync((byte)8));
+
+        await Assert.That(result.IsSome).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7, v8) = result.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v8).IsEqualTo((byte)8);
+    }
+
+    [Test]
+    public async Task Join_eight_any_none_returns_none()
+    {
+        var result = await SomeAsync(1)
+            .Join(SomeAsync("two"), SomeAsync(true), NoneAsync<double>(), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f), SomeAsync((byte)8));
+
+        await Assert.That(result.IsNone).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_three_runs_tasks_concurrently()
+    {
+        var task1Started = new TaskCompletionSource();
+        var task2Started = new TaskCompletionSource();
+        var task3Started = new TaskCompletionSource();
+
+        var first = Task.Run(async () =>
+        {
+            task1Started.SetResult();
+            await task2Started.Task;
+            await task3Started.Task;
+            return Option.Some(1);
+        });
+
+        var second = Task.Run(async () =>
+        {
+            task2Started.SetResult();
+            await task1Started.Task;
+            await task3Started.Task;
+            return Option.Some("two");
+        });
+
+        var third = Task.Run(async () =>
+        {
+            task3Started.SetResult();
+            await task1Started.Task;
+            await task2Started.Task;
+            return Option.Some(true);
+        });
+
+        var result = await first.Join(second, third);
+
+        await Assert.That(result.IsSome).IsTrue();
+    }
+
+    #endregion
 }

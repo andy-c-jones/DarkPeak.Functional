@@ -166,4 +166,92 @@ public static class TaskOptionExtensions
     public static async Task<Option<T>> OrElse<T>(
         this Task<Option<T>> task, Func<Option<T>> alternativeFactory) =>
         (await task).OrElse(alternativeFactory);
+
+    /// <summary>
+    /// Asynchronously combines two independent Option-producing tasks into a tuple.
+    /// Both tasks are awaited concurrently. Returns Some only if both are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2)>> Join<T1, T2>(
+        this Task<Option<T1>> first, Task<Option<T2>> second)
+    {
+        await Task.WhenAll(first, second);
+        return first.Result.Join(second.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines three independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3)>> Join<T1, T2, T3>(
+        this Task<Option<T1>> first, Task<Option<T2>> second, Task<Option<T3>> third)
+    {
+        await Task.WhenAll(first, second, third);
+        return first.Result.Join(second.Result, third.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines four independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3, T4)>> Join<T1, T2, T3, T4>(
+        this Task<Option<T1>> first, Task<Option<T2>> second,
+        Task<Option<T3>> third, Task<Option<T4>> fourth)
+    {
+        await Task.WhenAll(first, second, third, fourth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines five independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3, T4, T5)>> Join<T1, T2, T3, T4, T5>(
+        this Task<Option<T1>> first, Task<Option<T2>> second,
+        Task<Option<T3>> third, Task<Option<T4>> fourth,
+        Task<Option<T5>> fifth)
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines six independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3, T4, T5, T6)>> Join<T1, T2, T3, T4, T5, T6>(
+        this Task<Option<T1>> first, Task<Option<T2>> second,
+        Task<Option<T3>> third, Task<Option<T4>> fourth,
+        Task<Option<T5>> fifth, Task<Option<T6>> sixth)
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines seven independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3, T4, T5, T6, T7)>> Join<T1, T2, T3, T4, T5, T6, T7>(
+        this Task<Option<T1>> first, Task<Option<T2>> second,
+        Task<Option<T3>> third, Task<Option<T4>> fourth,
+        Task<Option<T5>> fifth, Task<Option<T6>> sixth,
+        Task<Option<T7>> seventh)
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth, seventh);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result, seventh.Result);
+    }
+
+    /// <summary>
+    /// Asynchronously combines eight independent Option-producing tasks into a tuple.
+    /// All tasks are awaited concurrently. Returns Some only if all are Some, otherwise None.
+    /// </summary>
+    public static async Task<Option<(T1, T2, T3, T4, T5, T6, T7, T8)>> Join<T1, T2, T3, T4, T5, T6, T7, T8>(
+        this Task<Option<T1>> first, Task<Option<T2>> second,
+        Task<Option<T3>> third, Task<Option<T4>> fourth,
+        Task<Option<T5>> fifth, Task<Option<T6>> sixth,
+        Task<Option<T7>> seventh, Task<Option<T8>> eighth)
+    {
+        await Task.WhenAll(first, second, third, fourth, fifth, sixth, seventh, eighth);
+        return first.Result.Join(second.Result, third.Result, fourth.Result, fifth.Result, sixth.Result, seventh.Result, eighth.Result);
+    }
 }

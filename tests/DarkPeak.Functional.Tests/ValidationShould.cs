@@ -333,27 +333,27 @@ public class ValidationShould
 
     #endregion
 
-    #region Combine (two values)
+    #region ZipWith (two values)
 
     [Test]
-    public async Task Combine_two_valid_produces_combined_result()
+    public async Task ZipWith_two_valid_produces_combined_result()
     {
         var name = Validation.Valid<string, Error>("Alice");
         var age = Validation.Valid<int, Error>(30);
 
-        var result = name.Combine(age, (n, a) => $"{n} is {a}");
+        var result = name.ZipWith(age, (n, a) => $"{n} is {a}");
 
         await Assert.That(result.IsValid).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice is 30");
     }
 
     [Test]
-    public async Task Combine_two_invalid_accumulates_errors()
+    public async Task ZipWith_two_invalid_accumulates_errors()
     {
         var name = Validation.Invalid<string, Error>(new ValidationError { Message = "Name required" });
         var age = Validation.Invalid<int, Error>(new ValidationError { Message = "Age required" });
 
-        var result = name.Combine(age, (n, a) => $"{n} is {a}");
+        var result = name.ZipWith(age, (n, a) => $"{n} is {a}");
 
         await Assert.That(result.IsInvalid).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
@@ -361,12 +361,12 @@ public class ValidationShould
     }
 
     [Test]
-    public async Task Combine_first_invalid_returns_first_error()
+    public async Task ZipWith_first_invalid_returns_first_error()
     {
         var name = Validation.Invalid<string, Error>(new ValidationError { Message = "Name required" });
         var age = Validation.Valid<int, Error>(30);
 
-        var result = name.Combine(age, (n, a) => $"{n} is {a}");
+        var result = name.ZipWith(age, (n, a) => $"{n} is {a}");
 
         await Assert.That(result.IsInvalid).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
@@ -376,29 +376,29 @@ public class ValidationShould
 
     #endregion
 
-    #region Combine (three values)
+    #region ZipWith (three values)
 
     [Test]
-    public async Task Combine_three_valid_produces_combined_result()
+    public async Task ZipWith_three_valid_produces_combined_result()
     {
         var first = Validation.Valid<string, Error>("Alice");
         var second = Validation.Valid<int, Error>(30);
         var third = Validation.Valid<string, Error>("London");
 
-        var result = first.Combine(second, third, (n, a, c) => $"{n}, {a}, {c}");
+        var result = first.ZipWith(second, third, (n, a, c) => $"{n}, {a}, {c}");
 
         await Assert.That(result.IsValid).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice, 30, London");
     }
 
     [Test]
-    public async Task Combine_three_all_invalid_accumulates_all_errors()
+    public async Task ZipWith_three_all_invalid_accumulates_all_errors()
     {
         var first = Validation.Invalid<string, Error>(new ValidationError { Message = "err1" });
         var second = Validation.Invalid<int, Error>(new ValidationError { Message = "err2" });
         var third = Validation.Invalid<string, Error>(new ValidationError { Message = "err3" });
 
-        var result = first.Combine(second, third, (a, b, c) => "");
+        var result = first.ZipWith(second, third, (a, b, c) => "");
 
         await Assert.That(result.IsInvalid).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
@@ -407,10 +407,10 @@ public class ValidationShould
 
     #endregion
 
-    #region Combine (sequence)
+    #region Sequence
 
     [Test]
-    public async Task Combine_sequence_all_valid()
+    public async Task Sequence_all_valid()
     {
         var validations = new[]
         {
@@ -419,7 +419,7 @@ public class ValidationShould
             Validation.Valid<int, Error>(3),
         };
 
-        var result = validations.Combine();
+        var result = validations.Sequence();
 
         await Assert.That(result.IsValid).IsTrue();
         var values = result.GetValueOrThrow().ToList();
@@ -430,7 +430,7 @@ public class ValidationShould
     }
 
     [Test]
-    public async Task Combine_sequence_accumulates_all_errors()
+    public async Task Sequence_accumulates_all_errors()
     {
         var validations = new[]
         {
@@ -440,7 +440,7 @@ public class ValidationShould
             Validation.Invalid<int, Error>(new ValidationError { Message = "err2" }),
         };
 
-        var result = validations.Combine();
+        var result = validations.Sequence();
 
         await Assert.That(result.IsInvalid).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
@@ -450,11 +450,11 @@ public class ValidationShould
     }
 
     [Test]
-    public async Task Combine_empty_sequence_returns_valid_empty()
+    public async Task Sequence_empty_returns_valid_empty()
     {
         var validations = Array.Empty<Validation<int, Error>>();
 
-        var result = validations.Combine();
+        var result = validations.Sequence();
 
         await Assert.That(result.IsValid).IsTrue();
         var values = result.GetValueOrThrow().ToList();
@@ -534,7 +534,7 @@ public class ValidationShould
 
         // All invalid — should accumulate 3 errors
         var result = ValidateName("")
-            .Combine(ValidateAge(-1), ValidateEmail("not-an-email"),
+            .ZipWith(ValidateAge(-1), ValidateEmail("not-an-email"),
                 (name, age, email) => $"{name}, {age}, {email}");
 
         await Assert.That(result.IsInvalid).IsTrue();
@@ -543,11 +543,442 @@ public class ValidationShould
 
         // All valid — should produce combined result
         var valid = ValidateName("Alice")
-            .Combine(ValidateAge(30), ValidateEmail("alice@example.com"),
+            .ZipWith(ValidateAge(30), ValidateEmail("alice@example.com"),
                 (name, age, email) => $"{name}, {age}, {email}");
 
         await Assert.That(valid.IsValid).IsTrue();
         await Assert.That(valid.GetValueOrThrow()).IsEqualTo("Alice, 30, alice@example.com");
+    }
+
+    #endregion
+
+    #region Traverse
+
+    [Test]
+    public async Task Traverse_all_valid_returns_mapped_values()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = source.Traverse(x =>
+            Validation.Valid<string, Error>($"v{x}"));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var values = result.GetValueOrThrow().ToList();
+        await Assert.That(values.Count).IsEqualTo(3);
+        await Assert.That(values[0]).IsEqualTo("v1");
+        await Assert.That(values[1]).IsEqualTo("v2");
+        await Assert.That(values[2]).IsEqualTo("v3");
+    }
+
+    [Test]
+    public async Task Traverse_accumulates_all_errors()
+    {
+        var source = new[] { 1, 2, 3 };
+
+        var result = source.Traverse(x =>
+            x == 2
+                ? Validation.Invalid<string, Error>(new ValidationError { Message = "bad2" })
+                : x == 3
+                    ? Validation.Invalid<string, Error>(new ValidationError { Message = "bad3" })
+                    : Validation.Valid<string, Error>($"v{x}"));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(2);
+        await Assert.That(errors[0].Message).IsEqualTo("bad2");
+        await Assert.That(errors[1].Message).IsEqualTo("bad3");
+    }
+
+    [Test]
+    public async Task Traverse_empty_returns_valid_empty()
+    {
+        var source = Array.Empty<int>();
+
+        var result = source.Traverse(x =>
+            Validation.Valid<string, Error>($"v{x}"));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var values = result.GetValueOrThrow().ToList();
+        await Assert.That(values.Count).IsEqualTo(0);
+    }
+
+    #endregion
+
+    #region Join (two values)
+
+    [Test]
+    public async Task Join_two_valid_returns_tuple()
+    {
+        var first = Validation.Valid<int, Error>(1);
+        var second = Validation.Valid<string, Error>("two");
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsValid).IsTrue();
+        var (v1, v2) = joined.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+    }
+
+    [Test]
+    public async Task Join_two_both_invalid_accumulates_errors()
+    {
+        var first = Validation.Invalid<int, Error>(new ValidationError { Message = "err1" });
+        var second = Validation.Invalid<string, Error>(new ValidationError { Message = "err2" });
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsInvalid).IsTrue();
+        var errors = joined.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(2);
+        await Assert.That(errors[0].Message).IsEqualTo("err1");
+        await Assert.That(errors[1].Message).IsEqualTo("err2");
+    }
+
+    [Test]
+    public async Task Join_two_first_invalid_returns_error()
+    {
+        var first = Validation.Invalid<int, Error>(new ValidationError { Message = "err1" });
+        var second = Validation.Valid<string, Error>("two");
+
+        var joined = first.Join(second);
+
+        await Assert.That(joined.IsInvalid).IsTrue();
+        var errors = joined.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(1);
+        await Assert.That(errors[0].Message).IsEqualTo("err1");
+    }
+
+    #endregion
+
+    #region Join (three values)
+
+    [Test]
+    public async Task Join_three_valid_returns_tuple()
+    {
+        var first = Validation.Valid<int, Error>(1);
+        var second = Validation.Valid<string, Error>("two");
+        var third = Validation.Valid<bool, Error>(true);
+
+        var joined = first.Join(second, third);
+
+        await Assert.That(joined.IsValid).IsTrue();
+        var (v1, v2, v3) = joined.GetValueOrThrow();
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+    }
+
+    [Test]
+    public async Task Join_three_all_invalid_accumulates_all_errors()
+    {
+        var first = Validation.Invalid<int, Error>(new ValidationError { Message = "err1" });
+        var second = Validation.Invalid<string, Error>(new ValidationError { Message = "err2" });
+        var third = Validation.Invalid<bool, Error>(new ValidationError { Message = "err3" });
+
+        var joined = first.Join(second, third);
+
+        await Assert.That(joined.IsInvalid).IsTrue();
+        var errors = joined.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(3);
+    }
+
+    #endregion
+
+    #region Join (4-arity)
+
+    [Test]
+    public async Task Join_four_valid_returns_tuple()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .Join(
+                Validation.Valid<string, Error>("two"),
+                Validation.Valid<bool, Error>(true),
+                Validation.Valid<double, Error>(4.0));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var (v1, v2, v3, v4) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+        await Assert.That(v4).IsEqualTo(4.0);
+    }
+
+    [Test]
+    public async Task Join_four_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .Join(
+                Validation.Invalid<string, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<bool, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<double, Error>(new ValidationError { Message = "e4" }));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(4);
+    }
+
+    #endregion
+
+    #region Join (5-arity)
+
+    [Test]
+    public async Task Join_five_valid_returns_tuple()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .Join(
+                Validation.Valid<string, Error>("two"),
+                Validation.Valid<bool, Error>(true),
+                Validation.Valid<double, Error>(4.0),
+                Validation.Valid<char, Error>('e'));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var (v1, v2, v3, v4, v5) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v2).IsEqualTo("two");
+        await Assert.That(v3).IsTrue();
+        await Assert.That(v4).IsEqualTo(4.0);
+        await Assert.That(v5).IsEqualTo('e');
+    }
+
+    [Test]
+    public async Task Join_five_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .Join(
+                Validation.Invalid<string, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<bool, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<double, Error>(new ValidationError { Message = "e4" }),
+                Validation.Invalid<char, Error>(new ValidationError { Message = "e5" }));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(5);
+    }
+
+    #endregion
+
+    #region Join (6-arity)
+
+    [Test]
+    public async Task Join_six_valid_returns_tuple()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .Join(
+                Validation.Valid<string, Error>("two"),
+                Validation.Valid<bool, Error>(true),
+                Validation.Valid<double, Error>(4.0),
+                Validation.Valid<char, Error>('e'),
+                Validation.Valid<long, Error>(6L));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var (v1, v2, v3, v4, v5, v6) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v6).IsEqualTo(6L);
+    }
+
+    [Test]
+    public async Task Join_six_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .Join(
+                Validation.Invalid<string, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<bool, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<double, Error>(new ValidationError { Message = "e4" }),
+                Validation.Invalid<char, Error>(new ValidationError { Message = "e5" }),
+                Validation.Invalid<long, Error>(new ValidationError { Message = "e6" }));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(6);
+    }
+
+    #endregion
+
+    #region Join (7-arity)
+
+    [Test]
+    public async Task Join_seven_valid_returns_tuple()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .Join(
+                Validation.Valid<string, Error>("two"),
+                Validation.Valid<bool, Error>(true),
+                Validation.Valid<double, Error>(4.0),
+                Validation.Valid<char, Error>('e'),
+                Validation.Valid<long, Error>(6L),
+                Validation.Valid<float, Error>(7.0f));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v7).IsEqualTo(7.0f);
+    }
+
+    [Test]
+    public async Task Join_seven_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .Join(
+                Validation.Invalid<string, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<bool, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<double, Error>(new ValidationError { Message = "e4" }),
+                Validation.Invalid<char, Error>(new ValidationError { Message = "e5" }),
+                Validation.Invalid<long, Error>(new ValidationError { Message = "e6" }),
+                Validation.Invalid<float, Error>(new ValidationError { Message = "e7" }));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(7);
+    }
+
+    #endregion
+
+    #region Join (8-arity)
+
+    [Test]
+    public async Task Join_eight_valid_returns_tuple()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .Join(
+                Validation.Valid<string, Error>("two"),
+                Validation.Valid<bool, Error>(true),
+                Validation.Valid<double, Error>(4.0),
+                Validation.Valid<char, Error>('e'),
+                Validation.Valid<long, Error>(6L),
+                Validation.Valid<float, Error>(7.0f),
+                Validation.Valid<byte, Error>((byte)8));
+
+        await Assert.That(result.IsValid).IsTrue();
+        var (v1, v2, v3, v4, v5, v6, v7, v8) = result.Match(v => v, _ => default);
+        await Assert.That(v1).IsEqualTo(1);
+        await Assert.That(v8).IsEqualTo((byte)8);
+    }
+
+    [Test]
+    public async Task Join_eight_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .Join(
+                Validation.Invalid<string, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<bool, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<double, Error>(new ValidationError { Message = "e4" }),
+                Validation.Invalid<char, Error>(new ValidationError { Message = "e5" }),
+                Validation.Invalid<long, Error>(new ValidationError { Message = "e6" }),
+                Validation.Invalid<float, Error>(new ValidationError { Message = "e7" }),
+                Validation.Invalid<byte, Error>(new ValidationError { Message = "e8" }));
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(8);
+    }
+
+    #endregion
+
+    #region ZipWith (4-8 arity)
+
+    [Test]
+    public async Task ZipWith_four_valid_combines_values()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .ZipWith(
+                Validation.Valid<int, Error>(2),
+                Validation.Valid<int, Error>(3),
+                Validation.Valid<int, Error>(4),
+                (a, b, c, d) => a + b + c + d);
+
+        await Assert.That(result.IsValid).IsTrue();
+        var value = result.Match(v => v, _ => 0);
+        await Assert.That(value).IsEqualTo(10);
+    }
+
+    [Test]
+    public async Task ZipWith_five_valid_combines_values()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .ZipWith(
+                Validation.Valid<int, Error>(2),
+                Validation.Valid<int, Error>(3),
+                Validation.Valid<int, Error>(4),
+                Validation.Valid<int, Error>(5),
+                (a, b, c, d, e) => a + b + c + d + e);
+
+        await Assert.That(result.IsValid).IsTrue();
+        var value = result.Match(v => v, _ => 0);
+        await Assert.That(value).IsEqualTo(15);
+    }
+
+    [Test]
+    public async Task ZipWith_six_valid_combines_values()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .ZipWith(
+                Validation.Valid<int, Error>(2),
+                Validation.Valid<int, Error>(3),
+                Validation.Valid<int, Error>(4),
+                Validation.Valid<int, Error>(5),
+                Validation.Valid<int, Error>(6),
+                (a, b, c, d, e, f) => a + b + c + d + e + f);
+
+        await Assert.That(result.IsValid).IsTrue();
+        var value = result.Match(v => v, _ => 0);
+        await Assert.That(value).IsEqualTo(21);
+    }
+
+    [Test]
+    public async Task ZipWith_seven_valid_combines_values()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .ZipWith(
+                Validation.Valid<int, Error>(2),
+                Validation.Valid<int, Error>(3),
+                Validation.Valid<int, Error>(4),
+                Validation.Valid<int, Error>(5),
+                Validation.Valid<int, Error>(6),
+                Validation.Valid<int, Error>(7),
+                (a, b, c, d, e, f, g) => a + b + c + d + e + f + g);
+
+        await Assert.That(result.IsValid).IsTrue();
+        var value = result.Match(v => v, _ => 0);
+        await Assert.That(value).IsEqualTo(28);
+    }
+
+    [Test]
+    public async Task ZipWith_eight_valid_combines_values()
+    {
+        var result = Validation.Valid<int, Error>(1)
+            .ZipWith(
+                Validation.Valid<int, Error>(2),
+                Validation.Valid<int, Error>(3),
+                Validation.Valid<int, Error>(4),
+                Validation.Valid<int, Error>(5),
+                Validation.Valid<int, Error>(6),
+                Validation.Valid<int, Error>(7),
+                Validation.Valid<int, Error>(8),
+                (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h);
+
+        await Assert.That(result.IsValid).IsTrue();
+        var value = result.Match(v => v, _ => 0);
+        await Assert.That(value).IsEqualTo(36);
+    }
+
+    [Test]
+    public async Task ZipWith_eight_accumulates_all_errors()
+    {
+        var result = Validation.Invalid<int, Error>(new ValidationError { Message = "e1" })
+            .ZipWith(
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e2" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e3" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e4" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e5" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e6" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e7" }),
+                Validation.Invalid<int, Error>(new ValidationError { Message = "e8" }),
+                (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h);
+
+        await Assert.That(result.IsInvalid).IsTrue();
+        var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
+        await Assert.That(errors.Length).IsEqualTo(8);
     }
 
     #endregion
