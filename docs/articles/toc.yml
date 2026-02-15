@@ -22,5 +22,9 @@
   href: orchestration.md
 - name: Redis
   href: redis.md
+- name: Dapper
+  href: dapper.md
+- name: Entity Framework
+  href: entity-framework.md
 - name: "Example: Blazor Form"
   href: example-blazor-form.md

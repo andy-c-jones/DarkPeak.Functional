@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.Dapper</PackageId>
+    <Description>Functional Dapper extensions for DarkPeak.Functional. Wraps Dapper query and execute methods in Result types with typed database error mapping and functional transaction support.</Description>
+    <PackageTags>functional;dapper;sql;database;result;railway-oriented;transactions</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+    <PackageReference Include="Dapper" Version="2.*" />
+  </ItemGroup>
+
+</Project>

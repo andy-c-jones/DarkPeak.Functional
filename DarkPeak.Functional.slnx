@@ -4,11 +4,15 @@
     <Project Path="src/DarkPeak.Functional.Http/DarkPeak.Functional.Http.csproj" />
     <Project Path="src/DarkPeak.Functional.AspNet/DarkPeak.Functional.AspNet.csproj" />
     <Project Path="src/DarkPeak.Functional.Redis/DarkPeak.Functional.Redis.csproj" />
+    <Project Path="src/DarkPeak.Functional.Dapper/DarkPeak.Functional.Dapper.csproj" />
+    <Project Path="src/DarkPeak.Functional.EntityFramework/DarkPeak.Functional.EntityFramework.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DarkPeak.Functional.Tests/DarkPeak.Functional.Tests.csproj" />
     <Project Path="tests/DarkPeak.Functional.Http.Tests/DarkPeak.Functional.Http.Tests.csproj" />
     <Project Path="tests/DarkPeak.Functional.AspNet.Tests/DarkPeak.Functional.AspNet.Tests.csproj" />
     <Project Path="tests/DarkPeak.Functional.Redis.Tests/DarkPeak.Functional.Redis.Tests.csproj" />
+    <Project Path="tests/DarkPeak.Functional.Dapper.Tests/DarkPeak.Functional.Dapper.Tests.csproj" />
+    <Project Path="tests/DarkPeak.Functional.EntityFramework.Tests/DarkPeak.Functional.EntityFramework.Tests.csproj" />
   </Folder>
 </Solution>

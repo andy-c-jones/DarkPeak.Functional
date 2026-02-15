@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.EntityFramework</PackageId>
+    <Description>Functional Entity Framework Core extensions for DarkPeak.Functional. Wraps DbContext query and save methods in Result types with typed error mapping and functional transaction support.</Description>
+    <PackageTags>functional;entity-framework;efcore;sql;database;result;railway-oriented;transactions</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.*" />
+  </ItemGroup>
+
+</Project>
