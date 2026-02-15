@@ -2,14 +2,26 @@
 
 A functional programming library for .NET providing monadic types and railway-oriented programming patterns.
 
-## Features
+## Core Types
 
 - **[Option&lt;T&gt;](articles/option.md)** — Eliminates null reference exceptions with explicit presence/absence
 - **[Result&lt;T, TError&gt;](articles/result.md)** — Railway-oriented error handling without exceptions
 - **[Either&lt;TLeft, TRight&gt;](articles/either.md)** — Symmetric dual-value type for branching logic
 - **[Validation&lt;T, TError&gt;](articles/validation.md)** — Accumulates multiple errors instead of short-circuiting
+
+## Resilience & Caching
+
 - **[Retry](articles/retry.md)** — Configurable retry policies with backoff strategies
+- **[Circuit Breaker](articles/circuit-breaker.md)** — Prevents cascading failures by short-circuiting requests to failing dependencies
 - **[Memoize](articles/memoize.md)** — Function caching with TTL, LRU eviction, and distributed cache support
+
+## Integration Packages
+
+- **[DarkPeak.Functional.Http](articles/http.md)** — Wraps `HttpClient` in `Result<T, Error>` for exception-free HTTP communication
+- **[DarkPeak.Functional.AspNet](articles/aspnet.md)** — Converts `Result<T, Error>` to `IResult` and `ProblemDetails` for minimal APIs
+- **[DarkPeak.Functional.Redis](articles/redis.md)** — Redis distributed cache provider for `Memoize` and `MemoizeResult`
+- **[DarkPeak.Functional.Dapper](articles/dapper.md)** — Wraps Dapper queries and commands in `Result<T, Error>` with typed database error mapping
+- **[DarkPeak.Functional.EntityFramework](articles/entity-framework.md)** — Wraps EF Core operations in `Result<T, Error>` with typed error handling
 
 ## Quick Start
 
@@ -43,4 +55,6 @@ dotnet add package DarkPeak.Functional
 ## Learn More
 
 - [Getting Started](articles/getting-started.md) — Installation, concepts, and first steps
+- [Orchestration](articles/orchestration.md) — Combining Validation and Result pipelines in real-world scenarios
+- [Example: Blazor Form](articles/example-blazor-form.md) — Using Validation in a Blazor component with inline field errors
 - [API Reference](api/index.md) — Full API documentation generated from source
