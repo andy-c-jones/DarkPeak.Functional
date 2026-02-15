@@ -12,6 +12,8 @@ A functional programming library for .NET providing monadic types and railway-or
 | **DarkPeak.Functional.Http** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.Http.svg)](https://www.nuget.org/packages/DarkPeak.Functional.Http/) | Wraps `HttpClient` operations in `Result<T, Error>` for type-safe, exception-free HTTP communication. Supports JSON, string, stream, and byte array responses with per-request header customization. |
 | **DarkPeak.Functional.AspNet** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.AspNet.svg)](https://www.nuget.org/packages/DarkPeak.Functional.AspNet/) | ASP.NET integration that converts `Result<T, Error>` to `IResult` and `ProblemDetails` for idiomatic minimal API error handling. |
 | **DarkPeak.Functional.Redis** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.Redis.svg)](https://www.nuget.org/packages/DarkPeak.Functional.Redis/) | Redis distributed cache provider implementing `ICacheProvider<TKey, TValue>` for use with `Memoize` and `MemoizeResult`. |
+| **DarkPeak.Functional.Dapper** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.Dapper.svg)](https://www.nuget.org/packages/DarkPeak.Functional.Dapper/) | Wraps Dapper queries and commands in `Result<T, Error>` with typed `DatabaseError` mapping and transaction support. |
+| **DarkPeak.Functional.EntityFramework** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.EntityFramework.svg)](https://www.nuget.org/packages/DarkPeak.Functional.EntityFramework/) | Wraps EF Core operations in `Result<T, Error>` with typed errors for concurrency, save failures, and general database exceptions. |
 
 All types support `Map`, `Bind`, `Match`, LINQ query syntax, and async variants.
 
