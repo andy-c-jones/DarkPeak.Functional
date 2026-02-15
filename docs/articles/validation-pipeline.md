@@ -145,6 +145,43 @@ var validate = ValidationPipeline.Create<Form, ValidationError>()
     .Build((f1, f2, f3, f4, f5, f6, f7, f8) => new Model(f1, f2, f3, f4, f5, f6, f7, f8));
 ```
 
+## Composing Nested Pipelines
+
+Each pipeline's `Build` returns a `Func<TInput, Validation<TResult, TError>>` — exactly the signature that `.Validate(...)` accepts. This means you can compose pipelines hierarchically, validating deeply nested objects without hitting the 8-step cap:
+
+```csharp
+record Address(string Street, string City, string PostCode);
+record ContactInfo(string Email, string Phone, Address Address);
+record RegistrationForm(string Name, int Age, ContactInfo Contact);
+
+// Address pipeline (3 steps → 1 Validation<Address>)
+var validateAddress = ValidationPipeline.Create<Address, ValidationError>()
+    .Validate(a => ValidateStreet(a.Street))
+    .Validate(a => ValidateCity(a.City))
+    .Validate(a => ValidatePostCode(a.PostCode))
+    .Build((street, city, postCode) => new Address(street, city, postCode));
+
+// ContactInfo pipeline (uses validateAddress as a single step)
+var validateContact = ValidationPipeline.Create<ContactInfo, ValidationError>()
+    .Validate(c => ValidateEmail(c.Email))
+    .Validate(c => ValidatePhone(c.Phone))
+    .Validate(c => validateAddress(c.Address))
+    .Build((email, phone, address) => new ContactInfo(email, phone, address));
+
+// Top-level pipeline (uses validateContact as a single step)
+var validate = ValidationPipeline.Create<RegistrationForm, ValidationError>()
+    .Validate(f => ValidateName(f.Name))
+    .Validate(f => ValidateAge(f.Age))
+    .Validate(f => validateContact(f.Contact))
+    .Build((name, age, contact) => new Registration(name, age, contact));
+
+var result = validate(new RegistrationForm("", -1,
+    new ContactInfo("bad", "", new Address("", "", "!!!"))));
+// Invalid — collects errors from Name, Age, Email, Phone, Street, City, and PostCode
+```
+
+Errors accumulate across all levels. The top-level call surfaces every failure from every nested pipeline in a single `Invalid` result, regardless of depth.
+
 ## When to Use What
 
 | Approach | Best for |
