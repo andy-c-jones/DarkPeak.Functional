@@ -189,10 +189,12 @@ public sealed class ResiliencePolicyBuilder<TError> where TError : Error
     /// Configures a circuit breaker policy.
     /// The circuit breaker sits between retry and bulkhead.
     /// </summary>
-    /// <param name="configure">A function to configure the circuit breaker policy.</param>
-    public ResiliencePolicyBuilder<TError> WithCircuitBreaker(Func<CircuitBreakerPolicy, CircuitBreakerPolicy> configure)
+    /// <param name="configure">A function to configure the circuit breaker starting with a default configuration.</param>
+    public ResiliencePolicyBuilder<TError> WithCircuitBreaker(Func<CircuitBreakerPolicyBuilder, CircuitBreakerPolicyBuilder> configure)
     {
-        _circuitBreaker = configure(new CircuitBreakerPolicy());
+        var builder = new CircuitBreakerPolicyBuilder();
+        builder = configure(builder);
+        _circuitBreaker = builder.Build();
         return this;
     }
 
@@ -200,10 +202,12 @@ public sealed class ResiliencePolicyBuilder<TError> where TError : Error
     /// Configures a bulkhead policy to limit concurrency.
     /// The bulkhead is the innermost policy, closest to the actual operation.
     /// </summary>
-    /// <param name="configure">A function to configure the bulkhead policy.</param>
-    public ResiliencePolicyBuilder<TError> WithBulkhead(Func<BulkheadPolicy, BulkheadPolicy> configure)
+    /// <param name="configure">A function to configure the bulkhead starting with a default configuration.</param>
+    public ResiliencePolicyBuilder<TError> WithBulkhead(Func<BulkheadPolicyBuilder, BulkheadPolicyBuilder> configure)
     {
-        _bulkhead = configure(new BulkheadPolicy());
+        var builder = new BulkheadPolicyBuilder();
+        builder = configure(builder);
+        _bulkhead = builder.Build();
         return this;
     }
 
@@ -289,6 +293,95 @@ public sealed class RetryPolicyBuilder
     }
 
     internal RetryPolicy Build() => _policy;
+}
+
+/// <summary>
+/// Helper builder for configuring circuit breaker policies within a resilience policy.
+/// </summary>
+public sealed class CircuitBreakerPolicyBuilder
+{
+    private CircuitBreakerPolicy _policy = new() { FailureThreshold = 5 };
+
+    /// <summary>
+    /// Sets the number of consecutive failures before the circuit opens.
+    /// </summary>
+    public CircuitBreakerPolicyBuilder WithFailureThreshold(int threshold)
+    {
+        if (threshold < 1)
+            throw new ArgumentOutOfRangeException(nameof(threshold), "Must be at least 1.");
+
+        _policy = _policy with { FailureThreshold = threshold };
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the duration the circuit stays open before transitioning to half-open.
+    /// </summary>
+    public CircuitBreakerPolicyBuilder WithResetTimeout(TimeSpan timeout)
+    {
+        _policy = _policy.WithResetTimeout(timeout);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets a predicate to determine which errors count toward the failure threshold.
+    /// </summary>
+    public CircuitBreakerPolicyBuilder WithBreakWhen(Func<Error, bool> predicate)
+    {
+        _policy = _policy.WithBreakWhen(predicate);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets a callback invoked when the circuit breaker changes state.
+    /// </summary>
+    public CircuitBreakerPolicyBuilder OnStateChange(Action<CircuitBreakerState, CircuitBreakerState> callback)
+    {
+        _policy = _policy.OnStateChange(callback);
+        return this;
+    }
+
+    internal CircuitBreakerPolicy Build() => _policy;
+}
+
+/// <summary>
+/// Helper builder for configuring bulkhead policies within a resilience policy.
+/// </summary>
+public sealed class BulkheadPolicyBuilder
+{
+    private BulkheadPolicy _policy = new() { MaxConcurrency = 10 };
+
+    /// <summary>
+    /// Sets the maximum number of concurrent operations.
+    /// </summary>
+    public BulkheadPolicyBuilder WithMaxConcurrency(int maxConcurrency)
+    {
+        if (maxConcurrency < 1)
+            throw new ArgumentOutOfRangeException(nameof(maxConcurrency), "Must be at least 1.");
+
+        _policy = _policy with { MaxConcurrency = maxConcurrency };
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the maximum queue size for waiting requests.
+    /// </summary>
+    public BulkheadPolicyBuilder WithMaxQueueSize(int maxQueueSize)
+    {
+        _policy = _policy.WithMaxQueueSize(maxQueueSize);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets a callback invoked when a request is rejected.
+    /// </summary>
+    public BulkheadPolicyBuilder OnRejected(Action callback)
+    {
+        _policy = _policy.OnRejected(callback);
+        return this;
+    }
+
+    internal BulkheadPolicy Build() => _policy;
 }
 
 /// <summary>

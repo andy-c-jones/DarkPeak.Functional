@@ -126,52 +126,86 @@ public sealed record BulkheadPolicy
 
 /// <summary>
 /// Mutable state tracker for a bulkhead, shared across all executions of a policy instance.
-/// Thread safety is ensured via <see cref="SemaphoreSlim"/>.
+/// Thread safety is ensured via lock.
 /// </summary>
 internal sealed class BulkheadStateTracker
 {
-    private readonly SemaphoreSlim _semaphore = new(0);
-    private int _maxConcurrency;
+    private readonly Lock _lock = new();
+    private int _currentConcurrency;
+    private readonly Queue<TaskCompletionSource<bool>> _queue = new();
 
     internal async Task<bool> TryAcquireAsync(int maxConcurrency, int maxQueueSize, CancellationToken cancellationToken)
     {
-        // Initialize semaphore on first call
-        if (_maxConcurrency == 0)
+        TaskCompletionSource<bool>? tcs = null;
+
+        lock (_lock)
         {
-            _maxConcurrency = maxConcurrency;
-            _semaphore.Release(maxConcurrency);
+            if (_currentConcurrency < maxConcurrency)
+            {
+                // Slot available
+                _currentConcurrency++;
+                return true;
+            }
+
+            // Check if we can queue
+            if (_queue.Count >= maxQueueSize)
+            {
+                // Queue is full
+                return false;
+            }
+
+            // Queue the request
+            tcs = new TaskCompletionSource<bool>();
+            _queue.Enqueue(tcs);
         }
 
-        var currentCount = _semaphore.CurrentCount;
-        var waiting = Math.Max(0, maxConcurrency - currentCount);
-
-        // Reject if queue is full
-        if (waiting >= maxConcurrency + maxQueueSize)
-        {
-            return false;
-        }
+        // Register cancellation
+        using var registration = cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
 
         try
         {
-            // Try to acquire without blocking first
-            if (_semaphore.CurrentCount > 0)
-            {
-                return await _semaphore.WaitAsync(0, cancellationToken);
-            }
-
-            // Queue is not full, wait for a slot
-            await _semaphore.WaitAsync(cancellationToken);
-            return true;
+            return await tcs.Task;
         }
         catch (OperationCanceledException)
         {
+            // Remove from queue if still there
+            lock (_lock)
+            {
+                if (_queue.Contains(tcs))
+                {
+                    var tempQueue = new Queue<TaskCompletionSource<bool>>(_queue.Count);
+                    while (_queue.Count > 0)
+                    {
+                        var item = _queue.Dequeue();
+                        if (item != tcs)
+                            tempQueue.Enqueue(item);
+                    }
+                    while (tempQueue.Count > 0)
+                        _queue.Enqueue(tempQueue.Dequeue());
+                }
+            }
             return false;
         }
     }
 
     internal void Release()
     {
-        _semaphore.Release();
+        lock (_lock)
+        {
+            _currentConcurrency--;
+
+            // Try to dequeue and release a waiting task
+            while (_queue.Count > 0)
+            {
+                var tcs = _queue.Dequeue();
+                if (tcs.TrySetResult(true))
+                {
+                    _currentConcurrency++;
+                    return;
+                }
+                // Task was cancelled, try next one
+            }
+        }
     }
 }
 
