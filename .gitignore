@@ -24,6 +24,7 @@ packages/
 # Test results
 TestResults/
 *.trx
+coverage-report/
 
 # OS files
 .DS_Store

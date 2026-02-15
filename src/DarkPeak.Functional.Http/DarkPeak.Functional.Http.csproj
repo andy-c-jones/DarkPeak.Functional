@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.Http</PackageId>
+    <Description>Functional HTTP client extensions for .NET. Wraps HttpClient operations in Result&lt;T, Error&gt; for type-safe, exception-free HTTP communication using railway-oriented programming.</Description>
+    <PackageTags>functional;http;httpclient;result;error-handling;railway</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+  </ItemGroup>
+
+</Project>

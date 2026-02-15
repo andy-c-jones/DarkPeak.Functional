@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Publish as a prerelease version'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.x'
+
+      - name: Determine version
+        id: version
+        uses: gittools/actions/gitversion/execute@v4
+        with:
+          useConfigFile: true
+
+      - name: Build
+        run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.semVer }}
+
+      - name: Test
+        run: |
+          for proj in tests/*/; do
+            proj_name=$(basename "$proj")
+            dotnet run --project "$proj" --configuration Release --no-build -- \
+              --coverage --coverage-output "${{ github.workspace }}/coverage-${proj_name}.cobertura.xml" --coverage-output-format cobertura \
+              --report-trx --report-trx-filename "${proj_name}.trx" --results-directory "${{ github.workspace }}/TestResults"
+          done
+
+      - name: Pack
+        run: |
+          for proj in src/*/; do
+            dotnet pack "$proj" --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.version.outputs.semVer }}
+          done
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Create tag
+        run: |
+          git tag "v${{ steps.version.outputs.semVer }}"
+          git push origin "v${{ steps.version.outputs.semVer }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.semVer }}
+          name: v${{ steps.version.outputs.semVer }}
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
+          files: ./nupkg/*.nupkg

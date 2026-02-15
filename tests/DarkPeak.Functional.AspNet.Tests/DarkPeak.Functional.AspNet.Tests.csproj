@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.*" />
-    <ProjectReference Include="..\..\src\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+    <ProjectReference Include="..\..\src\DarkPeak.Functional.AspNet\DarkPeak.Functional.AspNet.csproj" />
   </ItemGroup>
 
 </Project>

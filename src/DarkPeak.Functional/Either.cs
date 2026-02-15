@@ -153,45 +153,58 @@ public abstract record Either<TLeft, TRight>
 /// <typeparam name="TRight">The type parameter for the right.</typeparam>
 public sealed record Left<TLeft, TRight>(TLeft Value) : Either<TLeft, TRight>
 {
+    /// <inheritdoc />
     public override bool IsLeft => true;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<TLeft, TResult> left, Func<TRight, TResult> right) =>
         left(Value);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<TLeft, Task<TResult>> left, Func<TRight, Task<TResult>> right) =>
         await left(Value);
 
+    /// <inheritdoc />
     public override Either<TLeftResult, TRight> MapLeft<TLeftResult>(Func<TLeft, TLeftResult> mapper) =>
         new Left<TLeftResult, TRight>(mapper(Value));
 
+    /// <inheritdoc />
     public override Either<TLeft, TRightResult> MapRight<TRightResult>(Func<TRight, TRightResult> mapper) =>
         new Left<TLeft, TRightResult>(Value);
 
+    /// <inheritdoc />
     public override async Task<Either<TLeftResult, TRight>> MapLeftAsync<TLeftResult>(Func<TLeft, Task<TLeftResult>> mapper) =>
         new Left<TLeftResult, TRight>(await mapper(Value));
 
+    /// <inheritdoc />
     public override Task<Either<TLeft, TRightResult>> MapRightAsync<TRightResult>(Func<TRight, Task<TRightResult>> mapper) =>
         Task.FromResult<Either<TLeft, TRightResult>>(new Left<TLeft, TRightResult>(Value));
 
+    /// <inheritdoc />
     public override Either<TLeftResult, TRightResult> Map<TLeftResult, TRightResult>(
         Func<TLeft, TLeftResult> leftMapper,
         Func<TRight, TRightResult> rightMapper) =>
         new Left<TLeftResult, TRightResult>(leftMapper(Value));
 
+    /// <inheritdoc />
     public override Either<TLeft, TRightResult> Bind<TRightResult>(Func<TRight, Either<TLeft, TRightResult>> binder) =>
         new Left<TLeft, TRightResult>(Value);
 
+    /// <inheritdoc />
     public override Task<Either<TLeft, TRightResult>> BindAsync<TRightResult>(Func<TRight, Task<Either<TLeft, TRightResult>>> binder) =>
         Task.FromResult<Either<TLeft, TRightResult>>(new Left<TLeft, TRightResult>(Value));
 
+    /// <inheritdoc />
     public override Either<TLeft, TRight> IfLeft(Action<TLeft> action)
     {
         action(Value);
         return this;
     }
 
+    /// <inheritdoc />
     public override Either<TLeft, TRight> IfRight(Action<TRight> action) => this;
 
+    /// <inheritdoc />
     public override Either<TRight, TLeft> Swap() => new Right<TRight, TLeft>(Value);
 }
 
@@ -202,45 +215,58 @@ public sealed record Left<TLeft, TRight>(TLeft Value) : Either<TLeft, TRight>
 /// <typeparam name="TRight">The type of the right value.</typeparam>
 public sealed record Right<TLeft, TRight>(TRight Value) : Either<TLeft, TRight>
 {
+    /// <inheritdoc />
     public override bool IsLeft => false;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<TLeft, TResult> left, Func<TRight, TResult> right) =>
         right(Value);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<TLeft, Task<TResult>> left, Func<TRight, Task<TResult>> right) =>
         await right(Value);
 
+    /// <inheritdoc />
     public override Either<TLeftResult, TRight> MapLeft<TLeftResult>(Func<TLeft, TLeftResult> mapper) =>
         new Right<TLeftResult, TRight>(Value);
 
+    /// <inheritdoc />
     public override Either<TLeft, TRightResult> MapRight<TRightResult>(Func<TRight, TRightResult> mapper) =>
         new Right<TLeft, TRightResult>(mapper(Value));
 
+    /// <inheritdoc />
     public override Task<Either<TLeftResult, TRight>> MapLeftAsync<TLeftResult>(Func<TLeft, Task<TLeftResult>> mapper) =>
         Task.FromResult<Either<TLeftResult, TRight>>(new Right<TLeftResult, TRight>(Value));
 
+    /// <inheritdoc />
     public override async Task<Either<TLeft, TRightResult>> MapRightAsync<TRightResult>(Func<TRight, Task<TRightResult>> mapper) =>
         new Right<TLeft, TRightResult>(await mapper(Value));
 
+    /// <inheritdoc />
     public override Either<TLeftResult, TRightResult> Map<TLeftResult, TRightResult>(
         Func<TLeft, TLeftResult> leftMapper,
         Func<TRight, TRightResult> rightMapper) =>
         new Right<TLeftResult, TRightResult>(rightMapper(Value));
 
+    /// <inheritdoc />
     public override Either<TLeft, TRightResult> Bind<TRightResult>(Func<TRight, Either<TLeft, TRightResult>> binder) =>
         binder(Value);
 
+    /// <inheritdoc />
     public override async Task<Either<TLeft, TRightResult>> BindAsync<TRightResult>(Func<TRight, Task<Either<TLeft, TRightResult>>> binder) =>
         await binder(Value);
 
+    /// <inheritdoc />
     public override Either<TLeft, TRight> IfLeft(Action<TLeft> action) => this;
 
+    /// <inheritdoc />
     public override Either<TLeft, TRight> IfRight(Action<TRight> action)
     {
         action(Value);
         return this;
     }
 
+    /// <inheritdoc />
     public override Either<TRight, TLeft> Swap() => new Left<TRight, TLeft>(Value);
 }
 

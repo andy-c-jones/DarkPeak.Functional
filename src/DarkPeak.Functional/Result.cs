@@ -162,45 +162,60 @@ public abstract record Result<T, TError> where TError : Error
 /// <typeparam name="TError">The error type.</typeparam>
 public sealed record Success<T, TError>(T Value) : Result<T, TError> where TError : Error
 {
+    /// <inheritdoc />
     public override bool IsSuccess => true;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> success, Func<TError, TResult> failure) =>
         success(Value);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
         await success(Value);
 
+    /// <inheritdoc />
     public override Result<TResult, TError> Map<TResult>(Func<T, TResult> mapper) =>
         new Success<TResult, TError>(mapper(Value));
 
+    /// <inheritdoc />
     public override async Task<Result<TResult, TError>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         new Success<TResult, TError>(await mapper(Value));
 
+    /// <inheritdoc />
     public override Result<T, TErrorResult> MapError<TErrorResult>(Func<TError, TErrorResult> mapper) =>
         new Success<T, TErrorResult>(Value);
 
+    /// <inheritdoc />
     public override Result<TResult, TError> Bind<TResult>(Func<T, Result<TResult, TError>> binder) =>
         binder(Value);
 
+    /// <inheritdoc />
     public override async Task<Result<TResult, TError>> BindAsync<TResult>(Func<T, Task<Result<TResult, TError>>> binder) =>
         await binder(Value);
 
+    /// <inheritdoc />
     public override Result<T, TError> Tap(Action<T> action)
     {
         action(Value);
         return this;
     }
 
+    /// <inheritdoc />
     public override Result<T, TError> TapError(Action<TError> action) => this;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => Value;
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() => Value;
 
+    /// <inheritdoc />
     public override Result<T, TError> OrElse(Result<T, TError> alternative) => this;
 
+    /// <inheritdoc />
     public override Result<T, TError> OrElse(Func<Result<T, TError>> alternativeFactory) => this;
 }
 
@@ -211,46 +226,61 @@ public sealed record Success<T, TError>(T Value) : Result<T, TError> where TErro
 /// <typeparam name="TError">The error type.</typeparam>
 public sealed record Failure<T, TError>(TError Error) : Result<T, TError> where TError : Error
 {
+    /// <inheritdoc />
     public override bool IsSuccess => false;
 
+    /// <inheritdoc />
     public override TResult Match<TResult>(Func<T, TResult> success, Func<TError, TResult> failure) =>
         failure(Error);
 
+    /// <inheritdoc />
     public override async Task<TResult> MatchAsync<TResult>(Func<T, Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
         await failure(Error);
 
+    /// <inheritdoc />
     public override Result<TResult, TError> Map<TResult>(Func<T, TResult> mapper) =>
         new Failure<TResult, TError>(Error);
 
+    /// <inheritdoc />
     public override Task<Result<TResult, TError>> MapAsync<TResult>(Func<T, Task<TResult>> mapper) =>
         Task.FromResult<Result<TResult, TError>>(new Failure<TResult, TError>(Error));
 
+    /// <inheritdoc />
     public override Result<T, TErrorResult> MapError<TErrorResult>(Func<TError, TErrorResult> mapper) =>
         new Failure<T, TErrorResult>(mapper(Error));
 
+    /// <inheritdoc />
     public override Result<TResult, TError> Bind<TResult>(Func<T, Result<TResult, TError>> binder) =>
         new Failure<TResult, TError>(Error);
 
+    /// <inheritdoc />
     public override Task<Result<TResult, TError>> BindAsync<TResult>(Func<T, Task<Result<TResult, TError>>> binder) =>
         Task.FromResult<Result<TResult, TError>>(new Failure<TResult, TError>(Error));
 
+    /// <inheritdoc />
     public override Result<T, TError> Tap(Action<T> action) => this;
 
+    /// <inheritdoc />
     public override Result<T, TError> TapError(Action<TError> action)
     {
         action(Error);
         return this;
     }
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(T defaultValue) => defaultValue;
 
+    /// <inheritdoc />
     public override T GetValueOrDefault(Func<T> defaultFactory) => defaultFactory();
 
+    /// <inheritdoc />
     public override T GetValueOrThrow() =>
         throw new InvalidOperationException($"Cannot get value from a failed result. Error: {Error.Message}");
 
+    /// <inheritdoc />
     public override Result<T, TError> OrElse(Result<T, TError> alternative) => alternative;
 
+    /// <inheritdoc />
     public override Result<T, TError> OrElse(Func<Result<T, TError>> alternativeFactory) => alternativeFactory();
 }
 

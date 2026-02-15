@@ -6,49 +6,49 @@ namespace DarkPeak.Functional.Extensions;
 public static class TaskOptionExtensions
 {
     /// <summary>
-    /// Asynchronously transforms the value inside a <see cref="Option{T}.Some"/> using the specified mapping function.
+    /// Asynchronously transforms the value inside a <see cref="Some{T}"/> using the specified mapping function.
     /// </summary>
     /// <typeparam name="T">The source value type.</typeparam>
     /// <typeparam name="TResult">The result value type.</typeparam>
     /// <param name="task">The task producing an option.</param>
     /// <param name="mapper">The function to apply to the contained value.</param>
-    /// <returns>A new option containing the mapped value, or <see cref="Option{T}.None"/> if the source is None.</returns>
+    /// <returns>A new option containing the mapped value, or <see cref="None{T}"/> if the source is None.</returns>
     public static async Task<Option<TResult>> Map<T, TResult>(
         this Task<Option<T>> task, Func<T, TResult> mapper) =>
         (await task).Map(mapper);
 
     /// <summary>
-    /// Asynchronously transforms the value inside a <see cref="Option{T}.Some"/> using an async mapping function.
+    /// Asynchronously transforms the value inside a <see cref="Some{T}"/> using an async mapping function.
     /// </summary>
     /// <typeparam name="T">The source value type.</typeparam>
     /// <typeparam name="TResult">The result value type.</typeparam>
     /// <param name="task">The task producing an option.</param>
     /// <param name="mapper">The async function to apply to the contained value.</param>
-    /// <returns>A new option containing the mapped value, or <see cref="Option{T}.None"/> if the source is None.</returns>
+    /// <returns>A new option containing the mapped value, or <see cref="None{T}"/> if the source is None.</returns>
     public static async Task<Option<TResult>> MapAsync<T, TResult>(
         this Task<Option<T>> task, Func<T, Task<TResult>> mapper) =>
         await (await task).MapAsync(mapper);
 
     /// <summary>
-    /// Asynchronously applies a function that returns an option to the value inside a <see cref="Option{T}.Some"/>.
+    /// Asynchronously applies a function that returns an option to the value inside a <see cref="Some{T}"/>.
     /// </summary>
     /// <typeparam name="T">The source value type.</typeparam>
     /// <typeparam name="TResult">The result value type.</typeparam>
     /// <param name="task">The task producing an option.</param>
     /// <param name="binder">The function to apply to the contained value.</param>
-    /// <returns>The option returned by the binder, or <see cref="Option{T}.None"/> if the source is None.</returns>
+    /// <returns>The option returned by the binder, or <see cref="None{T}"/> if the source is None.</returns>
     public static async Task<Option<TResult>> Bind<T, TResult>(
         this Task<Option<T>> task, Func<T, Option<TResult>> binder) =>
         (await task).Bind(binder);
 
     /// <summary>
-    /// Asynchronously applies an async function that returns an option to the value inside a <see cref="Option{T}.Some"/>.
+    /// Asynchronously applies an async function that returns an option to the value inside a <see cref="Some{T}"/>.
     /// </summary>
     /// <typeparam name="T">The source value type.</typeparam>
     /// <typeparam name="TResult">The result value type.</typeparam>
     /// <param name="task">The task producing an option.</param>
     /// <param name="binder">The async function to apply to the contained value.</param>
-    /// <returns>The option returned by the binder, or <see cref="Option{T}.None"/> if the source is None.</returns>
+    /// <returns>The option returned by the binder, or <see cref="None{T}"/> if the source is None.</returns>
     public static async Task<Option<TResult>> BindAsync<T, TResult>(
         this Task<Option<T>> task, Func<T, Task<Option<TResult>>> binder) =>
         await (await task).BindAsync(binder);

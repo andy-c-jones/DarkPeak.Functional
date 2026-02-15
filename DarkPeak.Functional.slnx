@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/DarkPeak.Functional/DarkPeak.Functional.csproj" />
+    <Project Path="src/DarkPeak.Functional.Http/DarkPeak.Functional.Http.csproj" />
+    <Project Path="src/DarkPeak.Functional.AspNet/DarkPeak.Functional.AspNet.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DarkPeak.Functional.Tests/DarkPeak.Functional.Tests.csproj" />
+    <Project Path="tests/DarkPeak.Functional.Http.Tests/DarkPeak.Functional.Http.Tests.csproj" />
+    <Project Path="tests/DarkPeak.Functional.AspNet.Tests/DarkPeak.Functional.AspNet.Tests.csproj" />
   </Folder>
 </Solution>
