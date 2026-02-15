@@ -120,3 +120,36 @@ public sealed record InternalError : Error
     /// </summary>
     public string? ExceptionType { get; init; }
 }
+
+/// <summary>
+/// Represents a timeout error when an operation exceeds its allowed duration.
+/// </summary>
+public sealed record TimeoutError : Error
+{
+    /// <summary>
+    /// Gets or sets the duration the operation was allowed to run.
+    /// </summary>
+    public TimeSpan? Timeout { get; init; }
+
+    /// <summary>
+    /// Gets or sets the actual elapsed time when the timeout occurred.
+    /// </summary>
+    public TimeSpan? Elapsed { get; init; }
+}
+
+/// <summary>
+/// Represents an error when a bulkhead (concurrency limiter) rejects a request
+/// because the maximum number of concurrent operations and queue size has been reached.
+/// </summary>
+public sealed record BulkheadRejectedError : Error
+{
+    /// <summary>
+    /// Gets or sets the maximum number of concurrent operations allowed.
+    /// </summary>
+    public int? MaxConcurrency { get; init; }
+
+    /// <summary>
+    /// Gets or sets the maximum queue size.
+    /// </summary>
+    public int? MaxQueueSize { get; init; }
+}
