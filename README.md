@@ -17,18 +17,27 @@ A functional programming library for .NET providing monadic types and railway-or
 
 All types support `Map`, `Bind`, `Match`, LINQ query syntax, and async variants.
 
-## Quick Start
+## Example
 
 ```csharp
 using DarkPeak.Functional;
+using DarkPeak.Functional.Extensions;
 
-var result = Option.Some("42")
-    .Bind(s => Option.TryParse<int>(s))
-    .Map(x => x * 2)
-    .Match(
-        some: x => $"Result: {x}",
-        none: () => "No value");
-// "Result: 84"
+// Cache successful fetches for 5 minutes — failures are never cached
+var fetchUser = MemoizeResult.FuncAsync<int, User, Error>(
+    id => httpClient.GetResultAsync<User>($"/users/{id}"),
+    opts => opts.WithExpiration(TimeSpan.FromMinutes(5)));
+
+var fetchOrder = MemoizeResult.FuncAsync<int, Order, Error>(
+    id => httpClient.GetResultAsync<Order>($"/orders/{id}"),
+    opts => opts.WithExpiration(TimeSpan.FromMinutes(5)));
+
+// Run both fetches concurrently, then chain the result
+var summary = await fetchUser(42)
+    .Join(fetchOrder(7))                                     // concurrent via Task.WhenAll
+    .Map((user, order) => new Summary(user.Name, order.Total))
+    .Tap(s => logger.LogInformation("Built summary for {Name}", s.Name))
+    .TapError(err => logger.LogError("Failed: {Msg}", err.Message));
 ```
 
 ## Building
