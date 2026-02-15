@@ -103,6 +103,49 @@ public sealed record RetryPolicy
 
         return lastResult!;
     }
+
+    /// <summary>
+    /// Executes an async function with the configured retry policy and cancellation support.
+    /// Returns the first successful result, or the last failure if all attempts are exhausted.
+    /// </summary>
+    /// <param name="func">The async function to execute. Receives a <see cref="CancellationToken"/>.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    public async Task<Result<T, TError>> ExecuteAsync<T, TError>(
+        Func<CancellationToken, Task<Result<T, TError>>> func,
+        CancellationToken cancellationToken = default)
+        where TError : Error
+    {
+        Result<T, TError>? lastResult = null;
+
+        for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            lastResult = await func(cancellationToken);
+
+            if (lastResult.IsSuccess)
+                return lastResult;
+
+            var shouldRetry = attempt < MaxAttempts;
+            if (!shouldRetry)
+                break;
+
+            var error = lastResult.Match<TError>(
+                success: _ => throw new InvalidOperationException("Unexpected success"),
+                failure: e => e);
+
+            if (RetryPredicate is not null && !RetryPredicate(error))
+                break;
+
+            OnRetryCallback?.Invoke(attempt, error);
+
+            var delay = BackoffStrategy(attempt);
+            if (delay > TimeSpan.Zero)
+                await Task.Delay(delay, cancellationToken);
+        }
+
+        return lastResult!;
+    }
 }
 
 /// <summary>

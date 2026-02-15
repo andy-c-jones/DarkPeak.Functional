@@ -51,7 +51,7 @@ public sealed record CircuitBreakerOpenError : Error
 /// <para>
 /// The policy configuration is immutable. Internal state (failure count, current state, timestamps)
 /// is managed by a shared <see cref="CircuitBreakerStateTracker"/> allocated when the policy is created.
-/// Multiple calls to <see cref="Execute{T,TError}"/> and <see cref="ExecuteAsync{T,TError}"/> share
+/// Multiple calls to Execute and ExecuteAsync share
 /// this state, making the policy instance safe to reuse across threads.
 /// </para>
 /// </remarks>
@@ -159,6 +159,47 @@ public sealed record CircuitBreakerPolicy
         }
 
         var result = await func();
+
+        if (result.IsSuccess)
+        {
+            OnSuccess();
+        }
+        else
+        {
+            var error = result.Match<TError>(
+                success: _ => throw new InvalidOperationException("Unexpected success"),
+                failure: e => e);
+
+            OnFailure(error);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Executes an async function through the circuit breaker with cancellation support.
+    /// Returns the function's result if the circuit is closed or half-open,
+    /// or a <see cref="CircuitBreakerOpenError"/> if the circuit is open.
+    /// </summary>
+    /// <param name="func">The async function to execute. Receives a <see cref="CancellationToken"/>.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    public async Task<Result<T, TError>> ExecuteAsync<T, TError>(
+        Func<CancellationToken, Task<Result<T, TError>>> func,
+        CancellationToken cancellationToken = default)
+        where TError : Error
+    {
+        var (state, retryAfter) = GetEffectiveState();
+
+        if (state == CircuitBreakerState.Open)
+        {
+            return Result.Failure<T, TError>((TError)(Error)new CircuitBreakerOpenError
+            {
+                Message = "Circuit breaker is open. Requests are being rejected.",
+                RetryAfter = retryAfter
+            });
+        }
+
+        var result = await func(cancellationToken);
 
         if (result.IsSuccess)
         {
