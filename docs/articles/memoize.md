@@ -111,7 +111,7 @@ All caching delegated to the provider:
 ```csharp
 var cached = Memoize.Func<string, UserProfile>(
     LoadUser,
-    opts => opts.WithCacheProvider(new RedisCacheProvider<string, UserProfile>()));
+    opts => opts.WithCacheProvider(new RedisCacheProvider<string, UserProfile>(db)));
 ```
 
 ### L1 Memory + L2 Distributed

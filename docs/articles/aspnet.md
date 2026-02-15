@@ -75,7 +75,7 @@ Errors are automatically mapped to HTTP status codes based on their type:
 | `InternalError` | 500 Internal Server Error | Internal Server Error |
 | Any other `Error` | 500 Internal Server Error | Internal Server Error |
 
-`ValidationError` produces a `ValidationProblem` response with field-level errors preserved. All other errors produce a `Problem` response with ProblemDetails.
+`ValidationError` produces a `ValidationProblem` response with field-level errors preserved. `UnauthorizedError` produces a bare `401 Unauthorized` response with no body (matching ASP.NET conventions). All other errors produce a `Problem` response with ProblemDetails.
 
 ## ProblemDetails Conversion
 

@@ -47,14 +47,22 @@ jobs:
       - name: Test
         run: >
           dotnet test --configuration Release --no-build
-          --coverage --coverage-output "${{ github.workspace }}/coverage.cobertura.xml" --coverage-output-format cobertura
+          --coverage --coverage-output-format cobertura
           --report-trx --results-directory "${{ github.workspace }}/TestResults"
 
       - name: Publish test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: ${{ github.workspace }}/TestResults/*.trx
+          files: ${{ github.workspace }}/TestResults/**/*.trx
+
+      - name: Merge coverage reports
+        if: success() || failure()
+        run: |
+          dotnet tool install --global dotnet-coverage
+          dotnet-coverage merge ${{ github.workspace }}/TestResults/**/coverage.cobertura.xml \
+            --output ${{ github.workspace }}/coverage.cobertura.xml \
+            --output-format cobertura
 
       - name: Coverage summary
         if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''

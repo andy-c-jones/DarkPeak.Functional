@@ -314,5 +314,32 @@ public class RedisCacheProviderShould : IAsyncDisposable
         await Assert.That(value).IsEqualTo("second");
     }
 
+    // --- Null deserialization ---
+
+    [Test]
+    public async Task Return_none_when_stored_value_deserializes_to_null()
+    {
+        var db = await GetDatabaseAsync();
+        var provider = new RedisCacheProvider<string, TestRecord>(db);
+
+        // Write a raw JSON "null" directly to Redis, bypassing the provider
+        await db.StringSetAsync("null-value", "null");
+        var result = provider.Get("null-value");
+
+        await Assert.That(result).IsTypeOf<None<TestRecord>>();
+    }
+
+    [Test]
+    public async Task Return_none_when_stored_value_deserializes_to_null_async()
+    {
+        var db = await GetDatabaseAsync();
+        var provider = new RedisCacheProvider<string, TestRecord>(db);
+
+        await db.StringSetAsync("null-value-async", "null");
+        var result = await provider.GetAsync("null-value-async");
+
+        await Assert.That(result).IsTypeOf<None<TestRecord>>();
+    }
+
     private record TestRecord(int Id, string Name, bool Active);
 }
