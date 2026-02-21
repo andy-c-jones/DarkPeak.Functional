@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.*" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.*" />
-    <PackageReference Include="Npgsql" Version="9.*" />
+    <PackageReference Include="Npgsql" Version="10.*" />
     <ProjectReference Include="..\..\src\DarkPeak.Functional.Dapper\DarkPeak.Functional.Dapper.csproj" />
   </ItemGroup>
 
