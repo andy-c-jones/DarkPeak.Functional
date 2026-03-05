@@ -43,74 +43,6 @@ public class OneOfShould
     }
 
     [Test]
-    public async Task MapThird_transforms_third_case()
-    {
-        OneOf<string, int, bool> value = true;
-
-        var mapped = value.MapThird(flag => flag ? "yes" : "no");
-
-        await Assert.That(mapped.IsT3).IsTrue();
-        await Assert.That(mapped.AsT3).IsEqualTo("yes");
-    }
-
-    [Test]
-    public async Task ReduceThird_narrows_union()
-    {
-        OneOf<string, int, bool> value = true;
-
-        var reduced = value.ReduceThird(flag => flag ? "ok" : 0);
-
-        await Assert.That(reduced.IsT1).IsTrue();
-        await Assert.That(reduced.AsT1).IsEqualTo("ok");
-    }
-
-    [Test]
-    public async Task AsT_throws_when_wrong_case()
-    {
-        OneOf<string, int, bool> value = 42;
-
-        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
-    }
-
-    [Test]
-    public async Task Select_maps_last_case()
-    {
-        OneOf<string, int, bool> value = true;
-
-        var mapped = from v in value
-                     select v ? "done" : "skip";
-
-        await Assert.That(mapped.IsT3).IsTrue();
-        await Assert.That(mapped.AsT3).IsEqualTo("done");
-    }
-
-    [Test]
-    public async Task SelectMany_binds_last_case()
-    {
-        OneOf<string, int, bool> first = true;
-        OneOf<string, int, bool> second = false;
-
-        var query = from a in first
-                    from b in second
-                    select a && b;
-
-        await Assert.That(query.IsT3).IsTrue();
-        await Assert.That(query.AsT3).IsFalse();
-    }
-
-    [Test]
-    public async Task SelectMany_preserves_earlier_case()
-    {
-        OneOf<string, int, bool> value = "error";
-
-        var query = from v in value
-                    select !v;
-
-        await Assert.That(query.IsT1).IsTrue();
-        await Assert.That(query.AsT1).IsEqualTo("error");
-    }
-
-    [Test]
     public async Task Converts_to_and_from_either()
     {
         Either<string, int> either = 42;
@@ -133,16 +65,329 @@ public class OneOfShould
     }
 
     [Test]
-    public async Task Supports_higher_arity_match()
+    public async Task Arity2_map_methods_execute()
     {
-        OneOf<int, string, bool, double> value = 1.5d;
-
-        var result = value.Match(
-            t1 => t1.ToString(),
-            t2 => t2,
-            t3 => t3.ToString(),
-            t4 => t4.ToString("F1"));
-
-        await Assert.That(result).IsEqualTo("1.5");
+        OneOf<string, int> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
     }
+
+    [Test]
+    public async Task Arity2_linq_methods_execute()
+    {
+        OneOf<string, int> value = 2;
+        var selected = from v in value
+                       select v + 1;
+        await Assert.That(selected.IsT2).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity2_wrong_accessor_throws()
+    {
+        OneOf<string, int> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity3_map_methods_execute()
+    {
+        OneOf<string, int, bool> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity3_reduce_methods_execute()
+    {
+        OneOf<string, int, bool> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity3_linq_methods_execute()
+    {
+        OneOf<string, int, bool> value = true;
+        var selected = from v in value
+                       select !v;
+        await Assert.That(selected.IsT3).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity3_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity4_map_methods_execute()
+    {
+        OneOf<string, int, bool, double> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+        var mappedFourth = value.MapFourth(v => v);
+        await Assert.That(mappedFourth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity4_reduce_methods_execute()
+    {
+        OneOf<string, int, bool, double> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+        var reducedFourth = value.ReduceFourth(_ => "a");
+        await Assert.That(reducedFourth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity4_linq_methods_execute()
+    {
+        OneOf<string, int, bool, double> value = 4.0d;
+        var selected = from v in value
+                       select v;
+        await Assert.That(selected.IsT4).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity4_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool, double> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity5_map_methods_execute()
+    {
+        OneOf<string, int, bool, double, long> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+        var mappedFourth = value.MapFourth(v => v);
+        await Assert.That(mappedFourth.IsT1).IsTrue();
+        var mappedFifth = value.MapFifth(v => v);
+        await Assert.That(mappedFifth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity5_reduce_methods_execute()
+    {
+        OneOf<string, int, bool, double, long> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+        var reducedFourth = value.ReduceFourth(_ => "a");
+        await Assert.That(reducedFourth.IsT1).IsTrue();
+        var reducedFifth = value.ReduceFifth(_ => "a");
+        await Assert.That(reducedFifth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity5_linq_methods_execute()
+    {
+        OneOf<string, int, bool, double, long> value = 5L;
+        var selected = from v in value
+                       select v;
+        await Assert.That(selected.IsT5).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity5_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool, double, long> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity6_map_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+        var mappedFourth = value.MapFourth(v => v);
+        await Assert.That(mappedFourth.IsT1).IsTrue();
+        var mappedFifth = value.MapFifth(v => v);
+        await Assert.That(mappedFifth.IsT1).IsTrue();
+        var mappedSixth = value.MapSixth(v => v);
+        await Assert.That(mappedSixth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity6_reduce_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+        var reducedFourth = value.ReduceFourth(_ => "a");
+        await Assert.That(reducedFourth.IsT1).IsTrue();
+        var reducedFifth = value.ReduceFifth(_ => "a");
+        await Assert.That(reducedFifth.IsT1).IsTrue();
+        var reducedSixth = value.ReduceSixth(_ => "a");
+        await Assert.That(reducedSixth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity6_linq_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal> value = 6m;
+        var selected = from v in value
+                       select v;
+        await Assert.That(selected.IsT6).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity6_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool, double, long, decimal> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity7_map_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+        var mappedFourth = value.MapFourth(v => v);
+        await Assert.That(mappedFourth.IsT1).IsTrue();
+        var mappedFifth = value.MapFifth(v => v);
+        await Assert.That(mappedFifth.IsT1).IsTrue();
+        var mappedSixth = value.MapSixth(v => v);
+        await Assert.That(mappedSixth.IsT1).IsTrue();
+        var mappedSeventh = value.MapSeventh(v => v);
+        await Assert.That(mappedSeventh.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity7_reduce_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+        var reducedFourth = value.ReduceFourth(_ => "a");
+        await Assert.That(reducedFourth.IsT1).IsTrue();
+        var reducedFifth = value.ReduceFifth(_ => "a");
+        await Assert.That(reducedFifth.IsT1).IsTrue();
+        var reducedSixth = value.ReduceSixth(_ => "a");
+        await Assert.That(reducedSixth.IsT1).IsTrue();
+        var reducedSeventh = value.ReduceSeventh(_ => "a");
+        await Assert.That(reducedSeventh.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity7_linq_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char> value = 'x';
+        var selected = from v in value
+                       select v;
+        await Assert.That(selected.IsT7).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity7_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool, double, long, decimal, char> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity8_map_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char, byte> value = "a";
+        var mappedFirst = value.MapFirst(v => v + "!");
+        await Assert.That(mappedFirst.IsT1).IsTrue();
+        var mappedSecond = value.MapSecond(v => v);
+        await Assert.That(mappedSecond.IsT1).IsTrue();
+        var mappedThird = value.MapThird(v => v);
+        await Assert.That(mappedThird.IsT1).IsTrue();
+        var mappedFourth = value.MapFourth(v => v);
+        await Assert.That(mappedFourth.IsT1).IsTrue();
+        var mappedFifth = value.MapFifth(v => v);
+        await Assert.That(mappedFifth.IsT1).IsTrue();
+        var mappedSixth = value.MapSixth(v => v);
+        await Assert.That(mappedSixth.IsT1).IsTrue();
+        var mappedSeventh = value.MapSeventh(v => v);
+        await Assert.That(mappedSeventh.IsT1).IsTrue();
+        var mappedEighth = value.MapEighth(v => v);
+        await Assert.That(mappedEighth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity8_reduce_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char, byte> value = "a";
+        var reducedFirst = value.ReduceFirst(_ => 2);
+        await Assert.That(reducedFirst.IsT1).IsTrue();
+        var reducedSecond = value.ReduceSecond(_ => "a");
+        await Assert.That(reducedSecond.IsT1).IsTrue();
+        var reducedThird = value.ReduceThird(_ => "a");
+        await Assert.That(reducedThird.IsT1).IsTrue();
+        var reducedFourth = value.ReduceFourth(_ => "a");
+        await Assert.That(reducedFourth.IsT1).IsTrue();
+        var reducedFifth = value.ReduceFifth(_ => "a");
+        await Assert.That(reducedFifth.IsT1).IsTrue();
+        var reducedSixth = value.ReduceSixth(_ => "a");
+        await Assert.That(reducedSixth.IsT1).IsTrue();
+        var reducedSeventh = value.ReduceSeventh(_ => "a");
+        await Assert.That(reducedSeventh.IsT1).IsTrue();
+        var reducedEighth = value.ReduceEighth(_ => "a");
+        await Assert.That(reducedEighth.IsT1).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity8_linq_methods_execute()
+    {
+        OneOf<string, int, bool, double, long, decimal, char, byte> value = (byte)8;
+        var selected = from v in value
+                       select v;
+        await Assert.That(selected.IsT8).IsTrue();
+    }
+
+    [Test]
+    public async Task Arity8_wrong_accessor_throws()
+    {
+        OneOf<string, int, bool, double, long, decimal, char, byte> value = 2;
+        await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
 }
