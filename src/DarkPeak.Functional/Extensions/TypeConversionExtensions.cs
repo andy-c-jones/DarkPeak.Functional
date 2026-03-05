@@ -104,4 +104,24 @@ public static class TypeConversionExtensions
             left: error => new Failure<TRight, TLeft>(error),
             right: value => new Success<TRight, TLeft>(value)
         );
+
+    // ── Either ↔ OneOf<TLeft, TRight> ──
+
+    /// <summary>
+    /// Converts an Either to a OneOf with matching generic arguments.
+    /// </summary>
+    public static OneOf<TLeft, TRight> ToOneOf<TLeft, TRight>(this Either<TLeft, TRight> either) =>
+        either.Match<OneOf<TLeft, TRight>>(
+            left: value => value,
+            right: value => value
+        );
+
+    /// <summary>
+    /// Converts a two-case OneOf to an Either with matching generic arguments.
+    /// </summary>
+    public static Either<TLeft, TRight> ToEither<TLeft, TRight>(this OneOf<TLeft, TRight> oneOf) =>
+        oneOf.Match<Either<TLeft, TRight>>(
+            t1: value => new Left<TLeft, TRight>(value),
+            t2: value => new Right<TLeft, TRight>(value)
+        );
 }
