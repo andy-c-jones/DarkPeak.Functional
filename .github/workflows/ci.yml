@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: (success() || failure()) && hashFiles('coverage.cobertura.xml') != ''
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage.cobertura.xml
@@ -99,7 +99,7 @@ jobs:
           done
 
       - name: Upload package artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: nupkg
           path: ./nupkg/*.nupkg
