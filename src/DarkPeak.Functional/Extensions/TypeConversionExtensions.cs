@@ -1,7 +1,7 @@
 namespace DarkPeak.Functional.Extensions;
 
 /// <summary>
-/// Extension methods for converting between Option, Result, and Either types.
+/// Extension methods for converting between Option, Result, Either, and OneOf types.
 /// </summary>
 public static class TypeConversionExtensions
 {

@@ -15,7 +15,7 @@ A functional programming library for .NET providing monadic types and railway-or
 | **DarkPeak.Functional.Dapper** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.Dapper.svg)](https://www.nuget.org/packages/DarkPeak.Functional.Dapper/) | Wraps Dapper queries and commands in `Result<T, Error>` with typed `DatabaseError` mapping and transaction support. |
 | **DarkPeak.Functional.EntityFramework** | [![NuGet](https://img.shields.io/nuget/v/DarkPeak.Functional.EntityFramework.svg)](https://www.nuget.org/packages/DarkPeak.Functional.EntityFramework/) | Wraps EF Core operations in `Result<T, Error>` with typed errors for concurrency, save failures, and general database exceptions. |
 
-All types support `Map`, `Bind`, `Match`, LINQ query syntax, and async variants.
+Core types support exhaustive `Match`, LINQ query syntax where appropriate, and async APIs across the library.
 
 ## Example
 
@@ -39,6 +39,16 @@ var summary = await fetchUser(42)
     .Tap(s => logger.LogInformation("Built summary for {Name}", s.Name))
     .TapError(err => logger.LogError("Failed: {Msg}", err.Message));
 ```
+
+## Core Types
+
+- `Option<T>` — explicit presence or absence instead of `null`
+- `Result<T, TError>` — success/failure flows with typed errors
+- `Either<TLeft, TRight>` — two equally valid branches
+- `OneOf<T1, ..., Tn>` — discriminated unions with 2-8 cases
+- `Validation<T, TError>` — error accumulation instead of short-circuiting
+
+See [`docs/articles/oneof.md`](docs/articles/oneof.md) for `OneOf` usage and `Either` interop helpers.
 
 ## Building
 
