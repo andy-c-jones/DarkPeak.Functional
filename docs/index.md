@@ -7,6 +7,7 @@ A functional programming library for .NET providing monadic types and railway-or
 - **[Option&lt;T&gt;](articles/option.md)** — Eliminates null reference exceptions with explicit presence/absence
 - **[Result&lt;T, TError&gt;](articles/result.md)** — Railway-oriented error handling without exceptions
 - **[Either&lt;TLeft, TRight&gt;](articles/either.md)** — Symmetric dual-value type for branching logic
+- **[OneOf&lt;T1, ..., Tn&gt;](articles/oneof.md)** — Discriminated unions with 2-8 explicitly typed cases
 - **[Validation&lt;T, TError&gt;](articles/validation.md)** — Accumulates multiple errors instead of short-circuiting
 
 ## Resilience & Caching
@@ -36,6 +37,13 @@ var greeting = name.Map(n => $"Hello, {n}!");
 Result<int, ValidationError> parsed = Result.Success<int, ValidationError>(42);
 var doubled = parsed.Map(x => x * 2);
 
+// OneOf — multiple valid shapes
+OneOf<string, int, bool> response = true;
+var description = response.Match(
+    text => text,
+    number => number.ToString(),
+    flag => flag ? "enabled" : "disabled");
+
 // Fluent chaining
 var result = await Option.Some("42")
     .ToResult(new ValidationError { Message = "Missing" })
@@ -55,6 +63,7 @@ dotnet add package DarkPeak.Functional
 ## Learn More
 
 - [Getting Started](articles/getting-started.md) — Installation, concepts, and first steps
+- [OneOf](articles/oneof.md) — Discriminated unions with 2-8 cases and `Either` interop
 - [Orchestration](articles/orchestration.md) — Combining Validation and Result pipelines in real-world scenarios
 - [Example: Blazor Form](articles/example-blazor-form.md) — Using Validation in a Blazor component with inline field errors
 - [API Reference](api/index.md) — Full API documentation generated from source

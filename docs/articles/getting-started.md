@@ -10,20 +10,21 @@ dotnet add package DarkPeak.Functional
 
 ## Core Concepts
 
-### Monadic Types
+### Core Functional Types
 
-The library provides four core monadic types, each serving a different purpose:
+The library provides four monadic types plus `OneOf`, each serving a different purpose:
 
 | Type | Purpose | Error Handling |
 |------|---------|----------------|
 | `Option<T>` | Represents a value that may or may not exist | No error info — just presence/absence |
 | `Result<T, TError>` | Represents success or failure | Single error, short-circuits on first failure |
 | `Either<TLeft, TRight>` | Represents one of two possible values | No bias — both sides are equally valid |
+| `OneOf<T1, ..., Tn>` | Represents one of 2-8 possible values | No bias — every case is explicit and valid |
 | `Validation<T, TError>` | Represents valid or invalid with errors | Accumulates all errors |
 
 ### Railway-Oriented Programming
 
-Each type supports a common set of operations that let you chain computations without checking for errors at every step:
+The monadic types share a common set of operations that let you chain computations without checking for errors at every step:
 
 - **Map** — Transform the value inside the container
 - **Bind** — Chain operations that themselves return a container
@@ -48,7 +49,7 @@ var message = result.Match(
 
 ### LINQ Support
 
-All monadic types support LINQ query syntax:
+The monadic types, plus `OneOf`, support LINQ query syntax:
 
 ```csharp
 var result =
@@ -86,7 +87,7 @@ var result = await FetchUserAsync(userId)     // Task<Result<User, Error>>
 ## Namespace Layout
 
 ```
-DarkPeak.Functional              — Core types (Option, Result, Either, Validation, Error)
+DarkPeak.Functional              — Core types (Option, Result, Either, OneOf, Validation, Error)
 DarkPeak.Functional.Extensions   — Extension methods (type conversions, task extensions, etc.)
 ```
 
@@ -95,6 +96,7 @@ DarkPeak.Functional.Extensions   — Extension methods (type conversions, task e
 - [Option](option.md) — Eliminating null reference exceptions
 - [Result](result.md) — Railway-oriented error handling
 - [Either](either.md) — Symmetric dual-value type
+- [OneOf](oneof.md) — Discriminated unions with multiple valid cases
 - [Validation](validation.md) — Error accumulation
 - [Retry](retry.md) — Configurable retry policies
 - [Memoize](memoize.md) — Function caching
