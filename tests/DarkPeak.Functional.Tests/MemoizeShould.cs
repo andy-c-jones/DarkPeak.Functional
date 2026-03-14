@@ -105,7 +105,7 @@ public class MemoizeShould
                 callCount++;
                 return callCount;
             },
-            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(50)));
+            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(500)));
 
         var first = memoized("key");
         await Assert.That(first).IsEqualTo(1);
@@ -114,7 +114,7 @@ public class MemoizeShould
         await Assert.That(cached).IsEqualTo(1);
         await Assert.That(callCount).IsEqualTo(1);
 
-        await Task.Delay(80);
+        await Task.Delay(700);
 
         var recomputed = memoized("key");
         await Assert.That(recomputed).IsEqualTo(2);
@@ -261,12 +261,12 @@ public class MemoizeShould
                 await Task.Yield();
                 return callCount;
             },
-            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(50)));
+            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(500)));
 
         var first = await memoized("key");
         await Assert.That(first).IsEqualTo(1);
 
-        await Task.Delay(80);
+        await Task.Delay(700);
 
         var second = await memoized("key");
         await Assert.That(second).IsEqualTo(2);
@@ -311,13 +311,13 @@ public class MemoizeShould
                 callCount++;
                 return a + b;
             },
-            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(50)));
+            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(500)));
 
         memoized(1, 2);
         memoized(1, 2);
         await Assert.That(callCount).IsEqualTo(1);
 
-        await Task.Delay(80);
+        await Task.Delay(700);
 
         memoized(1, 2);
         await Assert.That(callCount).IsEqualTo(2);
