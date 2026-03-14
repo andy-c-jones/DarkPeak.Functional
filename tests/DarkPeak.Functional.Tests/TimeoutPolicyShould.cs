@@ -170,7 +170,7 @@ public class TimeoutPolicyShould
         var result = await timeout.ExecuteAsync<int, Error>(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(System.Threading.Timeout.InfiniteTimeSpan, ct);
                 return Result.Success<int, Error>(42);
             },
             cts.Token);
@@ -217,7 +217,7 @@ public class TimeoutPolicyShould
         var result = await timeout.ExecuteAsync<int, Error>(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(System.Threading.Timeout.InfiniteTimeSpan, ct);
                 return Result.Success<int, Error>(42);
             });
 
