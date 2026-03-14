@@ -23,6 +23,8 @@ A functional programming library for .NET providing monadic types and railway-or
 - **[DarkPeak.Functional.Redis](articles/redis.md)** — Redis distributed cache provider for `Memoize` and `MemoizeResult`
 - **[DarkPeak.Functional.Dapper](articles/dapper.md)** — Wraps Dapper queries and commands in `Result<T, Error>` with typed database error mapping
 - **[DarkPeak.Functional.EntityFramework](articles/entity-framework.md)** — Wraps EF Core operations in `Result<T, Error>` with typed error handling
+- **[DarkPeak.Functional.HealthChecks](articles/health-checks.md)** — Exposes circuit breaker and cache provider status via ASP.NET Core `IHealthCheck` implementations
+- **[DarkPeak.Functional.Mediator](articles/mediator.md)** — Integrates `Result<T, Error>` with [Mediator](https://github.com/martinothamar/Mediator) for source-generated CQRS pipelines
 
 ## Quick Start
 
