@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.HealthChecks</PackageId>
+    <Description>ASP.NET Core health check integration for DarkPeak.Functional resilience policies. Provides IHealthCheck implementations for circuit breakers and cache providers.</Description>
+    <PackageTags>functional;health-check;circuit-breaker;resilience;aspnet;diagnostics</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.*" />
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+  </ItemGroup>
+
+</Project>

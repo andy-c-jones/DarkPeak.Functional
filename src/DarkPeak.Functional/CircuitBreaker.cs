@@ -36,6 +36,19 @@ public sealed record CircuitBreakerOpenError : Error
 }
 
 /// <summary>
+/// A point-in-time snapshot of a circuit breaker's state.
+/// </summary>
+/// <param name="State">The current state of the circuit breaker.</param>
+/// <param name="ConsecutiveFailures">The number of consecutive failures recorded.</param>
+/// <param name="LastFailureTime">The timestamp of the most recent failure, or null if no failures have occurred.</param>
+/// <param name="ResetTimeout">The configured duration the circuit stays open before transitioning to half-open.</param>
+public sealed record CircuitBreakerSnapshot(
+    CircuitBreakerState State,
+    int ConsecutiveFailures,
+    DateTimeOffset? LastFailureTime,
+    TimeSpan ResetTimeout);
+
+/// <summary>
 /// Immutable circuit breaker policy built via fluent API.
 /// </summary>
 /// <remarks>
@@ -75,6 +88,31 @@ public sealed record CircuitBreakerPolicy
     internal Func<Error, bool>? BreakPredicate { get; init; }
     internal Action<CircuitBreakerState, CircuitBreakerState>? OnStateChangeCallback { get; init; }
     internal CircuitBreakerStateTracker StateTracker { get; init; } = new();
+
+    /// <summary>
+    /// Returns a point-in-time snapshot of the circuit breaker's current state.
+    /// The snapshot is read under the internal lock, so it is consistent at the moment of capture.
+    /// </summary>
+    public CircuitBreakerSnapshot GetSnapshot()
+    {
+        lock (StateTracker.Lock)
+        {
+            var effectiveState = StateTracker.State;
+            if (effectiveState == CircuitBreakerState.Open
+                && StateTracker.LastFailureTime.HasValue)
+            {
+                var elapsed = DateTimeOffset.UtcNow - StateTracker.LastFailureTime.Value;
+                if (elapsed >= ResetTimeout)
+                    effectiveState = CircuitBreakerState.HalfOpen;
+            }
+
+            return new CircuitBreakerSnapshot(
+                effectiveState,
+                StateTracker.ConsecutiveFailures,
+                StateTracker.LastFailureTime,
+                ResetTimeout);
+        }
+    }
 
     /// <summary>
     /// Sets the duration the circuit stays open before transitioning to half-open.

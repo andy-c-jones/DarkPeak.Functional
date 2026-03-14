@@ -40,11 +40,13 @@ DarkPeak.Functional/
 │   ├── DarkPeak.Functional/        # Core library: monadic types and extensions
 │   ├── DarkPeak.Functional.Http/   # HTTP client extensions wrapping HttpClient in Result<T, Error>
 │   ├── DarkPeak.Functional.AspNet/ # ASP.NET integration (ToIResult, ProblemDetails)
+│   ├── DarkPeak.Functional.HealthChecks/ # Health check integration for resilience policies
 │   └── DarkPeak.Functional.Redis/  # Redis distributed cache provider for Memoize
 ├── tests/
 │   ├── DarkPeak.Functional.Tests/
 │   ├── DarkPeak.Functional.Http.Tests/
 │   ├── DarkPeak.Functional.AspNet.Tests/
+│   ├── DarkPeak.Functional.HealthChecks.Tests/
 │   └── DarkPeak.Functional.Redis.Tests/
 └── docs/                           # DocFX API documentation
 ```
@@ -55,8 +57,9 @@ DarkPeak.Functional/
 - **DarkPeak.Functional.Http** — Depends on `DarkPeak.Functional`. Provides `HttpClientExtensions` for wrapping `HttpClient` operations in `Result<T, Error>`.
 - **DarkPeak.Functional.AspNet** — Depends on `DarkPeak.Functional`. References `Microsoft.AspNetCore.App` shared framework. Provides `ToIResult()`, `ToCreatedResult()`, `ToNoContentResult()`, and `ToProblemDetails()` extensions.
 - **DarkPeak.Functional.Redis** — Depends on `DarkPeak.Functional` and `StackExchange.Redis`. Provides `RedisCacheProvider<TKey, TValue>` implementing `ICacheProvider<TKey, TValue>` for distributed caching with `Memoize` and `MemoizeResult`. Supports key prefixes, configurable JSON serialization, and TTL.
+- **DarkPeak.Functional.HealthChecks** — Depends on `DarkPeak.Functional` and `Microsoft.Extensions.Diagnostics.HealthChecks`. Provides `IHealthCheck` implementations for circuit breakers and cache providers, with fluent `IHealthChecksBuilder` extension methods for registration. Supports tags for liveness/readiness separation.
 
-All four packages are versioned together and released simultaneously via the manual Release workflow.
+All packages are versioned together and released simultaneously via the manual Release workflow.
 
 ### Core Types (DarkPeak.Functional)
 
@@ -66,7 +69,8 @@ All four packages are versioned together and released simultaneously via the man
 - **`Validation<T, TError>`** — Accumulates multiple errors instead of short-circuiting. Implementations: `Valid<T, TError>`, `Invalid<T, TError>`
 - **`Error`** — Abstract base record for typed errors with HTTP-mapped subtypes (ValidationError, NotFoundError, UnauthorizedError, etc.)
 - **`RetryPolicy`** — Configurable retry with backoff strategies (None, Constant, Linear, Exponential). Entry point: `Retry.WithMaxAttempts()`
-- **`CircuitBreakerPolicy`** — Circuit breaker that tracks consecutive failures and transitions between Closed, Open, and HalfOpen states to prevent cascading failures. Entry point: `CircuitBreaker.WithFailureThreshold()`. Uses a shared `CircuitBreakerStateTracker` for mutable state with `Lock`-based thread safety.
+- **`CircuitBreakerPolicy`** — Circuit breaker that tracks consecutive failures and transitions between Closed, Open, and HalfOpen states to prevent cascading failures. Entry point: `CircuitBreaker.WithFailureThreshold()`. Uses a shared `CircuitBreakerStateTracker` for mutable state with `Lock`-based thread safety. Exposes current state via `GetSnapshot()`.
+- **`CircuitBreakerSnapshot`** — Point-in-time read-only snapshot of circuit breaker state: `State`, `ConsecutiveFailures`, `LastFailureTime`, `ResetTimeout`.
 - **`CircuitBreakerOpenError`** — Error returned when the circuit is open, with a `RetryAfter` property indicating time until half-open.
 - **`Memoize`** — Function caching with TTL, LRU eviction, and pluggable distributed cache via `ICacheProvider<TKey, TValue>`
 - **`MemoizeResult`** — Function caching for `Result<T, TError>`-returning functions that only caches successful results. Failed results pass through uncached so subsequent calls retry the computation. Entry point: `MemoizeResult.Func()` / `MemoizeResult.FuncAsync()`
@@ -107,6 +111,15 @@ All four packages are versioned together and released simultaneously via the man
   - `ToProblemDetails()` — Converts any `Error` to `ProblemDetails` with correct status code
   - `ToValidationProblemDetails()` — Converts `ValidationError` to `HttpValidationProblemDetails` preserving field errors
   - Metadata and error codes are included in `ProblemDetails.Extensions`
+
+### Health Check Integration (DarkPeak.Functional.HealthChecks)
+
+- **`CircuitBreakerHealthCheck`** — `IHealthCheck` that monitors a `CircuitBreakerPolicy`. Maps Closed→Healthy, HalfOpen→Degraded, Open→Unhealthy. Includes `state`, `failureCount`, and `resetTime` in health check data.
+- **`CacheProviderHealthCheck<TKey, TValue>`** — `IHealthCheck` that probes an `ICacheProvider<TKey, TValue>` by calling `GetAsync` with a sentinel key. Healthy if reachable, Unhealthy if it throws.
+- **`CircuitBreakerSnapshot`** — Immutable record exposing circuit breaker state: `State`, `ConsecutiveFailures`, `LastFailureTime`, `ResetTimeout`. Obtained via `CircuitBreakerPolicy.GetSnapshot()`.
+- **`HealthChecksBuilderExtensions`** — Fluent registration on `IHealthChecksBuilder`:
+  - `AddCircuitBreakerHealthCheck(name, policy, tags?)` — Registers a circuit breaker health check
+  - `AddCacheProviderHealthCheck<TKey, TValue>(name, cacheProvider, probeKey, tags?)` — Registers a cache health check that probes an `ICacheProvider` with `GetAsync`
 
 ### Extensions Namespace (`DarkPeak.Functional.Extensions`)
 
