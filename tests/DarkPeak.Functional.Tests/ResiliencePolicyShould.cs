@@ -247,12 +247,14 @@ public class ResiliencePolicyShould
 
         var executing = 0;
         var maxConcurrent = 0;
+        var started = new SemaphoreSlim(0, 2);
 
         var task1 = policy.ExecuteAsync(async ct =>
         {
             var current = Interlocked.Increment(ref executing);
             maxConcurrent = Math.Max(maxConcurrent, current);
-            await Task.Delay(100, ct);
+            started.Release();
+            await Task.Delay(500, ct);
             Interlocked.Decrement(ref executing);
             return Result.Success<int, Error>(1);
         });
@@ -261,12 +263,15 @@ public class ResiliencePolicyShould
         {
             var current = Interlocked.Increment(ref executing);
             maxConcurrent = Math.Max(maxConcurrent, current);
-            await Task.Delay(100, ct);
+            started.Release();
+            await Task.Delay(500, ct);
             Interlocked.Decrement(ref executing);
             return Result.Success<int, Error>(2);
         });
 
-        await Task.Delay(20);
+        // Wait for both tasks to actually start executing
+        await started.WaitAsync();
+        await started.WaitAsync();
 
         var result3 = await policy.ExecuteAsync(
             async ct =>
