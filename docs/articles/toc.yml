@@ -42,5 +42,9 @@
   href: dapper.md
 - name: Entity Framework
   href: entity-framework.md
+- name: Health Checks
+  href: health-checks.md
+- name: Mediator
+  href: mediator.md
 - name: "Example: Blazor Form"
   href: example-blazor-form.md
