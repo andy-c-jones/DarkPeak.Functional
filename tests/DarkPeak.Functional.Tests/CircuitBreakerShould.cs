@@ -329,4 +329,84 @@ public class CircuitBreakerShould
     }
 
     #endregion
+
+    #region GetSnapshot
+
+    [Test]
+    public async Task GetSnapshot_returns_closed_state_initially()
+    {
+        var breaker = CircuitBreaker.WithFailureThreshold(3)
+            .WithResetTimeout(TimeSpan.FromSeconds(30));
+
+        var snapshot = breaker.GetSnapshot();
+
+        await Assert.That(snapshot.State).IsEqualTo(CircuitBreakerState.Closed);
+        await Assert.That(snapshot.ConsecutiveFailures).IsEqualTo(0);
+        await Assert.That(snapshot.LastFailureTime).IsNull();
+        await Assert.That(snapshot.ResetTimeout).IsEqualTo(TimeSpan.FromSeconds(30));
+    }
+
+    [Test]
+    public async Task GetSnapshot_reflects_failure_count()
+    {
+        var breaker = CircuitBreaker.WithFailureThreshold(5);
+
+        breaker.Execute(() => Result.Failure<int, Error>(
+            new ExternalServiceError { Message = "fail 1" }));
+        breaker.Execute(() => Result.Failure<int, Error>(
+            new ExternalServiceError { Message = "fail 2" }));
+
+        var snapshot = breaker.GetSnapshot();
+
+        await Assert.That(snapshot.ConsecutiveFailures).IsEqualTo(2);
+        await Assert.That(snapshot.LastFailureTime).IsNotNull();
+    }
+
+    [Test]
+    public async Task GetSnapshot_returns_open_state_after_threshold()
+    {
+        var breaker = CircuitBreaker.WithFailureThreshold(2)
+            .WithResetTimeout(TimeSpan.FromSeconds(60));
+
+        breaker.Execute(() => Result.Failure<int, Error>(
+            new ExternalServiceError { Message = "fail 1" }));
+        breaker.Execute(() => Result.Failure<int, Error>(
+            new ExternalServiceError { Message = "fail 2" }));
+
+        var snapshot = breaker.GetSnapshot();
+
+        await Assert.That(snapshot.State).IsEqualTo(CircuitBreakerState.Open);
+        await Assert.That(snapshot.ConsecutiveFailures).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task GetSnapshot_returns_half_open_after_reset_timeout_elapses()
+    {
+        var breaker = CircuitBreaker.WithFailureThreshold(1)
+            .WithResetTimeout(TimeSpan.FromMilliseconds(50));
+
+        breaker.Execute(() => Result.Failure<int, Error>(
+            new ExternalServiceError { Message = "fail" }));
+
+        await Assert.That(breaker.GetSnapshot().State).IsEqualTo(CircuitBreakerState.Open);
+
+        await Task.Delay(100);
+
+        var snapshot = breaker.GetSnapshot();
+        await Assert.That(snapshot.State).IsEqualTo(CircuitBreakerState.HalfOpen);
+    }
+
+    [Test]
+    public async Task GetSnapshot_returns_configured_reset_timeout()
+    {
+        var timeout = TimeSpan.FromMinutes(5);
+        var breaker = CircuitBreaker.WithFailureThreshold(3)
+            .WithResetTimeout(timeout);
+
+        var snapshot = breaker.GetSnapshot();
+
+        await Assert.That(snapshot.ResetTimeout).IsEqualTo(timeout);
+    }
+
+    #endregion
 }
