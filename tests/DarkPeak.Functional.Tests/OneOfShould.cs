@@ -89,6 +89,23 @@ public class OneOfShould
     }
 
     [Test]
+    public async Task Arity2_map_does_not_execute_inactive_mapper()
+    {
+        OneOf<string, int> value = "left";
+        var mapSecondCalled = false;
+
+        var mapped = value.MapSecond(v =>
+        {
+            mapSecondCalled = true;
+            return v + 1;
+        });
+
+        await Assert.That(mapped.IsT1).IsTrue();
+        await Assert.That(mapped.AsT1).IsEqualTo("left");
+        await Assert.That(mapSecondCalled).IsFalse();
+    }
+
+    [Test]
     public async Task Arity3_factory_methods_create_all_cases()
     {
         var v1 = OneOf.First<string, int, bool>("a");
@@ -114,7 +131,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3))).IsEqualTo(2);
         OneOf<string, int, bool> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3))).IsEqualTo(3);
     }
@@ -133,7 +150,7 @@ public class OneOfShould
         OneOf<string, int, bool> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
     }
 
     [Test]
@@ -157,7 +174,7 @@ public class OneOfShould
         var selected = from x in success
                        select (!x);
         await Assert.That(selected.IsT3).IsTrue();
-        await Assert.That(selected.AsT3).IsEqualTo(false);
+        await Assert.That(selected.AsT3).IsFalse();
 
         var bound = from x in success
                     from y in (OneOf<string, int, bool>)(true)
@@ -176,6 +193,23 @@ public class OneOfShould
     {
         OneOf<string, int, bool> value = 2;
         await Assert.That(() => value.AsT1).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Arity3_reduce_does_not_execute_inactive_reducer()
+    {
+        OneOf<string, int, bool> value = "left";
+        var reduceThirdCalled = false;
+
+        var reduced = value.ReduceThird(v =>
+        {
+            reduceThirdCalled = true;
+            return v ? "true" : "false";
+        });
+
+        await Assert.That(reduced.IsT1).IsTrue();
+        await Assert.That(reduced.AsT1).IsEqualTo("left");
+        await Assert.That(reduceThirdCalled).IsFalse();
     }
 
     [Test]
@@ -206,7 +240,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4))).IsEqualTo(2);
         OneOf<string, int, bool, double> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3, t4 => 4)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4))).IsEqualTo(3);
         OneOf<string, int, bool, double> c4 = 4.0d;
@@ -230,7 +264,7 @@ public class OneOfShould
         OneOf<string, int, bool, double> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
         OneOf<string, int, bool, double> map4 = 4.0d;
         var mapped4 = map4.MapFourth(v => v + 1d);
         await Assert.That(mapped4.IsT4).IsTrue();
@@ -312,7 +346,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5))).IsEqualTo(2);
         OneOf<string, int, bool, double, long> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3, t4 => 4, t5 => 5)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5))).IsEqualTo(3);
         OneOf<string, int, bool, double, long> c4 = 4.0d;
@@ -341,7 +375,7 @@ public class OneOfShould
         OneOf<string, int, bool, double, long> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
         OneOf<string, int, bool, double, long> map4 = 4.0d;
         var mapped4 = map4.MapFourth(v => v + 1d);
         await Assert.That(mapped4.IsT4).IsTrue();
@@ -432,7 +466,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6))).IsEqualTo(2);
         OneOf<string, int, bool, double, long, decimal> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3, t4 => 4, t5 => 5, t6 => 6)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6))).IsEqualTo(3);
         OneOf<string, int, bool, double, long, decimal> c4 = 4.0d;
@@ -466,7 +500,7 @@ public class OneOfShould
         OneOf<string, int, bool, double, long, decimal> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
         OneOf<string, int, bool, double, long, decimal> map4 = 4.0d;
         var mapped4 = map4.MapFourth(v => v + 1d);
         await Assert.That(mapped4.IsT4).IsTrue();
@@ -566,7 +600,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6), t7 => Task.FromResult(7))).IsEqualTo(2);
         OneOf<string, int, bool, double, long, decimal, char> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3, t4 => 4, t5 => 5, t6 => 6, t7 => 7)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6), t7 => Task.FromResult(7))).IsEqualTo(3);
         OneOf<string, int, bool, double, long, decimal, char> c4 = 4.0d;
@@ -605,7 +639,7 @@ public class OneOfShould
         OneOf<string, int, bool, double, long, decimal, char> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
         OneOf<string, int, bool, double, long, decimal, char> map4 = 4.0d;
         var mapped4 = map4.MapFourth(v => v + 1d);
         await Assert.That(mapped4.IsT4).IsTrue();
@@ -714,7 +748,7 @@ public class OneOfShould
         await Assert.That(await c2.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6), t7 => Task.FromResult(7), t8 => Task.FromResult(8))).IsEqualTo(2);
         OneOf<string, int, bool, double, long, decimal, char, byte> c3 = true;
         await Assert.That(c3.IsT3).IsTrue();
-        await Assert.That(c3.AsT3).IsEqualTo(true);
+        await Assert.That(c3.AsT3).IsTrue();
         await Assert.That(c3.Match(t1 => 1, t2 => 2, t3 => 3, t4 => 4, t5 => 5, t6 => 6, t7 => 7, t8 => 8)).IsEqualTo(3);
         await Assert.That(await c3.MatchAsync(t1 => Task.FromResult(1), t2 => Task.FromResult(2), t3 => Task.FromResult(3), t4 => Task.FromResult(4), t5 => Task.FromResult(5), t6 => Task.FromResult(6), t7 => Task.FromResult(7), t8 => Task.FromResult(8))).IsEqualTo(3);
         OneOf<string, int, bool, double, long, decimal, char, byte> c4 = 4.0d;
@@ -758,7 +792,7 @@ public class OneOfShould
         OneOf<string, int, bool, double, long, decimal, char, byte> map3 = true;
         var mapped3 = map3.MapThird(v => !v);
         await Assert.That(mapped3.IsT3).IsTrue();
-        await Assert.That(mapped3.AsT3).IsEqualTo(false);
+        await Assert.That(mapped3.AsT3).IsFalse();
         OneOf<string, int, bool, double, long, decimal, char, byte> map4 = 4.0d;
         var mapped4 = map4.MapFourth(v => v + 1d);
         await Assert.That(mapped4.IsT4).IsTrue();
@@ -868,6 +902,20 @@ public class OneOfShould
         var oneOf8 = CreateInvalidState<OneOf<string, int, bool, double, long, decimal, char, byte>>("x");
         await Assert.That(() => oneOf8.Match(_ => 1, _ => 2, _ => 3, _ => 4, _ => 5, _ => 6, _ => 7, _ => 8)).Throws<InvalidOperationException>();
         await Assert.That(async () => await oneOf8.MatchAsync(_ => Task.FromResult(1), _ => Task.FromResult(2), _ => Task.FromResult(3), _ => Task.FromResult(4), _ => Task.FromResult(5), _ => Task.FromResult(6), _ => Task.FromResult(7), _ => Task.FromResult(8))).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Accessors_throw_descriptive_errors_for_wrong_case()
+    {
+        OneOf<string, int> twoCase = 42;
+        var exception = await Assert.That(() => twoCase.AsT1).Throws<InvalidOperationException>();
+        await Assert.That(exception).IsNotNull();
+        await Assert.That(exception!.Message).IsEqualTo("Value is not T1.");
+
+        OneOf<string, int, bool> threeCase = "x";
+        var exception2 = await Assert.That(() => threeCase.AsT3).Throws<InvalidOperationException>();
+        await Assert.That(exception2).IsNotNull();
+        await Assert.That(exception2!.Message).IsEqualTo("Value is not T3.");
     }
 
 }

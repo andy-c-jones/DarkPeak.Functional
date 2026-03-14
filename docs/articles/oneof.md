@@ -72,6 +72,14 @@ OneOf<string, int> reduced = input.ReduceThird(flag =>
     flag ? "enabled" : 0);
 ```
 
+`Map...` and `Reduce...` only execute the delegate for the active case. For inactive cases, the union is returned unchanged in shape and value.
+
+## Error Behavior
+
+`AsTn` accessors enforce case safety. Accessing the wrong case throws `InvalidOperationException` with a descriptive message (for example, `"Value is not T3."`).
+
+`Match` and `MatchAsync` validate internal state and throw `InvalidOperationException` if an invalid index is encountered (for example, after malformed reflection-based construction in tests).
+
 ## LINQ Support
 
 `OneOf` supports LINQ query syntax. Queries operate on the final generic argument, and the earlier cases short-circuit through the query unchanged.
