@@ -7,6 +7,7 @@
     <Project Path="src/DarkPeak.Functional.Dapper/DarkPeak.Functional.Dapper.csproj" />
     <Project Path="src/DarkPeak.Functional.EntityFramework/DarkPeak.Functional.EntityFramework.csproj" />
     <Project Path="src/DarkPeak.Functional.HealthChecks/DarkPeak.Functional.HealthChecks.csproj" />
+    <Project Path="src/DarkPeak.Functional.Mediator/DarkPeak.Functional.Mediator.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DarkPeak.Functional.Tests/DarkPeak.Functional.Tests.csproj" />
@@ -16,5 +17,6 @@
     <Project Path="tests/DarkPeak.Functional.Dapper.Tests/DarkPeak.Functional.Dapper.Tests.csproj" />
     <Project Path="tests/DarkPeak.Functional.EntityFramework.Tests/DarkPeak.Functional.EntityFramework.Tests.csproj" />
     <Project Path="tests/DarkPeak.Functional.HealthChecks.Tests/DarkPeak.Functional.HealthChecks.Tests.csproj" />
+    <Project Path="tests/DarkPeak.Functional.Mediator.Tests/DarkPeak.Functional.Mediator.Tests.csproj" />
   </Folder>
 </Solution>
