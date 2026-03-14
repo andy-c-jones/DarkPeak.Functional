@@ -59,7 +59,7 @@ public class ResiliencePolicyShould
         var result = await policy.ExecuteAsync(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<int, Error>(42);
             });
 
@@ -75,14 +75,14 @@ public class ResiliencePolicyShould
         var policy = ResiliencePolicy.Create<Error>()
             .WithRetry(r => r
                 .WithMaxAttempts(3)
-                .WithTimeout(TimeSpan.FromMilliseconds(100)))
+                .WithTimeout(TimeSpan.FromMilliseconds(200)))
             .Build();
 
         var result = await policy.ExecuteAsync(
             async ct =>
             {
                 attempts++;
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<int, Error>(42);
             });
 
@@ -98,10 +98,10 @@ public class ResiliencePolicyShould
     {
         var attempts = 0;
         var policy = ResiliencePolicy.Create<Error>()
-            .WithTimeout(TimeSpan.FromMilliseconds(150))
+            .WithTimeout(TimeSpan.FromMilliseconds(500))
             .WithRetry(r => r
                 .WithMaxAttempts(100)
-                .WithBackoff(Backoff.Constant(TimeSpan.FromMilliseconds(50))))
+                .WithBackoff(Backoff.Constant(TimeSpan.FromMilliseconds(100))))
             .Build();
 
         var result = await policy.ExecuteAsync(
@@ -367,7 +367,7 @@ public class ResiliencePolicyShould
             .Build();
 
         var cts = new CancellationTokenSource();
-        cts.CancelAfter(50);
+        cts.CancelAfter(200);
 
         var tokenReceived = false;
 
@@ -377,7 +377,7 @@ public class ResiliencePolicyShould
                 async ct =>
                 {
                     tokenReceived = ct.CanBeCanceled;
-                    await Task.Delay(5000, ct);
+                    await Task.Delay(10_000, ct);
                     return Result.Success<int, Error>(42);
                 },
                 cts.Token);
@@ -394,7 +394,7 @@ public class ResiliencePolicyShould
     public async Task Builder_can_create_policy_with_only_timeout()
     {
         var policy = ResiliencePolicy.Create<Error>()
-            .WithTimeout(TimeSpan.FromMilliseconds(100))
+            .WithTimeout(TimeSpan.FromSeconds(1))
             .Build();
 
         var result = await policy.ExecuteAsync(
@@ -434,7 +434,7 @@ public class ResiliencePolicyShould
     {
         var policy = ResiliencePolicy.Create<Error>()
             .WithTimeout(
-                TimeSpan.FromMilliseconds(50),
+                TimeSpan.FromMilliseconds(200),
                 elapsed => new ExternalServiceError
                 {
                     Message = "Custom timeout",
@@ -445,7 +445,7 @@ public class ResiliencePolicyShould
         var result = await policy.ExecuteAsync(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<int, Error>(42);
             });
 

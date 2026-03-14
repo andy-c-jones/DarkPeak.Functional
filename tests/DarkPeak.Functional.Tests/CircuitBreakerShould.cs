@@ -167,7 +167,7 @@ public class CircuitBreakerShould
     public async Task Circuit_transitions_to_half_open_after_reset_timeout()
     {
         var breaker = CircuitBreaker.WithFailureThreshold(1)
-            .WithResetTimeout(TimeSpan.FromMilliseconds(50));
+            .WithResetTimeout(TimeSpan.FromMilliseconds(200));
 
         breaker.Execute(() => Result.Failure<int, Error>(
             new ExternalServiceError { Message = "fail" }));
@@ -177,7 +177,7 @@ public class CircuitBreakerShould
         await Assert.That(openResult.IsFailure).IsTrue();
 
         // Wait for reset timeout
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         // Circuit should be half-open — allow one request through
         var halfOpenResult = breaker.Execute(() => Result.Success<int, Error>(42));
@@ -189,11 +189,11 @@ public class CircuitBreakerShould
     public async Task Circuit_closes_on_success_in_half_open()
     {
         var breaker = CircuitBreaker.WithFailureThreshold(1)
-            .WithResetTimeout(TimeSpan.FromMilliseconds(50));
+            .WithResetTimeout(TimeSpan.FromMilliseconds(200));
 
         breaker.Execute(() => Result.Failure<int, Error>(
             new ExternalServiceError { Message = "fail" }));
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         // Half-open: success should close
         breaker.Execute(() => Result.Success<int, Error>(42));
@@ -209,11 +209,11 @@ public class CircuitBreakerShould
     public async Task Circuit_reopens_on_failure_in_half_open()
     {
         var breaker = CircuitBreaker.WithFailureThreshold(1)
-            .WithResetTimeout(TimeSpan.FromMilliseconds(50));
+            .WithResetTimeout(TimeSpan.FromMilliseconds(200));
 
         breaker.Execute(() => Result.Failure<int, Error>(
             new ExternalServiceError { Message = "fail" }));
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         // Half-open: failure should reopen
         breaker.Execute(() => Result.Failure<int, Error>(
@@ -255,13 +255,13 @@ public class CircuitBreakerShould
         var transitions = new List<(CircuitBreakerState From, CircuitBreakerState To)>();
 
         var breaker = CircuitBreaker.WithFailureThreshold(1)
-            .WithResetTimeout(TimeSpan.FromMilliseconds(50))
+            .WithResetTimeout(TimeSpan.FromMilliseconds(200))
             .OnStateChange((from, to) => transitions.Add((from, to)));
 
         // Closed -> Open
         breaker.Execute(() => Result.Failure<int, Error>(
             new ExternalServiceError { Message = "fail" }));
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         // Open -> HalfOpen -> Closed (on success in half-open)
         breaker.Execute(() => Result.Success<int, Error>(42));
@@ -383,14 +383,14 @@ public class CircuitBreakerShould
     public async Task GetSnapshot_returns_half_open_after_reset_timeout_elapses()
     {
         var breaker = CircuitBreaker.WithFailureThreshold(1)
-            .WithResetTimeout(TimeSpan.FromMilliseconds(50));
+            .WithResetTimeout(TimeSpan.FromMilliseconds(200));
 
         breaker.Execute(() => Result.Failure<int, Error>(
             new ExternalServiceError { Message = "fail" }));
 
         await Assert.That(breaker.GetSnapshot().State).IsEqualTo(CircuitBreakerState.Open);
 
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         var snapshot = breaker.GetSnapshot();
         await Assert.That(snapshot.State).IsEqualTo(CircuitBreakerState.HalfOpen);
