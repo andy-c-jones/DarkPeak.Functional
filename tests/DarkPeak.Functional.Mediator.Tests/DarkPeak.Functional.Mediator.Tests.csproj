@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.*" />
+    <ProjectReference Include="..\..\src\DarkPeak.Functional.Mediator\DarkPeak.Functional.Mediator.csproj" />
+  </ItemGroup>
+
+</Project>

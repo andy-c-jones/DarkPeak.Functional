@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>DarkPeak.Functional.Mediator</PackageId>
+    <Description>Mediator integration for DarkPeak.Functional. Provides convenience interfaces, pipeline behaviors, and extensions for using Result&lt;T, Error&gt; with the source-generated Mediator library.</Description>
+    <PackageTags>functional;mediator;cqrs;result;error-handling;pipeline;source-generator</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mediator.Abstractions" Version="3.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.*" />
+    <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
+  </ItemGroup>
+
+</Project>
