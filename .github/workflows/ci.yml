@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   checks: write
+  issues: write
   pull-requests: write
 
 jobs:
@@ -103,3 +104,9 @@ jobs:
         with:
           name: nupkg
           path: ./nupkg/*.nupkg
+
+      - name: StructuraLens analysis
+        uses: andy-c-jones/StructuraLensAction@v1
+        with:
+          solution: DarkPeak.Functional.slnx
+          github-token: ${{ github.token }}
