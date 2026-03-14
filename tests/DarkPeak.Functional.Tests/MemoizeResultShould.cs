@@ -128,12 +128,12 @@ public class MemoizeResultShould
                 callCount++;
                 return Result.Success<int, Error>(callCount * 10);
             },
-            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(50)));
+            opts => opts.WithExpiration(TimeSpan.FromMilliseconds(500)));
 
         var result1 = await cached("key");
         await Assert.That(result1.GetValueOrThrow()).IsEqualTo(10);
 
-        await Task.Delay(100);
+        await Task.Delay(700);
 
         var result2 = await cached("key");
         await Assert.That(result2.GetValueOrThrow()).IsEqualTo(20);
