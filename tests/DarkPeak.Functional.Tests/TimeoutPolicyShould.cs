@@ -27,12 +27,12 @@ public class TimeoutPolicyShould
     public async Task ExecuteAsync_returns_timeout_error_when_operation_exceeds_timeout()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50));
+            .WithTimeout(TimeSpan.FromMilliseconds(200));
 
         var result = await timeout.ExecuteAsync<int, Error>(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<int, Error>(42);
             });
 
@@ -41,7 +41,7 @@ public class TimeoutPolicyShould
         await Assert.That(error).IsAssignableTo<TimeoutError>();
         
         var timeoutError = (TimeoutError)error;
-        await Assert.That(timeoutError.Timeout).IsEqualTo(TimeSpan.FromMilliseconds(50));
+        await Assert.That(timeoutError.Timeout).IsEqualTo(TimeSpan.FromMilliseconds(200));
         await Assert.That(timeoutError.Elapsed).IsNotNull();
     }
 
@@ -49,7 +49,7 @@ public class TimeoutPolicyShould
     public async Task ExecuteAsync_returns_timeout_error_with_custom_message()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50))
+            .WithTimeout(TimeSpan.FromMilliseconds(200))
             .WithTimeoutError(elapsed => new TimeoutError
             {
                 Message = $"Custom timeout message: {elapsed.TotalMilliseconds}ms",
@@ -59,7 +59,7 @@ public class TimeoutPolicyShould
         var result = await timeout.ExecuteAsync<int, Error>(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<int, Error>(42);
             });
 
@@ -72,7 +72,7 @@ public class TimeoutPolicyShould
     public async Task ExecuteAsync_cancels_operation_on_timeout()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50));
+            .WithTimeout(TimeSpan.FromMilliseconds(200));
         
         var wasCancelled = false;
 
@@ -81,7 +81,7 @@ public class TimeoutPolicyShould
             {
                 try
                 {
-                    await Task.Delay(500, ct);
+                    await Task.Delay(5000, ct);
                 }
                 catch (OperationCanceledException)
                 {
@@ -120,12 +120,12 @@ public class TimeoutPolicyShould
     public async Task ExecuteAsync_with_plain_value_returns_timeout_error_when_exceeds_timeout()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50));
+            .WithTimeout(TimeSpan.FromMilliseconds(200));
 
         var result = await timeout.ExecuteAsync<int, Error>(
             async ct =>
             {
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return 42;
             });
 
@@ -145,7 +145,7 @@ public class TimeoutPolicyShould
             .WithTimeout(TimeSpan.FromSeconds(10));
 
         var cts = new CancellationTokenSource();
-        cts.CancelAfter(50);
+        cts.CancelAfter(200);
 
         await Assert.That(async () =>
         {
@@ -163,7 +163,7 @@ public class TimeoutPolicyShould
     public async Task ExecuteAsync_distinguishes_timeout_from_external_cancellation()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50));
+            .WithTimeout(TimeSpan.FromMilliseconds(200));
 
         var cts = new CancellationTokenSource();
 
@@ -207,7 +207,7 @@ public class TimeoutPolicyShould
     public async Task WithTimeoutError_uses_custom_error_type()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(50))
+            .WithTimeout(TimeSpan.FromMilliseconds(200))
             .WithTimeoutError(elapsed => new ExternalServiceError
             {
                 Message = "Service timed out",
@@ -235,7 +235,7 @@ public class TimeoutPolicyShould
     public async Task Timeout_with_slow_operation_scenario()
     {
         var timeout = Timeout.Create()
-            .WithTimeout(TimeSpan.FromMilliseconds(100));
+            .WithTimeout(TimeSpan.FromMilliseconds(200));
 
         var attempts = 0;
 
@@ -244,7 +244,7 @@ public class TimeoutPolicyShould
             {
                 attempts++;
                 // Simulate a slow external API call
-                await Task.Delay(500, ct);
+                await Task.Delay(5000, ct);
                 return Result.Success<string, Error>("data");
             });
 

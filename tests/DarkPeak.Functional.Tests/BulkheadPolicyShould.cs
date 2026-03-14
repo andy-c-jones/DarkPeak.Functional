@@ -302,7 +302,7 @@ public class BulkheadPolicyShould
     {
         var bulkhead = Bulkhead.WithMaxConcurrency(10);
         var cts = new CancellationTokenSource();
-        cts.CancelAfter(50);
+        cts.CancelAfter(200);
 
         await Assert.That(async () =>
         {
