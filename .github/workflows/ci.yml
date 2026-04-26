@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - dotnet-11
   pull_request:
     branches:
       - main
+      - dotnet-11
 
 permissions:
   contents: read
@@ -27,9 +29,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v4
