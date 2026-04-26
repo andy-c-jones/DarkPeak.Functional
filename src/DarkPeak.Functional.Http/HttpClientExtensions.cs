@@ -730,7 +730,7 @@ public static class HttpClientExtensions
         {
             var response = await client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-            if (response.IsSuccess()StatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 return Result.Success<Stream, Error>(stream);
@@ -780,7 +780,7 @@ public static class HttpClientExtensions
             configure(request);
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-            if (response.IsSuccess()StatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 return Result.Success<Stream, Error>(stream);
@@ -824,7 +824,7 @@ public static class HttpClientExtensions
         {
             var response = await client.GetAsync(requestUri, cancellationToken);
 
-            if (response.IsSuccess()StatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
                 return Result.Success<byte[], Error>(bytes);
@@ -871,7 +871,7 @@ public static class HttpClientExtensions
             configure(request);
             var response = await client.SendAsync(request, cancellationToken);
 
-            if (response.IsSuccess()StatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
                 return Result.Success<byte[], Error>(bytes);
@@ -893,7 +893,7 @@ public static class HttpClientExtensions
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
-        if (response.IsSuccess()StatusCode)
+        if (response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             return Result.Success<string, Error>(body);
@@ -911,7 +911,7 @@ public static class HttpClientExtensions
         JsonSerializerOptions? options,
         CancellationToken cancellationToken)
     {
-        if (response.IsSuccess()StatusCode)
+        if (response.IsSuccessStatusCode)
         {
             var value = await response.Content.ReadFromJsonAsync<T>(options ?? JsonSerializerOptions.Default, cancellationToken);
             return value is not null
@@ -935,7 +935,7 @@ public static class HttpClientExtensions
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
-        if (response.IsSuccess()StatusCode)
+        if (response.IsSuccessStatusCode)
         {
             return Result.Success<Unit, Error>(Unit.Value);
         }

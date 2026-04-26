@@ -21,7 +21,7 @@ public sealed class ResultValidationBehaviorShould
         await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(result).IsTypeOf<Failure<string, Error>>();
 
-        var failure = (Failure<string, Error>)result;
+        var failure = result switch { Failure<string, Error> f => f, _ => throw new InvalidOperationException() };
         await Assert.That(failure.Error).IsTypeOf<ValidationError>();
 
         var validationError = (ValidationError)failure.Error;
@@ -40,7 +40,7 @@ public sealed class ResultValidationBehaviorShould
         await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result).IsTypeOf<Success<string, Error>>();
 
-        var success = (Success<string, Error>)result;
+        var success = result switch { Success<string, Error> s => s, _ => throw new InvalidOperationException() };
         await Assert.That(success.Value).IsEqualTo("handled");
     }
 

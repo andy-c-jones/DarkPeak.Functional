@@ -184,10 +184,10 @@ public class OptionShould
     }
 
     [Test]
-    public async Task Implicit_conversion_from_value_creates_some()
+    public async Task Implicit_case_to_union_conversion_creates_some()
     {
         // Arrange & Act
-        Option<string> option = "hello";
+        Option<string> option = new Some<string>("hello");
         
         // Assert
         await Assert.That(option.IsSome()).IsTrue();

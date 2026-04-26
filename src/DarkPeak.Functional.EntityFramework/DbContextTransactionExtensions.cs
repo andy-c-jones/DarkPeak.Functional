@@ -1,3 +1,4 @@
+using DarkPeak.Functional;
 using Microsoft.EntityFrameworkCore;
 
 namespace DarkPeak.Functional.EntityFramework;
@@ -93,7 +94,7 @@ public static class DbContextTransactionExtensions
         {
             var result = await operation(context);
 
-            return await result.MatchAsync<Result<T, Error>>(
+            return await result.MatchAsync<T, Error, Result<T, Error>>(
                 success: async value =>
                 {
                     await transaction.CommitAsync(cancellationToken);

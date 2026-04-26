@@ -13,7 +13,7 @@ public sealed class SenderExtensionsShould
         var result = await sender.SendResult(new TestResultCommand<string>());
 
         await Assert.That(result.IsSuccess()).IsTrue();
-        await Assert.That(((Success<string, Error>)result).Value).IsEqualTo("ok");
+        await Assert.That(result.GetValueOrDefault("")).IsEqualTo("ok");
     }
 
     [Test]
@@ -36,7 +36,7 @@ public sealed class SenderExtensionsShould
         var result = await sender.SendResult(new TestResultQuery());
 
         await Assert.That(result.IsSuccess()).IsTrue();
-        await Assert.That(((Success<int, Error>)result).Value).IsEqualTo(42);
+        await Assert.That(result.GetValueOrDefault(0)).IsEqualTo(42);
     }
 
     [Test]
@@ -48,7 +48,7 @@ public sealed class SenderExtensionsShould
         var result = await sender.SendResult(new TestResultRequest());
 
         await Assert.That(result.IsSuccess()).IsTrue();
-        await Assert.That(((Success<string, Error>)result).Value).IsEqualTo("requested");
+        await Assert.That(result.GetValueOrDefault("")).IsEqualTo("requested");
     }
 
     [Test]

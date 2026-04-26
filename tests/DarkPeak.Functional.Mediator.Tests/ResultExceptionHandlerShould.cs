@@ -17,7 +17,7 @@ public sealed class ResultExceptionHandlerShould
 
         await Assert.That(result.IsFailure()).IsTrue();
 
-        var failure = (Failure<string, Error>)result;
+        var failure = result switch { Failure<string, Error> f => f, _ => throw new InvalidOperationException() };
         await Assert.That(failure.Error).IsTypeOf<InternalError>();
 
         var internalError = (InternalError)failure.Error;
@@ -34,7 +34,7 @@ public sealed class ResultExceptionHandlerShould
 
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
-        var failure = (Failure<string, Error>)result;
+        var failure = result switch { Failure<string, Error> f => f, _ => throw new InvalidOperationException() };
         var internalError = (InternalError)failure.Error;
         await Assert.That(internalError.ExceptionType).IsEqualTo("CustomTestException");
         await Assert.That(internalError.Message).IsEqualTo("Custom failure");
@@ -50,7 +50,7 @@ public sealed class ResultExceptionHandlerShould
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
         await Assert.That(result.IsSuccess()).IsTrue();
-        var success = (Success<string, Error>)result;
+        var success = result switch { Success<string, Error> s => s, _ => throw new InvalidOperationException() };
         await Assert.That(success.Value).IsEqualTo("success");
     }
 
@@ -65,7 +65,7 @@ public sealed class ResultExceptionHandlerShould
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
         await Assert.That(result.IsFailure()).IsTrue();
-        var failure = (Failure<string, Error>)result;
+        var failure = result switch { Failure<string, Error> f => f, _ => throw new InvalidOperationException() };
         await Assert.That(failure.Error).IsTypeOf<NotFoundError>();
         await Assert.That(failure.Error.Message).IsEqualTo("Not found");
     }

@@ -41,9 +41,9 @@ public class ValidationShould
     }
 
     [Test]
-    public async Task Implicit_conversion_from_value_creates_valid()
+    public async Task Implicit_case_to_union_conversion_for_valid()
     {
-        Validation<int, Error> validation = 42;
+        Validation<int, Error> validation = new Valid<int, Error>(42);
 
         await Assert.That(validation.IsValid()).IsTrue();
         await Assert.That(validation.GetValueOrThrow()).IsEqualTo(42);

@@ -55,7 +55,7 @@ public class RedisCacheProviderShould : IAsyncDisposable
         var result = await provider.GetAsync("exists");
 
         await Assert.That(result).IsTypeOf<Some<string>>();
-        var value = ((Some<string>)result).Value;
+        var value = result switch { Some<string> s => s.Value, _ => throw new InvalidOperationException() };
         await Assert.That(value).IsEqualTo("hello");
     }
 
@@ -69,7 +69,7 @@ public class RedisCacheProviderShould : IAsyncDisposable
         var result = provider.Get("sync-key");
 
         await Assert.That(result).IsTypeOf<Some<string>>();
-        var value = ((Some<string>)result).Value;
+        var value = result switch { Some<string> s => s.Value, _ => throw new InvalidOperationException() };
         await Assert.That(value).IsEqualTo("sync-value");
     }
 
@@ -205,7 +205,7 @@ public class RedisCacheProviderShould : IAsyncDisposable
         var result = await provider.GetAsync("complex");
 
         await Assert.That(result).IsTypeOf<Some<TestRecord>>();
-        var retrieved = ((Some<TestRecord>)result).Value;
+        var retrieved = result switch { Some<TestRecord> s => s.Value, _ => throw new InvalidOperationException() };
         await Assert.That(retrieved.Id).IsEqualTo(42);
         await Assert.That(retrieved.Name).IsEqualTo("Alice");
         await Assert.That(retrieved.Active).IsTrue();
@@ -223,7 +223,7 @@ public class RedisCacheProviderShould : IAsyncDisposable
         var result = await provider.GetAsync(42);
 
         await Assert.That(result).IsTypeOf<Some<string>>();
-        var value = ((Some<string>)result).Value;
+        var value = result switch { Some<string> s => s.Value, _ => throw new InvalidOperationException() };
         await Assert.That(value).IsEqualTo("answer");
     }
 
@@ -310,7 +310,7 @@ public class RedisCacheProviderShould : IAsyncDisposable
         var result = await provider.GetAsync("overwrite");
 
         await Assert.That(result).IsTypeOf<Some<string>>();
-        var value = ((Some<string>)result).Value;
+        var value = result switch { Some<string> s => s.Value, _ => throw new InvalidOperationException() };
         await Assert.That(value).IsEqualTo("second");
     }
 

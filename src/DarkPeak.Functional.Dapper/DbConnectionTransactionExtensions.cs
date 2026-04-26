@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using DarkPeak.Functional;
 
 namespace DarkPeak.Functional.Dapper;
 
@@ -91,7 +92,7 @@ public static class DbConnectionTransactionExtensions
         {
             var result = await operation(connection, transaction);
 
-            return await result.MatchAsync<Result<T, Error>>(
+            return await result.MatchAsync<T, Error, Result<T, Error>>(
                 success: async value =>
                 {
                     await transaction.CommitAsync();
