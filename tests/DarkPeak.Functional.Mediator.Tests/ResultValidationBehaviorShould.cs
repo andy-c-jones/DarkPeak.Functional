@@ -18,7 +18,7 @@ public sealed class ResultValidationBehaviorShould
 
         var result = await _sut.Handle(command, NextHandler, CancellationToken.None);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(result).IsTypeOf<Failure<string, Error>>();
 
         var failure = (Failure<string, Error>)result;
@@ -37,7 +37,7 @@ public sealed class ResultValidationBehaviorShould
 
         var result = await _sut.Handle(command, NextHandler, CancellationToken.None);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result).IsTypeOf<Success<string, Error>>();
 
         var success = (Success<string, Error>)result;

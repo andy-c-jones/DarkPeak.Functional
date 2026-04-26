@@ -314,7 +314,7 @@ public static class TaskValidationExtensions
         foreach (var task in tasks)
         {
             var validation = await task;
-            validation.Match<object?>(
+            validation.Match(
                 valid: v => { values.Add(v); return null; },
                 invalid: errs => { errors.AddRange(errs); return null; }
             );
@@ -339,7 +339,7 @@ public static class TaskValidationExtensions
         foreach (var item in source)
         {
             var validation = await func(item);
-            validation.Match<object?>(
+            validation.Match(
                 valid: v => { values.Add(v); return null; },
                 invalid: errs => { errors.AddRange(errs); return null; }
             );

@@ -16,7 +16,7 @@ public class OptionExtensionsShould
         string? value = "hello";
         var option = value.ToOption();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => "")).IsEqualTo("hello");
     }
 
@@ -26,7 +26,7 @@ public class OptionExtensionsShould
         string? value = null;
         var option = value.ToOption();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // ToOption - value type
@@ -37,7 +37,7 @@ public class OptionExtensionsShould
         int? value = 42;
         var option = value.ToOption();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(42);
     }
 
@@ -47,7 +47,7 @@ public class OptionExtensionsShould
         int? value = null;
         var option = value.ToOption();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // FirstOrNone
@@ -57,7 +57,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3 }.FirstOrNone();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(1);
     }
 
@@ -66,7 +66,7 @@ public class OptionExtensionsShould
     {
         var option = Array.Empty<int>().FirstOrNone();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -74,7 +74,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3, 4 }.FirstOrNone(x => x > 2);
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(3);
     }
 
@@ -83,7 +83,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3 }.FirstOrNone(x => x > 10);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // SingleOrNone
@@ -93,7 +93,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 42 }.SingleOrNone();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(42);
     }
 
@@ -102,7 +102,7 @@ public class OptionExtensionsShould
     {
         var option = Array.Empty<int>().SingleOrNone();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -110,7 +110,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2 }.SingleOrNone();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -118,7 +118,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3 }.SingleOrNone(x => x == 2);
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(2);
     }
 
@@ -127,7 +127,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 2, 3 }.SingleOrNone(x => x == 2);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // LastOrNone
@@ -137,7 +137,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3 }.LastOrNone();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(3);
     }
 
@@ -146,7 +146,7 @@ public class OptionExtensionsShould
     {
         var option = Array.Empty<int>().LastOrNone();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -154,7 +154,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3, 4 }.LastOrNone(x => x < 3);
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(2);
     }
 
@@ -163,7 +163,7 @@ public class OptionExtensionsShould
     {
         var option = new[] { 1, 2, 3 }.LastOrNone(x => x > 10);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // TryGetValueAsOption - IDictionary
@@ -174,7 +174,7 @@ public class OptionExtensionsShould
         IDictionary<string, int> dict = new Dictionary<string, int> { ["a"] = 1, ["b"] = 2 };
         var option = dict.TryGetValueAsOption("a");
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(1);
     }
 
@@ -184,7 +184,7 @@ public class OptionExtensionsShould
         IDictionary<string, int> dict = new Dictionary<string, int> { ["a"] = 1 };
         var option = dict.TryGetValueAsOption("z");
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // TryGetValueAsOption - IReadOnlyDictionary
@@ -195,7 +195,7 @@ public class OptionExtensionsShould
         IReadOnlyDictionary<string, int> dict = new Dictionary<string, int> { ["a"] = 1 };
         var option = dict.TryGetValueAsOption("a");
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.Match(v => v, () => 0)).IsEqualTo(1);
     }
 
@@ -205,7 +205,7 @@ public class OptionExtensionsShould
         IReadOnlyDictionary<string, int> dict = new Dictionary<string, int> { ["a"] = 1 };
         var option = dict.TryGetValueAsOption("z");
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // Flatten
@@ -216,7 +216,7 @@ public class OptionExtensionsShould
         var nested = Option.Some(Option.Some(42));
         var flat = nested.Flatten();
 
-        await Assert.That(flat.IsSome).IsTrue();
+        await Assert.That(flat.IsSome()).IsTrue();
         await Assert.That(flat.Match(v => v, () => 0)).IsEqualTo(42);
     }
 
@@ -226,7 +226,7 @@ public class OptionExtensionsShould
         var nested = Option.Some(Option.None<int>());
         var flat = nested.Flatten();
 
-        await Assert.That(flat.IsNone).IsTrue();
+        await Assert.That(flat.IsNone()).IsTrue();
     }
 
     [Test]
@@ -235,7 +235,7 @@ public class OptionExtensionsShould
         var nested = Option.None<Option<int>>();
         var flat = nested.Flatten();
 
-        await Assert.That(flat.IsNone).IsTrue();
+        await Assert.That(flat.IsNone()).IsTrue();
     }
 
     // Choose
@@ -308,7 +308,7 @@ public class OptionExtensionsShould
 
         var result = options.Sequence();
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -328,7 +328,7 @@ public class OptionExtensionsShould
 
         var result = options.Sequence();
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -338,7 +338,7 @@ public class OptionExtensionsShould
 
         var result = options.Sequence();
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(0);
     }
@@ -352,7 +352,7 @@ public class OptionExtensionsShould
 
         var result = source.Traverse(x => Option.Some($"v{x}"));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo("v1");
@@ -368,7 +368,7 @@ public class OptionExtensionsShould
         var result = source.Traverse(x =>
             x == 2 ? Option.None<string>() : Option.Some($"v{x}"));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Join (2-arity)
@@ -381,7 +381,7 @@ public class OptionExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsSome).IsTrue();
+        await Assert.That(joined.IsSome()).IsTrue();
         var (v1, v2) = joined.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -395,7 +395,7 @@ public class OptionExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsNone).IsTrue();
+        await Assert.That(joined.IsNone()).IsTrue();
     }
 
     [Test]
@@ -406,7 +406,7 @@ public class OptionExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsNone).IsTrue();
+        await Assert.That(joined.IsNone()).IsTrue();
     }
 
     // Join (3-arity)
@@ -420,7 +420,7 @@ public class OptionExtensionsShould
 
         var joined = first.Join(second, third);
 
-        await Assert.That(joined.IsSome).IsTrue();
+        await Assert.That(joined.IsSome()).IsTrue();
         var (v1, v2, v3) = joined.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -436,7 +436,7 @@ public class OptionExtensionsShould
 
         var joined = first.Join(second, third);
 
-        await Assert.That(joined.IsNone).IsTrue();
+        await Assert.That(joined.IsNone()).IsTrue();
     }
 
     // Join (4-arity)
@@ -450,7 +450,7 @@ public class OptionExtensionsShould
                 Option.Some(true),
                 Option.Some(4.0));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4) = result.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -467,7 +467,7 @@ public class OptionExtensionsShould
                 Option.Some(true),
                 Option.Some(4.0));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Join (5-arity)
@@ -482,7 +482,7 @@ public class OptionExtensionsShould
                 Option.Some(4.0),
                 Option.Some('e'));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5) = result.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v5).IsEqualTo('e');
@@ -498,7 +498,7 @@ public class OptionExtensionsShould
                 Option.None<double>(),
                 Option.Some('e'));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Join (6-arity)
@@ -514,7 +514,7 @@ public class OptionExtensionsShould
                 Option.Some('e'),
                 Option.Some(6L));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6) = result.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v6).IsEqualTo(6L);
@@ -531,7 +531,7 @@ public class OptionExtensionsShould
                 Option.Some('e'),
                 Option.None<long>());
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Join (7-arity)
@@ -548,7 +548,7 @@ public class OptionExtensionsShould
                 Option.Some(6L),
                 Option.Some(7.0f));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7) = result.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v7).IsEqualTo(7.0f);
@@ -566,7 +566,7 @@ public class OptionExtensionsShould
                 Option.Some(6L),
                 Option.Some(7.0f));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Join (8-arity)
@@ -584,7 +584,7 @@ public class OptionExtensionsShould
                 Option.Some(7.0f),
                 Option.Some((byte)8));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7, v8) = result.Match(v => v, () => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v8).IsEqualTo((byte)8);
@@ -603,7 +603,7 @@ public class OptionExtensionsShould
                 Option.Some(7.0f),
                 Option.Some((byte)8));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // SequenceAsync (sequential)
@@ -620,7 +620,7 @@ public class OptionExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -640,7 +640,7 @@ public class OptionExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // TraverseAsync (sequential)
@@ -656,7 +656,7 @@ public class OptionExtensionsShould
             return Option.Some($"v{x}");
         });
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo("v1");
@@ -673,7 +673,7 @@ public class OptionExtensionsShould
             return x == 2 ? Option.None<string>() : Option.Some($"v{x}");
         });
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // SequenceParallel
@@ -690,7 +690,7 @@ public class OptionExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
     }
@@ -707,7 +707,7 @@ public class OptionExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // TraverseParallel
@@ -723,7 +723,7 @@ public class OptionExtensionsShould
             return Option.Some($"v{x}");
         });
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var values = result.Match(v => v.ToList(), () => []);
         await Assert.That(values).Count().IsEqualTo(3);
     }
@@ -739,7 +739,7 @@ public class OptionExtensionsShould
             return x == 2 ? Option.None<string>() : Option.Some($"v{x}");
         });
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // Concurrency barrier tests for *Parallel methods
@@ -768,7 +768,7 @@ public class OptionExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -793,6 +793,6 @@ public class OptionExtensionsShould
             return Option.Some(x);
         });
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 }

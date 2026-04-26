@@ -18,7 +18,7 @@ public class TaskValidationExtensionsShould
     {
         var result = await ValidAsync<int, Error>(5).Map(x => x * 2);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(10);
     }
 
@@ -28,7 +28,7 @@ public class TaskValidationExtensionsShould
         var result = await InvalidAsync<int, Error>(new ValidationError { Message = "err" })
             .Map(x => x * 2);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     [Test]
@@ -40,7 +40,7 @@ public class TaskValidationExtensionsShould
             return x * 2;
         });
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(10);
     }
 
@@ -50,7 +50,7 @@ public class TaskValidationExtensionsShould
         var result = await InvalidAsync<int, Error>(new ValidationError { Message = "err" })
             .MapAsync(async x => { await Task.Delay(1); return x * 2; });
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     #endregion
@@ -63,7 +63,7 @@ public class TaskValidationExtensionsShould
         var result = await ValidAsync<int, Error>(42)
             .Bind(x => Validation.Valid<string, Error>($"Value: {x}"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -73,7 +73,7 @@ public class TaskValidationExtensionsShould
         var result = await InvalidAsync<int, Error>(new ValidationError { Message = "err" })
             .Bind(x => Validation.Valid<string, Error>($"Value: {x}"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class TaskValidationExtensionsShould
             return Validation.Valid<string, Error>($"Value: {x}");
         });
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -99,7 +99,7 @@ public class TaskValidationExtensionsShould
                 return Validation.Valid<string, Error>($"Value: {x}");
             });
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     #endregion
@@ -160,7 +160,7 @@ public class TaskValidationExtensionsShould
         var result = await ValidAsync<int, Error>(42).Tap(x => executed = true);
 
         await Assert.That(executed).IsTrue();
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     [Test]
@@ -258,7 +258,7 @@ public class TaskValidationExtensionsShould
     {
         var result = await ValidAsync<int, Error>(42).ToResult();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -267,7 +267,7 @@ public class TaskValidationExtensionsShould
     {
         var result = await InvalidAsync<int, Error>(new ValidationError { Message = "err" }).ToResult();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     #endregion
@@ -282,7 +282,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(30),
                 (n, a) => $"{n} is {a}");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice is 30");
     }
 
@@ -294,7 +294,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e2" }),
                 (n, a) => $"{n} is {a}");
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(2);
     }
@@ -312,7 +312,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<string, Error>("London"),
                 (n, a, c) => $"{n}, {a}, {c}");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice, 30, London");
     }
 
@@ -325,7 +325,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<string, Error>(new ValidationError { Message = "e3" }),
                 (a, b, c) => "");
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(3);
     }
@@ -344,7 +344,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(4),
                 (a, b, c, d) => a + b + c + d);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(10);
     }
 
@@ -358,7 +358,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e4" }),
                 (a, b, c, d) => a + b + c + d);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(4);
     }
@@ -378,7 +378,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(5),
                 (a, b, c, d, e) => a + b + c + d + e);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(15);
     }
 
@@ -393,7 +393,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e5" }),
                 (a, b, c, d, e) => a + b + c + d + e);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(5);
     }
@@ -414,7 +414,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(6),
                 (a, b, c, d, e, f) => a + b + c + d + e + f);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(21);
     }
 
@@ -430,7 +430,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e6" }),
                 (a, b, c, d, e, f) => a + b + c + d + e + f);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(6);
     }
@@ -452,7 +452,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(7),
                 (a, b, c, d, e, f, g) => a + b + c + d + e + f + g);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(28);
     }
 
@@ -469,7 +469,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e7" }),
                 (a, b, c, d, e, f, g) => a + b + c + d + e + f + g);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(7);
     }
@@ -492,7 +492,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<int, Error>(8),
                 (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(36);
     }
 
@@ -510,7 +510,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<int, Error>(new ValidationError { Message = "e8" }),
                 (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h);
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(8);
     }
@@ -541,7 +541,7 @@ public class TaskValidationExtensionsShould
 
         var result = await first.ZipWithAsync(second, (a, b) => a + b);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(3);
     }
 
@@ -554,7 +554,7 @@ public class TaskValidationExtensionsShould
     {
         var result = await ValidAsync<int, Error>(1).Join(ValidAsync<string, Error>("two"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -566,7 +566,7 @@ public class TaskValidationExtensionsShould
         var result = await InvalidAsync<int, Error>(new ValidationError { Message = "e1" })
             .Join(InvalidAsync<string, Error>(new ValidationError { Message = "e2" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(2);
     }
@@ -581,7 +581,7 @@ public class TaskValidationExtensionsShould
         var result = await ValidAsync<int, Error>(1)
             .Join(ValidAsync<string, Error>("two"), ValidAsync<bool, Error>(true));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -596,7 +596,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<string, Error>(new ValidationError { Message = "e2" }),
                 InvalidAsync<bool, Error>(new ValidationError { Message = "e3" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(3);
     }
@@ -614,7 +614,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<bool, Error>(true),
                 ValidAsync<double, Error>(4.0));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3, v4) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v4).IsEqualTo(4.0);
@@ -629,7 +629,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<bool, Error>(new ValidationError { Message = "e3" }),
                 InvalidAsync<double, Error>(new ValidationError { Message = "e4" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(4);
     }
@@ -648,7 +648,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<double, Error>(4.0),
                 ValidAsync<char, Error>('e'));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3, v4, v5) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v5).IsEqualTo('e');
@@ -664,7 +664,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<double, Error>(new ValidationError { Message = "e4" }),
                 InvalidAsync<char, Error>(new ValidationError { Message = "e5" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(5);
     }
@@ -684,7 +684,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<char, Error>('e'),
                 ValidAsync<long, Error>(6L));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3, v4, v5, v6) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v6).IsEqualTo(6L);
@@ -701,7 +701,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<char, Error>(new ValidationError { Message = "e5" }),
                 InvalidAsync<long, Error>(new ValidationError { Message = "e6" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(6);
     }
@@ -722,7 +722,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<long, Error>(6L),
                 ValidAsync<float, Error>(7.0f));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v7).IsEqualTo(7.0f);
@@ -740,7 +740,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<long, Error>(new ValidationError { Message = "e6" }),
                 InvalidAsync<float, Error>(new ValidationError { Message = "e7" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(7);
     }
@@ -762,7 +762,7 @@ public class TaskValidationExtensionsShould
                 ValidAsync<float, Error>(7.0f),
                 ValidAsync<byte, Error>((byte)8));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7, v8) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v8).IsEqualTo((byte)8);
@@ -781,7 +781,7 @@ public class TaskValidationExtensionsShould
                 InvalidAsync<float, Error>(new ValidationError { Message = "e7" }),
                 InvalidAsync<byte, Error>(new ValidationError { Message = "e8" }));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(8);
     }
@@ -812,7 +812,7 @@ public class TaskValidationExtensionsShould
 
         var result = await first.Join(second);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     [Test]
@@ -848,7 +848,7 @@ public class TaskValidationExtensionsShould
 
         var result = await first.Join(second, third);
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     #endregion
@@ -867,7 +867,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow().ToList();
         await Assert.That(values.Count).IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -888,7 +888,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(2);
         await Assert.That(errors[0].Message).IsEqualTo("e1");
@@ -902,7 +902,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow().ToList();
         await Assert.That(values.Count).IsEqualTo(0);
     }
@@ -922,7 +922,7 @@ public class TaskValidationExtensionsShould
             return Validation.Valid<string, Error>($"v{x}");
         });
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow().ToList();
         await Assert.That(values.Count).IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo("v1");
@@ -943,7 +943,7 @@ public class TaskValidationExtensionsShould
                     : Validation.Valid<string, Error>($"v{x}");
         });
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(2);
     }
@@ -964,7 +964,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow().ToList();
         await Assert.That(values.Count).IsEqualTo(3);
     }
@@ -981,7 +981,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(2);
     }
@@ -1010,7 +1010,7 @@ public class TaskValidationExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     #endregion
@@ -1028,7 +1028,7 @@ public class TaskValidationExtensionsShould
             return Validation.Valid<string, Error>($"v{x}");
         });
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow().ToList();
         await Assert.That(values.Count).IsEqualTo(3);
     }
@@ -1046,7 +1046,7 @@ public class TaskValidationExtensionsShould
                 : Validation.Valid<string, Error>($"v{x}");
         });
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     [Test]
@@ -1071,7 +1071,7 @@ public class TaskValidationExtensionsShould
             return Validation.Valid<int, Error>(x);
         });
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     #endregion

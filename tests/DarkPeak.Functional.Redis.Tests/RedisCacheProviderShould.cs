@@ -277,23 +277,23 @@ public class RedisCacheProviderShould : IAsyncDisposable
 
         // First call: fails, should NOT cache
         var result1 = await cached("test");
-        await Assert.That(result1.IsSuccess).IsFalse();
+        await Assert.That(result1.IsSuccess()).IsFalse();
         await Assert.That(callCount).IsEqualTo(1);
 
         // Second call: still fails, function is called again (not cached)
         var result2 = await cached("test");
-        await Assert.That(result2.IsSuccess).IsFalse();
+        await Assert.That(result2.IsSuccess()).IsFalse();
         await Assert.That(callCount).IsEqualTo(2);
 
         // Now succeed
         shouldFail = false;
         var result3 = await cached("test");
-        await Assert.That(result3.IsSuccess).IsTrue();
+        await Assert.That(result3.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(3);
 
         // Fourth call: should be cached
         var result4 = await cached("test");
-        await Assert.That(result4.IsSuccess).IsTrue();
+        await Assert.That(result4.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(3); // not called again
     }
 

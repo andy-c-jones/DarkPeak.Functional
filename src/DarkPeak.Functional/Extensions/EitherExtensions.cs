@@ -33,7 +33,7 @@ public static class EitherExtensions
     /// Flattens a nested Either where the right side is itself an Either with the same left type.
     /// </summary>
     public static Either<TLeft, TRight> Flatten<TLeft, TRight>(this Either<TLeft, Either<TLeft, TRight>> either) =>
-        either.Match<Either<TLeft, TRight>>(
+        either.Match(
             left: value => new Left<TLeft, TRight>(value),
             right: inner => inner
         );
@@ -42,7 +42,7 @@ public static class EitherExtensions
     /// Flattens a nested Either where the left side is itself an Either with the same right type.
     /// </summary>
     public static Either<TLeft, TRight> FlattenLeft<TLeft, TRight>(this Either<Either<TLeft, TRight>, TRight> either) =>
-        either.Match<Either<TLeft, TRight>>(
+        either.Match(
             left: inner => inner,
             right: value => new Right<TLeft, TRight>(value)
         );

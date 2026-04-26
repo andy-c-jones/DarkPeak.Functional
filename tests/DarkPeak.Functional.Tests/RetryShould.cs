@@ -18,7 +18,7 @@ public class RetryShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
         await Assert.That(attempts).IsEqualTo(1);
     }
@@ -37,7 +37,7 @@ public class RetryShould
                     : Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
         await Assert.That(attempts).IsEqualTo(3);
     }
@@ -55,7 +55,7 @@ public class RetryShould
                     new ExternalServiceError { Message = $"Attempt {attempts}" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => (Error)null!, e => e);
         await Assert.That(error.Message).IsEqualTo("Attempt 3");
         await Assert.That(attempts).IsEqualTo(3);
@@ -74,7 +74,7 @@ public class RetryShould
                     new ExternalServiceError { Message = "fail" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(1);
     }
 
@@ -95,7 +95,7 @@ public class RetryShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(attempts).IsEqualTo(1);
     }
 
@@ -114,7 +114,7 @@ public class RetryShould
                     : Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(attempts).IsEqualTo(2);
     }
 
@@ -132,7 +132,7 @@ public class RetryShould
                     new ExternalServiceError { Message = $"Attempt {attempts}" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => (Error)null!, e => e);
         await Assert.That(error.Message).IsEqualTo("Attempt 2");
     }
@@ -172,7 +172,7 @@ public class RetryShould
                     new ValidationError { Message = "not retryable" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(1);
     }
 
@@ -191,7 +191,7 @@ public class RetryShould
                     : Result.Failure<int, Error>(new ValidationError { Message = "permanent" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(3);
         var error = result.Match(_ => (Error)null!, e => e);
         await Assert.That(error.Message).IsEqualTo("permanent");
@@ -330,7 +330,7 @@ public class RetryShould
 
         sw.Stop();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(3);
         // 2 retries * 50ms = ~100ms minimum
         await Assert.That(sw.ElapsedMilliseconds).IsGreaterThanOrEqualTo(80);
@@ -376,7 +376,7 @@ public class RetryShould
                     : Result.Success<string, Error>("Connected!");
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Connected!");
         await Assert.That(attempts).IsEqualTo(4);
         await Assert.That(retryLog.Count).IsEqualTo(3);

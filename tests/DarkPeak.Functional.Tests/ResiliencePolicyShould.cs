@@ -23,7 +23,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -41,7 +41,7 @@ public class ResiliencePolicyShould
                 return 42;
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -63,7 +63,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }
@@ -86,7 +86,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(3); // Should retry 3 times
         
         var error = result.Match(_ => null!, e => e);
@@ -112,7 +112,7 @@ public class ResiliencePolicyShould
                 return Result.Failure<int, Error>(new ExternalServiceError { Message = "fail" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsLessThan(100); // Should be stopped by overall timeout
         
         var error = result.Match(_ => null!, e => e);
@@ -143,7 +143,7 @@ public class ResiliencePolicyShould
                     : Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(attempts).IsEqualTo(3);
     }
 
@@ -165,7 +165,7 @@ public class ResiliencePolicyShould
                 return Result.Failure<int, Error>(new ValidationError { Message = "not retryable" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(1); // Should not retry ValidationError
     }
 
@@ -201,7 +201,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<CircuitBreakerOpenError>();
     }
@@ -227,7 +227,7 @@ public class ResiliencePolicyShould
                 return Result.Failure<int, Error>(new ExternalServiceError { Message = "fail" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         // Circuit should open after 3 attempts, stopping further retries
         await Assert.That(attempts).IsLessThanOrEqualTo(4); // 3 to open + 1 rejection
     }
@@ -281,7 +281,7 @@ public class ResiliencePolicyShould
             });
 
         await Assert.That(maxConcurrent).IsLessThanOrEqualTo(2);
-        await Assert.That(result3.IsFailure).IsTrue();
+        await Assert.That(result3.IsFailure()).IsTrue();
         
         var error = result3.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BulkheadRejectedError>();
@@ -320,7 +320,7 @@ public class ResiliencePolicyShould
                     : Result.Success<string, Error>("success");
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("success");
         await Assert.That(attempts).IsEqualTo(2);
     }
@@ -346,7 +346,7 @@ public class ResiliencePolicyShould
                 return Result.Failure<string, Error>(new ExternalServiceError { Message = "permanent" });
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(3); // All retries exhausted
         
         var error = result.Match(_ => null!, e => e);
@@ -404,7 +404,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -425,7 +425,7 @@ public class ResiliencePolicyShould
                     : Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(attempts).IsEqualTo(2);
     }
 
@@ -449,7 +449,7 @@ public class ResiliencePolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
         await Assert.That(((ExternalServiceError)error).ServiceName).IsEqualTo("Test");
@@ -497,7 +497,7 @@ public class ResiliencePolicyShould
                     : Result.Success<string, Error>("payment-id-12345");
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("payment-id-12345");
         await Assert.That(attempts).IsEqualTo(2);
         await Assert.That(circuitOpenEvents).IsEqualTo(0); // Circuit should not open

@@ -20,8 +20,8 @@ public class MemoizeResultShould
         var result1 = await cached("key");
         var result2 = await cached("key");
 
-        await Assert.That(result1.IsSuccess).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsSuccess()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(result1.GetValueOrThrow()).IsEqualTo(42);
         await Assert.That(callCount).IsEqualTo(1);
     }
@@ -42,8 +42,8 @@ public class MemoizeResultShould
         var result1 = await cached("key");
         var result2 = await cached("key");
 
-        await Assert.That(result1.IsFailure).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsFailure()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(result2.GetValueOrThrow()).IsEqualTo(42);
         await Assert.That(callCount).IsEqualTo(2);
     }
@@ -88,8 +88,8 @@ public class MemoizeResultShould
         var result1 = await cached("key");
         var result2 = await cached("key");
 
-        await Assert.That(result1.IsSuccess).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsSuccess()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(1);
     }
 
@@ -111,8 +111,8 @@ public class MemoizeResultShould
         var result1 = await cached("key");
         var result2 = await cached("key");
 
-        await Assert.That(result1.IsFailure).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsFailure()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(result2.GetValueOrThrow()).IsEqualTo(99);
         await Assert.That(callCount).IsEqualTo(2);
     }
@@ -184,8 +184,8 @@ public class MemoizeResultShould
         var result1 = cached("key");
         var result2 = cached("key");
 
-        await Assert.That(result1.IsSuccess).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsSuccess()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(1);
     }
 
@@ -205,8 +205,8 @@ public class MemoizeResultShould
         var result1 = cached("key");
         var result2 = cached("key");
 
-        await Assert.That(result1.IsFailure).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsFailure()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(2);
     }
 
@@ -230,8 +230,8 @@ public class MemoizeResultShould
         var result1 = cached("key");
         var result2 = cached("key");
 
-        await Assert.That(result1.IsSuccess).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsSuccess()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(1);
     }
 
@@ -253,8 +253,8 @@ public class MemoizeResultShould
         var result1 = cached("key");
         var result2 = cached("key");
 
-        await Assert.That(result1.IsFailure).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsFailure()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
         await Assert.That(callCount).IsEqualTo(2);
     }
 

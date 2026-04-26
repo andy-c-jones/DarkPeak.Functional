@@ -36,7 +36,7 @@ public class PipelineShould
                 ? Result.Success<int, InternalError>(x)
                 : Result.Failure<int, InternalError>(new InternalError { Message = "must be positive" }));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -45,7 +45,7 @@ public class PipelineShould
     {
         var result = "hello".Pipe(s => s.Length > 0 ? Option.Some(s) : Option.None<string>());
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -116,7 +116,7 @@ public class PipelineShould
         var composed = validate.Compose(format);
 
         var result = composed(42);
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -134,7 +134,7 @@ public class PipelineShould
         var composed = validate.Compose(format);
 
         var result = composed(-1);
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     [Test]
@@ -157,7 +157,7 @@ public class PipelineShould
         var composed = validate.ComposeAsync(format);
 
         var result = await composed(42);
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -173,7 +173,7 @@ public class PipelineShould
         var composed = tryParse.Compose(format);
 
         var result = composed("42");
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Positive: 42");
     }
 
@@ -189,7 +189,7 @@ public class PipelineShould
         var composed = tryParse.Compose(format);
 
         var result = composed("not a number");
-        await Assert.That(result.IsSome).IsFalse();
+        await Assert.That(result.IsSome()).IsFalse();
     }
 
     #endregion
@@ -206,7 +206,7 @@ public class PipelineShould
 
         var result = pipeline(21);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -226,7 +226,7 @@ public class PipelineShould
 
         var result = pipeline(21);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(lastStepCalled).IsFalse();
     }
 
@@ -241,7 +241,7 @@ public class PipelineShould
 
         var result = pipeline("  hello  ");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(5);
     }
 
@@ -259,7 +259,7 @@ public class PipelineShould
 
         var result = await pipeline(21);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Value: 42");
     }
 
@@ -283,7 +283,7 @@ public class PipelineShould
 
         var result = await pipeline(21);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(lastStepCalled).IsFalse();
     }
 
@@ -302,7 +302,7 @@ public class PipelineShould
 
         var result = await pipeline("  hello  ");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(5);
     }
 
@@ -324,7 +324,7 @@ public class PipelineShould
 
         var result = await pipeline(5);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Result: 15");
     }
 
@@ -342,7 +342,7 @@ public class PipelineShould
 
         var result = await pipeline(21);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("42");
     }
 

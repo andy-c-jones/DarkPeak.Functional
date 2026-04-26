@@ -43,14 +43,14 @@ public class AsyncEnumerableValidationExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsValid).IsTrue();
+        await Assert.That(result[0].IsValid()).IsTrue();
         await Assert.That(result[0].GetValueOrThrow()).IsEqualTo(10);
 
-        await Assert.That(result[1].IsInvalid).IsTrue();
+        await Assert.That(result[1].IsInvalid()).IsTrue();
         var errors = result[1].Match(_ => Array.Empty<ValidationError>(), errs => errs.ToArray());
         await Assert.That(errors[0].Message).IsEqualTo("bad");
 
-        await Assert.That(result[2].IsValid).IsTrue();
+        await Assert.That(result[2].IsValid()).IsTrue();
         await Assert.That(result[2].GetValueOrThrow()).IsEqualTo(30);
     }
 
@@ -89,12 +89,12 @@ public class AsyncEnumerableValidationExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsValid).IsTrue();
+        await Assert.That(result[0].IsValid()).IsTrue();
         await Assert.That(result[0].GetValueOrThrow()).IsEqualTo(10);
 
-        await Assert.That(result[1].IsInvalid).IsTrue();
+        await Assert.That(result[1].IsInvalid()).IsTrue();
 
-        await Assert.That(result[2].IsValid).IsTrue();
+        await Assert.That(result[2].IsValid()).IsTrue();
         await Assert.That(result[2].GetValueOrThrow()).IsEqualTo(20);
     }
 
@@ -120,9 +120,9 @@ public class AsyncEnumerableValidationExtensionsShould
         await Assert.That(tapped[1]).IsEqualTo(3);
 
         await Assert.That(result.Count).IsEqualTo(3);
-        await Assert.That(result[0].IsValid).IsTrue();
-        await Assert.That(result[1].IsInvalid).IsTrue();
-        await Assert.That(result[2].IsValid).IsTrue();
+        await Assert.That(result[0].IsValid()).IsTrue();
+        await Assert.That(result[1].IsInvalid()).IsTrue();
+        await Assert.That(result[2].IsValid()).IsTrue();
     }
 
     // ── TapInvalid ──
@@ -149,9 +149,9 @@ public class AsyncEnumerableValidationExtensionsShould
         await Assert.That(tappedErrors[0][1].Message).IsEqualTo("e2");
 
         await Assert.That(result.Count).IsEqualTo(3);
-        await Assert.That(result[0].IsValid).IsTrue();
-        await Assert.That(result[1].IsInvalid).IsTrue();
-        await Assert.That(result[2].IsValid).IsTrue();
+        await Assert.That(result[0].IsValid()).IsTrue();
+        await Assert.That(result[1].IsInvalid()).IsTrue();
+        await Assert.That(result[2].IsValid()).IsTrue();
     }
 
     // ── ChooseValid ──
@@ -220,7 +220,7 @@ public class AsyncEnumerableValidationExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow();
         await Assert.That(values.Count).IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -242,7 +242,7 @@ public class AsyncEnumerableValidationExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<ValidationError>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(1);
         await Assert.That(errors[0].Message).IsEqualTo("not valid");
@@ -264,7 +264,7 @@ public class AsyncEnumerableValidationExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<ValidationError>(), errs => errs.ToArray());
         await Assert.That(errors.Length).IsEqualTo(3);
         await Assert.That(errors[0].Message).IsEqualTo("err1");
@@ -282,7 +282,7 @@ public class AsyncEnumerableValidationExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var values = result.GetValueOrThrow();
         await Assert.That(values.Count).IsEqualTo(0);
     }

@@ -180,13 +180,8 @@ public static class OptionExtensions
     {
         foreach (var option in source)
         {
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    yield return value;
-                }
-            }
+            if (option is Some<T> { Value: var value })
+                yield return value;
         }
     }
 
@@ -211,13 +206,8 @@ public static class OptionExtensions
         foreach (var item in source)
         {
             var option = selector(item);
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    yield return value;
-                }
-            }
+            if (option is Some<TResult> { Value: var value })
+                yield return value;
         }
     }
 
@@ -237,13 +227,8 @@ public static class OptionExtensions
         foreach (var item in source)
         {
             var option = await selector(item);
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    results.Add(value);
-                }
-            }
+            if (option is Some<TResult> { Value: var value })
+                results.Add(value);
         }
         return results;
     }
@@ -263,17 +248,10 @@ public static class OptionExtensions
 
         foreach (var option in source)
         {
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    values.Add(value);
-                }
-            }
+            if (option is Some<T> { Value: var value })
+                values.Add(value);
             else
-            {
                 return Option.None<IEnumerable<T>>();
-            }
         }
 
         return Option.Some<IEnumerable<T>>(values);
@@ -298,17 +276,10 @@ public static class OptionExtensions
         foreach (var item in source)
         {
             var option = func(item);
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    values.Add(value);
-                }
-            }
+            if (option is Some<TResult> { Value: var value })
+                values.Add(value);
             else
-            {
                 return Option.None<IEnumerable<TResult>>();
-            }
         }
 
         return Option.Some<IEnumerable<TResult>>(values);
@@ -399,17 +370,10 @@ public static class OptionExtensions
         foreach (var task in tasks)
         {
             var option = await task;
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    values.Add(value);
-                }
-            }
+            if (option is Some<T> { Value: var value })
+                values.Add(value);
             else
-            {
                 return Option.None<IEnumerable<T>>();
-            }
         }
 
         return Option.Some<IEnumerable<T>>(values);
@@ -432,17 +396,10 @@ public static class OptionExtensions
         foreach (var item in source)
         {
             var option = await func(item);
-            if (option.IsSome)
-            {
-                foreach (var value in option)
-                {
-                    values.Add(value);
-                }
-            }
+            if (option is Some<TResult> { Value: var value })
+                values.Add(value);
             else
-            {
                 return Option.None<IEnumerable<TResult>>();
-            }
         }
 
         return Option.Some<IEnumerable<TResult>>(values);

@@ -423,8 +423,8 @@ public class MemoizeShould
         var err = memoized("abc");
         var okCached = memoized("42");
 
-        await Assert.That(ok.IsSuccess).IsTrue();
-        await Assert.That(err.IsSuccess).IsFalse();
+        await Assert.That(ok.IsSuccess()).IsTrue();
+        await Assert.That(err.IsSuccess()).IsFalse();
         await Assert.That(callCount).IsEqualTo(2);
     }
 

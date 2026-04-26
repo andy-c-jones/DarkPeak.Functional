@@ -18,7 +18,7 @@ public class BulkheadPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -49,7 +49,7 @@ public class BulkheadPolicyShould
         var results = await Task.WhenAll(tasks);
 
         await Assert.That(maxConcurrent).IsLessThanOrEqualTo(2);
-        await Assert.That(results.All(r => r.IsSuccess)).IsTrue();
+        await Assert.That(results.All(r => r.IsSuccess())).IsTrue();
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class BulkheadPolicyShould
                 return Result.Success<int, Error>(999);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BulkheadRejectedError>();
 
@@ -115,7 +115,7 @@ public class BulkheadPolicyShould
 
         var results = await Task.WhenAll(tasks);
 
-        await Assert.That(results.All(r => r.IsSuccess)).IsTrue();
+        await Assert.That(results.All(r => r.IsSuccess())).IsTrue();
         await Assert.That(results.Length).IsEqualTo(5);
     }
 
@@ -135,7 +135,7 @@ public class BulkheadPolicyShould
                 return 42;
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -164,7 +164,7 @@ public class BulkheadPolicyShould
                 return 2;
             });
 
-        await Assert.That(result2.IsFailure).IsTrue();
+        await Assert.That(result2.IsFailure()).IsTrue();
         var error = result2.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BulkheadRejectedError>();
 
@@ -203,7 +203,7 @@ public class BulkheadPolicyShould
             });
 
         await Assert.That(rejectionCount).IsEqualTo(1);
-        await Assert.That(result2.IsFailure).IsTrue();
+        await Assert.That(result2.IsFailure()).IsTrue();
 
         await task1;
     }
@@ -282,7 +282,7 @@ public class BulkheadPolicyShould
                 return Result.Success<int, Error>(4);
             });
 
-        await Assert.That(result4.IsFailure).IsTrue();
+        await Assert.That(result4.IsFailure()).IsTrue();
         var error = result4.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BulkheadRejectedError>();
 
@@ -351,8 +351,8 @@ public class BulkheadPolicyShould
 
         var results = await Task.WhenAll(tasks);
 
-        var succeeded = results.Count(r => r.IsSuccess);
-        var rejected = results.Count(r => r.IsFailure);
+        var succeeded = results.Count(r => r.IsSuccess());
+        var rejected = results.Count(r => r.IsFailure());
 
         await Assert.That(succeeded + rejected).IsEqualTo(10);
         await Assert.That(succeeded).IsEqualTo(successCount);

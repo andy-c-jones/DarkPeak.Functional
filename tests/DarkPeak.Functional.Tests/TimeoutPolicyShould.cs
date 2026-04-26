@@ -19,7 +19,7 @@ public class TimeoutPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -36,7 +36,7 @@ public class TimeoutPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
         
@@ -63,7 +63,7 @@ public class TimeoutPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error.Message).Contains("Custom timeout message");
     }
@@ -91,7 +91,7 @@ public class TimeoutPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(wasCancelled).IsTrue();
     }
 
@@ -112,7 +112,7 @@ public class TimeoutPolicyShould
                 return 42;
             });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -129,7 +129,7 @@ public class TimeoutPolicyShould
                 return 42;
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }
@@ -176,7 +176,7 @@ public class TimeoutPolicyShould
             cts.Token);
 
         // Should return TimeoutError, not throw OperationCanceledException
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }
@@ -221,7 +221,7 @@ public class TimeoutPolicyShould
                 return Result.Success<int, Error>(42);
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
         await Assert.That(((ExternalServiceError)error).ServiceName).IsEqualTo("TestService");
@@ -248,7 +248,7 @@ public class TimeoutPolicyShould
                 return Result.Success<string, Error>("data");
             });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         await Assert.That(attempts).IsEqualTo(1);
         
         var error = result.Match(_ => null!, e => e);

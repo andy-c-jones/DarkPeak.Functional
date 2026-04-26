@@ -18,7 +18,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(5).Map(x => x * 2);
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(10);
     }
 
@@ -27,7 +27,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await NoneAsync<int>().Map(x => x * 2);
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class TaskOptionExtensionsShould
             return x * 2;
         });
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(10);
     }
 
@@ -53,7 +53,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(10).Bind(x =>
             x > 5 ? Option.Some(x * 2) : Option.None<int>());
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(20);
     }
 
@@ -62,7 +62,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await NoneAsync<int>().Bind(x => Option.Some(x * 2));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -74,7 +74,7 @@ public class TaskOptionExtensionsShould
             return x > 5 ? Option.Some(x * 2) : Option.None<int>();
         });
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(20);
     }
 
@@ -121,7 +121,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(10).Filter(x => x > 5);
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -129,7 +129,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(3).Filter(x => x > 5);
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     #endregion
@@ -199,7 +199,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(42).Tap(x => executed = true);
 
         await Assert.That(executed).IsTrue();
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -305,7 +305,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(1).Join(SomeAsync("two"));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -316,7 +316,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await NoneAsync<int>().Join(SomeAsync("two"));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -324,7 +324,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(1).Join(NoneAsync<string>());
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -349,7 +349,7 @@ public class TaskOptionExtensionsShould
 
         var result = await first.Join(second);
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -357,7 +357,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(1).Join(SomeAsync("two"), SomeAsync(true));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -369,7 +369,7 @@ public class TaskOptionExtensionsShould
     {
         var result = await SomeAsync(1).Join(NoneAsync<string>(), SomeAsync(true));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -378,7 +378,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v4).IsEqualTo(4.0);
@@ -390,7 +390,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), NoneAsync<bool>(), SomeAsync(4.0));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -399,7 +399,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v5).IsEqualTo('e');
@@ -411,7 +411,7 @@ public class TaskOptionExtensionsShould
         var result = await NoneAsync<int>()
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -420,7 +420,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v6).IsEqualTo(6L);
@@ -432,7 +432,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), NoneAsync<long>());
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -441,7 +441,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v7).IsEqualTo(7.0f);
@@ -453,7 +453,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), NoneAsync<bool>(), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -462,7 +462,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), SomeAsync(4.0), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f), SomeAsync((byte)8));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7, v8) = result.GetValueOrThrow();
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v8).IsEqualTo((byte)8);
@@ -474,7 +474,7 @@ public class TaskOptionExtensionsShould
         var result = await SomeAsync(1)
             .Join(SomeAsync("two"), SomeAsync(true), NoneAsync<double>(), SomeAsync('e'), SomeAsync(6L), SomeAsync(7.0f), SomeAsync((byte)8));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -510,7 +510,7 @@ public class TaskOptionExtensionsShould
 
         var result = await first.Join(second, third);
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     #endregion

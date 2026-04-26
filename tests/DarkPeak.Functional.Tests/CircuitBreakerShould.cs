@@ -13,7 +13,7 @@ public class CircuitBreakerShould
 
         var result = breaker.Execute(() => Result.Success<int, Error>(42));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -25,7 +25,7 @@ public class CircuitBreakerShould
         var result = breaker.Execute(
             () => Result.Failure<int, Error>(new ExternalServiceError { Message = "fail" }));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -44,7 +44,7 @@ public class CircuitBreakerShould
 
         var result = breaker.Execute(() => Result.Success<int, Error>(42));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<CircuitBreakerOpenError>();
     }
@@ -60,7 +60,7 @@ public class CircuitBreakerShould
 
         // Should not be open because success reset the counter
         var result = breaker.Execute(() => Result.Success<int, Error>(99));
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(99);
     }
 
@@ -79,7 +79,7 @@ public class CircuitBreakerShould
         }
 
         var result = breaker.Execute(() => Result.Success<int, Error>(42));
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class CircuitBreakerShould
         breaker.Execute(() => Result.Failure<int, Error>(new ExternalServiceError { Message = "fail 2" }));
 
         var result = breaker.Execute(() => Result.Success<int, Error>(42));
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<CircuitBreakerOpenError>();
     }
@@ -110,7 +110,7 @@ public class CircuitBreakerShould
         var result = await breaker.ExecuteAsync(
             () => Task.FromResult(Result.Success<int, Error>(42)));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -130,7 +130,7 @@ public class CircuitBreakerShould
         var result = await breaker.ExecuteAsync(
             () => Task.FromResult(Result.Success<int, Error>(42)));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<CircuitBreakerOpenError>();
     }
@@ -156,7 +156,7 @@ public class CircuitBreakerShould
 
         var result = await breaker.ExecuteAsync(
             () => Task.FromResult(Result.Success<int, Error>(99)));
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     #endregion
@@ -174,14 +174,14 @@ public class CircuitBreakerShould
 
         // Circuit should be open
         var openResult = breaker.Execute(() => Result.Success<int, Error>(42));
-        await Assert.That(openResult.IsFailure).IsTrue();
+        await Assert.That(openResult.IsFailure()).IsTrue();
 
         // Wait for reset timeout
         await Task.Delay(500);
 
         // Circuit should be half-open — allow one request through
         var halfOpenResult = breaker.Execute(() => Result.Success<int, Error>(42));
-        await Assert.That(halfOpenResult.IsSuccess).IsTrue();
+        await Assert.That(halfOpenResult.IsSuccess()).IsTrue();
         await Assert.That(halfOpenResult.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -201,8 +201,8 @@ public class CircuitBreakerShould
         // Should now be closed — multiple successes should work
         var result1 = breaker.Execute(() => Result.Success<int, Error>(1));
         var result2 = breaker.Execute(() => Result.Success<int, Error>(2));
-        await Assert.That(result1.IsSuccess).IsTrue();
-        await Assert.That(result2.IsSuccess).IsTrue();
+        await Assert.That(result1.IsSuccess()).IsTrue();
+        await Assert.That(result2.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -221,7 +221,7 @@ public class CircuitBreakerShould
 
         // Should be open again
         var result = breaker.Execute(() => Result.Success<int, Error>(42));
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<CircuitBreakerOpenError>();
     }

@@ -51,7 +51,7 @@ public class ValidationPipelineShould
 
         var result = pipeline("Alice");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice");
     }
 
@@ -64,7 +64,7 @@ public class ValidationPipelineShould
 
         var result = pipeline("");
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(1);
     }
@@ -83,7 +83,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -99,7 +99,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("", 30, "alice@test.com"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(1);
         await Assert.That(errors[0].Message).IsEqualTo("Name is required");
@@ -115,7 +115,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("", -1, "alice@test.com"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -135,7 +135,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
         await Assert.That(user.Age).IsEqualTo(30);
@@ -153,7 +153,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(3);
     }
@@ -174,7 +174,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("A", "B", "C", "D"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D");
     }
 
@@ -190,7 +190,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(4);
     }
@@ -212,7 +212,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("A", "B", "C", "D", "E"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E");
     }
 
@@ -229,7 +229,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(5);
     }
@@ -252,7 +252,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("A", "B", "C", "D", "E", "F"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F");
     }
 
@@ -270,7 +270,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(6);
     }
@@ -294,7 +294,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("A", "B", "C", "D", "E", "F", "G"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F,G");
     }
 
@@ -313,7 +313,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("", "", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(7);
     }
@@ -338,7 +338,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("A", "B", "C", "D", "E", "F", "G", "H"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F,G,H");
     }
 
@@ -358,7 +358,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(("", "", "", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(8);
     }
@@ -376,7 +376,7 @@ public class ValidationPipelineShould
 
         var result = pipeline("  hello  ");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("hello");
     }
 
@@ -390,7 +390,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("  Alice  ", 30, "test@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -406,7 +406,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("Alice", -1, "test@test.com"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(1);
         await Assert.That(errors[0].Message).IsEqualTo("Age must be between 0 and 150");
@@ -428,7 +428,7 @@ public class ValidationPipelineShould
         // Name is valid, Age is invalid, Email is invalid
         var result = pipeline(new UserDto("Alice", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -448,8 +448,8 @@ public class ValidationPipelineShould
         var validResult = pipeline(new UserDto("Alice", 30, ""));
         var invalidResult = pipeline(new UserDto("", -1, ""));
 
-        await Assert.That(validResult.IsValid).IsTrue();
-        await Assert.That(invalidResult.IsInvalid).IsTrue();
+        await Assert.That(validResult.IsValid()).IsTrue();
+        await Assert.That(invalidResult.IsInvalid()).IsTrue();
 
         var errors = invalidResult.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
@@ -470,7 +470,7 @@ public class ValidationPipelineShould
 
         var result = pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
         await Assert.That(user.Age).IsEqualTo(30);
@@ -490,7 +490,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline("Alice");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice");
     }
 
@@ -503,7 +503,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline("");
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
     }
 
     #endregion
@@ -520,7 +520,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -536,7 +536,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, "alice@test.com"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -556,7 +556,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
     }
@@ -572,7 +572,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(3);
     }
@@ -593,7 +593,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("A", "B", "C", "D"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D");
     }
 
@@ -609,7 +609,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(4);
     }
@@ -631,7 +631,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("A", "B", "C", "D", "E"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E");
     }
 
@@ -648,7 +648,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(5);
     }
@@ -671,7 +671,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("A", "B", "C", "D", "E", "F"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F");
     }
 
@@ -689,7 +689,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(6);
     }
@@ -713,7 +713,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("A", "B", "C", "D", "E", "F", "G"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F,G");
     }
 
@@ -732,7 +732,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("", "", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(7);
     }
@@ -757,7 +757,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("A", "B", "C", "D", "E", "F", "G", "H"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("A,B,C,D,E,F,G,H");
     }
 
@@ -777,7 +777,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(("", "", "", "", "", "", "", ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(8);
     }
@@ -796,7 +796,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, ""));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -811,7 +811,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, ""));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -828,7 +828,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
     }
@@ -844,7 +844,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(3);
     }
@@ -859,7 +859,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, ""));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -875,7 +875,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, ""));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("Alice");
         await Assert.That(value.age).IsEqualTo(30);
@@ -921,7 +921,7 @@ public class ValidationPipelineShould
         tcs2.SetResult(Validation.Valid<int, Error>(30));
 
         var result = await pipelineTask;
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     [Test]
@@ -942,7 +942,7 @@ public class ValidationPipelineShould
         tcs2.SetResult(Validation.Invalid<int, Error>(new ValidationError { Message = "Error 2" }));
 
         var result = await pipelineTask;
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -962,8 +962,8 @@ public class ValidationPipelineShould
         var validResult = await pipeline(new UserDto("Alice", 30, ""));
         var invalidResult = await pipeline(new UserDto("", -1, ""));
 
-        await Assert.That(validResult.IsValid).IsTrue();
-        await Assert.That(invalidResult.IsInvalid).IsTrue();
+        await Assert.That(validResult.IsValid()).IsTrue();
+        await Assert.That(invalidResult.IsInvalid()).IsTrue();
         var errors = invalidResult.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(2);
     }
@@ -985,7 +985,7 @@ public class ValidationPipelineShould
         // Return type is Func<UserDto, Task<Validation<User, Error>>>
         var result = await pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
         await Assert.That(user.Age).IsEqualTo(30);
@@ -1003,7 +1003,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(3);
     }
@@ -1023,7 +1023,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("Alice", 30, "alice@test.com"));
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
     }
 
     [Test]
@@ -1037,7 +1037,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline(new UserDto("", -1, "bademail"));
 
-        await Assert.That(result.IsInvalid).IsTrue();
+        await Assert.That(result.IsInvalid()).IsTrue();
         var errors = result.Match(_ => Array.Empty<Error>(), errs => errs.ToArray());
         await Assert.That(errors).Count().IsEqualTo(3);
     }
@@ -1058,7 +1058,7 @@ public class ValidationPipelineShould
 
         // Valid submission
         var validResult = validateRegistration(new UserDto("Alice", 30, "alice@example.com"));
-        await Assert.That(validResult.IsValid).IsTrue();
+        await Assert.That(validResult.IsValid()).IsTrue();
         var user = validResult.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
         await Assert.That(user.Age).IsEqualTo(30);
@@ -1066,7 +1066,7 @@ public class ValidationPipelineShould
 
         // Invalid submission — all fields fail
         var invalidResult = validateRegistration(new UserDto("", -1, "invalid"));
-        await Assert.That(invalidResult.IsInvalid).IsTrue();
+        await Assert.That(invalidResult.IsInvalid()).IsTrue();
 
         var errors = invalidResult.Match(
             _ => Array.Empty<Error>(),
@@ -1106,11 +1106,11 @@ public class ValidationPipelineShould
 
         // All checks pass
         var validResult = await validateRegistration(new UserDto("Alice", 30, "alice@test.com"));
-        await Assert.That(validResult.IsValid).IsTrue();
+        await Assert.That(validResult.IsValid()).IsTrue();
 
         // Multiple failures across sync and async steps
         var invalidResult = await validateRegistration(new UserDto("taken", -1, "taken@test.com"));
-        await Assert.That(invalidResult.IsInvalid).IsTrue();
+        await Assert.That(invalidResult.IsInvalid()).IsTrue();
 
         var errors = invalidResult.Match(
             _ => Array.Empty<Error>(),
@@ -1132,7 +1132,7 @@ public class ValidationPipelineShould
 
         var result = pipeline("hello");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo(5);
     }
 
@@ -1146,7 +1146,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline("hello");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         var value = result.GetValueOrThrow();
         await Assert.That(value.name).IsEqualTo("hello");
         await Assert.That(value.len).IsEqualTo(5);
@@ -1162,7 +1162,7 @@ public class ValidationPipelineShould
 
         var result = pipeline("  Alice  ");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("  Alice  ");
     }
 
@@ -1175,7 +1175,7 @@ public class ValidationPipelineShould
 
         var result = await pipeline("Alice");
 
-        await Assert.That(result.IsValid).IsTrue();
+        await Assert.That(result.IsValid()).IsTrue();
         await Assert.That(result.GetValueOrThrow()).IsEqualTo("Alice");
     }
 

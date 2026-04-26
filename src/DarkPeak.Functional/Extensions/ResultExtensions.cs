@@ -72,18 +72,11 @@ public static class ResultExtensions
         
         foreach (var result in results)
         {
-            if (result.IsFailure)
-            {
-                return result.Match<Result<IEnumerable<T>, TError>>(
-                    success: _ => throw new InvalidOperationException("Unexpected success"),
-                    failure: error => Result.Failure<IEnumerable<T>, TError>(error)
-                );
-            }
-            
-            values.Add(result.Match(
-                success: value => value,
-                failure: _ => throw new InvalidOperationException("Unexpected failure")
-            ));
+            if (result is Failure<T, TError> { Error: var error })
+                return new Failure<IEnumerable<T>, TError>(error);
+
+            if (result is Success<T, TError> { Value: var value })
+                values.Add(value);
         }
         
         return Result.Success<IEnumerable<T>, TError>(values);
@@ -104,14 +97,10 @@ public static class ResultExtensions
         
         foreach (var result in results)
         {
-            if (result.IsSuccess)
-            {
-                values.Add(result.Match(success: v => v, failure: _ => default!));
-            }
-            else
-            {
-                errors.Add(result.Match(success: _ => default!, failure: e => e));
-            }
+            if (result is Success<T, ValidationError> { Value: var v })
+                values.Add(v);
+            else if (result is Failure<T, ValidationError> { Error: var e })
+                errors.Add(e);
         }
         
         if (errors.Count > 0)
@@ -144,13 +133,8 @@ public static class ResultExtensions
     {
         foreach (var result in source)
         {
-            if (result.IsSuccess)
-            {
-                yield return result.Match(
-                    success: value => value,
-                    failure: _ => throw new InvalidOperationException("Unexpected failure")
-                );
-            }
+            if (result is Success<T, TError> { Value: var value })
+                yield return value;
         }
     }
 
@@ -170,14 +154,10 @@ public static class ResultExtensions
         
         foreach (var result in source)
         {
-            if (result.IsSuccess)
-            {
-                successes.Add(result.Match(success: v => v, failure: _ => default!));
-            }
-            else
-            {
-                failures.Add(result.Match(success: _ => default!, failure: e => e));
-            }
+            if (result is Success<T, TError> { Value: var v })
+                successes.Add(v);
+            else if (result is Failure<T, TError> { Error: var e })
+                failures.Add(e);
         }
         
         return (successes, failures);
@@ -204,16 +184,11 @@ public static class ResultExtensions
         foreach (var item in source)
         {
             var result = func(item);
-            if (result.IsFailure)
-            {
-                return result.Match<Result<IEnumerable<TResult>, TError>>(
-                    success: _ => throw new InvalidOperationException("Unexpected success"),
-                    failure: error => Result.Failure<IEnumerable<TResult>, TError>(error));
-            }
+            if (result is Failure<TResult, TError> { Error: var error })
+                return new Failure<IEnumerable<TResult>, TError>(error);
 
-            values.Add(result.Match(
-                success: v => v,
-                failure: _ => throw new InvalidOperationException("Unexpected failure")));
+            if (result is Success<TResult, TError> { Value: var v })
+                values.Add(v);
         }
 
         return Result.Success<IEnumerable<TResult>, TError>(values);
@@ -313,16 +288,11 @@ public static class ResultExtensions
         foreach (var task in tasks)
         {
             var result = await task;
-            if (result.IsFailure)
-            {
-                return result.Match<Result<IEnumerable<T>, TError>>(
-                    success: _ => throw new InvalidOperationException("Unexpected success"),
-                    failure: error => Result.Failure<IEnumerable<T>, TError>(error));
-            }
+            if (result is Failure<T, TError> { Error: var error })
+                return new Failure<IEnumerable<T>, TError>(error);
 
-            values.Add(result.Match(
-                success: v => v,
-                failure: _ => throw new InvalidOperationException("Unexpected failure")));
+            if (result is Success<T, TError> { Value: var v })
+                values.Add(v);
         }
 
         return Result.Success<IEnumerable<T>, TError>(values);
@@ -347,16 +317,11 @@ public static class ResultExtensions
         foreach (var item in source)
         {
             var result = await func(item);
-            if (result.IsFailure)
-            {
-                return result.Match<Result<IEnumerable<TResult>, TError>>(
-                    success: _ => throw new InvalidOperationException("Unexpected success"),
-                    failure: error => Result.Failure<IEnumerable<TResult>, TError>(error));
-            }
+            if (result is Failure<TResult, TError> { Error: var error })
+                return new Failure<IEnumerable<TResult>, TError>(error);
 
-            values.Add(result.Match(
-                success: v => v,
-                failure: _ => throw new InvalidOperationException("Unexpected failure")));
+            if (result is Success<TResult, TError> { Value: var v })
+                values.Add(v);
         }
 
         return Result.Success<IEnumerable<TResult>, TError>(values);
@@ -379,14 +344,10 @@ public static class ResultExtensions
         foreach (var task in tasks)
         {
             var result = await task;
-            if (result.IsSuccess)
-            {
-                successes.Add(result.Match(success: v => v, failure: _ => default!));
-            }
-            else
-            {
-                failures.Add(result.Match(success: _ => default!, failure: e => e));
-            }
+            if (result is Success<T, TError> { Value: var v })
+                successes.Add(v);
+            else if (result is Failure<T, TError> { Error: var e })
+                failures.Add(e);
         }
 
         return (successes, failures);
@@ -408,12 +369,8 @@ public static class ResultExtensions
         foreach (var task in tasks)
         {
             var result = await task;
-            if (result.IsSuccess)
-            {
-                values.Add(result.Match(
-                    success: v => v,
-                    failure: _ => throw new InvalidOperationException("Unexpected failure")));
-            }
+            if (result is Success<T, TError> { Value: var value })
+                values.Add(value);
         }
 
         return values;

@@ -52,7 +52,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Id).IsEqualTo(1);
         await Assert.That(value.Name).IsEqualTo("Widget");
@@ -65,7 +65,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpError>();
         await Assert.That(error.Message).Contains("null");
@@ -78,7 +78,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/999");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
         await Assert.That(error.Message).Contains("Resource not found");
@@ -91,7 +91,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<UnauthorizedError>();
     }
@@ -103,7 +103,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ForbiddenError>();
     }
@@ -115,7 +115,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BadRequestError>();
     }
@@ -127,7 +127,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ConflictError>();
     }
@@ -139,7 +139,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ValidationError>();
     }
@@ -151,7 +151,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -163,7 +163,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -175,7 +175,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpError>();
         var httpError = (HttpError)error;
@@ -190,7 +190,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
         await Assert.That(error.Message).Contains("Connection refused");
@@ -203,7 +203,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
         await Assert.That(error.Message).Contains("timed out");
@@ -218,7 +218,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetResultAsync<TestPayload>("/api/items/1", options);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Widget");
     }
@@ -236,7 +236,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PostResultAsync<TestPayload>("/api/items", payload);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Id).IsEqualTo(1);
     }
@@ -249,7 +249,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PostResultAsync<TestPayload>("/api/items", payload);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BadRequestError>();
     }
@@ -261,7 +261,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PostResultAsync<TestPayload>("/api/items", new TestPayload(0, "X"));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -279,7 +279,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PutResultAsync<TestPayload>("/api/items/1", payload);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Updated");
     }
@@ -291,7 +291,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PutResultAsync<TestPayload>("/api/items/999", new TestPayload(999, "X"));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
     }
@@ -303,7 +303,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PutResultAsync<TestPayload>("/api/items/1", new TestPayload(1, "X"));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -320,7 +320,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PatchResultAsync<TestPayload>("/api/items/1", new { Name = "Patched" });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Patched");
     }
@@ -332,7 +332,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PatchResultAsync<TestPayload>("/api/items/1", new { Name = "" });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ValidationError>();
     }
@@ -344,7 +344,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.PatchResultAsync<TestPayload>("/api/items/1", new { Name = "X" });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -360,7 +360,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync("/api/items/1");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -370,7 +370,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync("/api/items/1");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -380,7 +380,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync("/api/items/999");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
     }
@@ -392,7 +392,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync("/api/items/1");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -405,7 +405,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync<TestPayload>("/api/items/1");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Deleted");
     }
@@ -417,7 +417,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.DeleteResultAsync<TestPayload>("/api/items/999");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
     }
@@ -435,7 +435,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync<TestPayload>(request);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Custom");
     }
@@ -448,7 +448,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync<TestPayload>(request);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -461,7 +461,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync<TestPayload>(request);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -474,7 +474,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync(request);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -485,7 +485,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync(request);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -498,7 +498,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.SendResultAsync(request);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -542,7 +542,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStringResultAsync("/api/health");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value).IsEqualTo("Hello, World!");
     }
@@ -554,7 +554,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStringResultAsync("/api/missing");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
     }
@@ -566,7 +566,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStringResultAsync("/api/health");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -582,7 +582,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStreamResultAsync("/api/export");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var stream = result.Match(v => v, _ => null!);
         using var reader = new StreamReader(stream);
         var content = await reader.ReadToEndAsync();
@@ -596,7 +596,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStreamResultAsync("/api/export");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }
@@ -608,7 +608,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetStreamResultAsync("/api/export");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -624,7 +624,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetBytesResultAsync("/api/images/logo.png");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var bytes = result.Match(v => v, _ => null!);
         await Assert.That(bytes.Length).IsGreaterThan(0);
     }
@@ -636,7 +636,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetBytesResultAsync("/api/images/missing.png");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<NotFoundError>();
     }
@@ -648,7 +648,7 @@ public class HttpClientExtensionsShould
 
         var result = await client.GetBytesResultAsync("/api/images/logo.png");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<HttpRequestError>();
     }
@@ -668,7 +668,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Custom", "test-value");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(handler.LastRequest!.Headers.GetValues("X-Custom").First()).IsEqualTo("test-value");
         client.Dispose();
     }
@@ -683,7 +683,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("Authorization", "Bearer expired-token");
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<UnauthorizedError>();
         await Assert.That(handler.LastRequest!.Headers.GetValues("Authorization").First()).IsEqualTo("Bearer expired-token");
@@ -701,7 +701,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Idempotency-Key", "abc-123");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(handler.LastRequest!.Headers.GetValues("X-Idempotency-Key").First()).IsEqualTo("abc-123");
         client.Dispose();
     }
@@ -717,7 +717,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("If-Match", "\"etag-value\"");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(handler.LastRequest!.Headers.GetValues("If-Match").First()).IsEqualTo("\"etag-value\"");
         client.Dispose();
     }
@@ -733,7 +733,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("If-Match", "\"etag-value\"");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(handler.LastRequest!.Headers.GetValues("If-Match").First()).IsEqualTo("\"etag-value\"");
         client.Dispose();
     }
@@ -748,7 +748,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Reason", "cleanup");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(handler.LastRequest!.Headers.GetValues("X-Reason").First()).IsEqualTo("cleanup");
         client.Dispose();
     }
@@ -764,7 +764,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Audit", "user-42");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value.Name).IsEqualTo("Deleted");
         await Assert.That(handler.LastRequest!.Headers.GetValues("X-Audit").First()).IsEqualTo("user-42");
@@ -781,7 +781,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("Accept", "text/plain");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => null!);
         await Assert.That(value).IsEqualTo("Hello, World!");
         await Assert.That(handler.LastRequest!.Headers.GetValues("Accept").First()).IsEqualTo("text/plain");
@@ -798,7 +798,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Download-Token", "token-xyz");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var stream = result.Match(v => v, _ => null!);
         using var reader = new StreamReader(stream);
         var content = await reader.ReadToEndAsync();
@@ -817,7 +817,7 @@ public class HttpClientExtensionsShould
             request.Headers.Add("X-Api-Key", "key-abc");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var bytes = result.Match(v => v, _ => null!);
         await Assert.That(bytes.Length).IsGreaterThan(0);
         await Assert.That(handler.LastRequest!.Headers.GetValues("X-Api-Key").First()).IsEqualTo("key-abc");

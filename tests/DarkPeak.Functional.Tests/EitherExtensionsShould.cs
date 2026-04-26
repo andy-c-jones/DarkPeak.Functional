@@ -132,7 +132,7 @@ public class EitherExtensionsShould
 
         var result = nested.Flatten();
 
-        await Assert.That(result.IsRight).IsTrue();
+        await Assert.That(result.IsRight()).IsTrue();
         var value = result.Match(_ => 0, v => v);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -144,7 +144,7 @@ public class EitherExtensionsShould
 
         var result = nested.Flatten();
 
-        await Assert.That(result.IsLeft).IsTrue();
+        await Assert.That(result.IsLeft()).IsTrue();
         var value = result.Match(v => v, _ => "");
         await Assert.That(value).IsEqualTo("inner error");
     }
@@ -156,7 +156,7 @@ public class EitherExtensionsShould
 
         var result = nested.Flatten();
 
-        await Assert.That(result.IsLeft).IsTrue();
+        await Assert.That(result.IsLeft()).IsTrue();
         var value = result.Match(v => v, _ => "");
         await Assert.That(value).IsEqualTo("outer error");
     }
@@ -172,7 +172,7 @@ public class EitherExtensionsShould
 
         var result = nested.FlattenLeft();
 
-        await Assert.That(result.IsLeft).IsTrue();
+        await Assert.That(result.IsLeft()).IsTrue();
         var value = result.Match(v => v, _ => "");
         await Assert.That(value).IsEqualTo("hello");
     }
@@ -184,7 +184,7 @@ public class EitherExtensionsShould
 
         var result = nested.FlattenLeft();
 
-        await Assert.That(result.IsRight).IsTrue();
+        await Assert.That(result.IsRight()).IsTrue();
         var value = result.Match(_ => 0, v => v);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -196,7 +196,7 @@ public class EitherExtensionsShould
 
         var result = nested.FlattenLeft();
 
-        await Assert.That(result.IsRight).IsTrue();
+        await Assert.That(result.IsRight()).IsTrue();
         var value = result.Match(_ => 0, v => v);
         await Assert.That(value).IsEqualTo(99);
     }

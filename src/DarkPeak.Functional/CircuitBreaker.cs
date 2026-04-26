@@ -161,13 +161,13 @@ public sealed record CircuitBreakerPolicy
 
         var result = func();
 
-        if (result.IsSuccess)
+        if (result.IsSuccess())
         {
             OnSuccess();
         }
         else
         {
-            var error = result.Match<TError>(
+            var error = result.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -198,13 +198,13 @@ public sealed record CircuitBreakerPolicy
 
         var result = await func();
 
-        if (result.IsSuccess)
+        if (result.IsSuccess())
         {
             OnSuccess();
         }
         else
         {
-            var error = result.Match<TError>(
+            var error = result.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -239,13 +239,13 @@ public sealed record CircuitBreakerPolicy
 
         var result = await func(cancellationToken);
 
-        if (result.IsSuccess)
+        if (result.IsSuccess())
         {
             OnSuccess();
         }
         else
         {
-            var error = result.Match<TError>(
+            var error = result.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 

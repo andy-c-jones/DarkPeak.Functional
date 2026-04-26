@@ -15,8 +15,8 @@ public class ResultShould
     {
         var result = new Success<int, Error>(42);
         
-        await Assert.That(result.IsSuccess).IsTrue();
-        await Assert.That(result.IsFailure).IsFalse();
+        await Assert.That(result.IsSuccess()).IsTrue();
+        await Assert.That(result.IsFailure()).IsFalse();
     }
     
     [Test]
@@ -25,8 +25,8 @@ public class ResultShould
         var error = new ValidationError { Message = "Invalid input" };
         var result = new Failure<int, Error>(error);
         
-        await Assert.That(result.IsFailure).IsTrue();
-        await Assert.That(result.IsSuccess).IsFalse();
+        await Assert.That(result.IsFailure()).IsTrue();
+        await Assert.That(result.IsSuccess()).IsFalse();
     }
     
     [Test]
@@ -34,7 +34,7 @@ public class ResultShould
     {
         Result<int, Error> result = 42;
         
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
     
     [Test]
@@ -42,7 +42,7 @@ public class ResultShould
     {
         Result<int, Error> result = new ValidationError { Message = "Error" };
         
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
     
     #endregion
@@ -112,7 +112,7 @@ public class ResultShould
         
         var mapped = result.Map(x => x * 2);
         
-        await Assert.That(mapped.IsSuccess).IsTrue();
+        await Assert.That(mapped.IsSuccess()).IsTrue();
         var value = mapped.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -125,7 +125,7 @@ public class ResultShould
         
         var mapped = result.Map(x => x * 2);
         
-        await Assert.That(mapped.IsFailure).IsTrue();
+        await Assert.That(mapped.IsFailure()).IsTrue();
         var errorResult = mapped.Match(_ => new ValidationError { Message = "" }, e => e);
         await Assert.That(errorResult.Message).IsEqualTo("Invalid");
     }
@@ -137,7 +137,7 @@ public class ResultShould
         
         var mapped = await result.MapAsync(async x => { await Task.Delay(1); return x * 2; });
         
-        await Assert.That(mapped.IsSuccess).IsTrue();
+        await Assert.That(mapped.IsSuccess()).IsTrue();
         var value = mapped.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -149,7 +149,7 @@ public class ResultShould
         
         var mapped = result.MapError(e => new NotFoundError { Message = $"Not found: {e.Message}" });
         
-        await Assert.That(mapped.IsFailure).IsTrue();
+        await Assert.That(mapped.IsFailure()).IsTrue();
         var error = mapped.Match(_ => new NotFoundError { Message = "" }, e => e);
         await Assert.That(error).IsTypeOf<NotFoundError>();
         await Assert.That(error.Message).IsEqualTo("Not found: Invalid");
@@ -162,7 +162,7 @@ public class ResultShould
         
         var mapped = result.MapError(e => new NotFoundError { Message = $"Not found: {e.Message}" });
         
-        await Assert.That(mapped.IsSuccess).IsTrue();
+        await Assert.That(mapped.IsSuccess()).IsTrue();
         var value = mapped.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -178,7 +178,7 @@ public class ResultShould
         
         var bound = result.Bind(x => new Success<string, Error>($"Value: {x}"));
         
-        await Assert.That(bound.IsSuccess).IsTrue();
+        await Assert.That(bound.IsSuccess()).IsTrue();
         var value = bound.Match(v => v, _ => "");
         await Assert.That(value).IsEqualTo("Value: 42");
     }
@@ -191,7 +191,7 @@ public class ResultShould
         
         var bound = result.Bind(x => new Success<string, Error>($"Value: {x}"));
         
-        await Assert.That(bound.IsFailure).IsTrue();
+        await Assert.That(bound.IsFailure()).IsTrue();
         var errorResult = bound.Match(_ => new ValidationError { Message = "" }, e => e);
         await Assert.That(errorResult.Message).IsEqualTo("Invalid");
     }
@@ -203,7 +203,7 @@ public class ResultShould
         
         var bound = result.Bind(_ => new Failure<string, Error>(new NotFoundError { Message = "Not found" }));
         
-        await Assert.That(bound.IsFailure).IsTrue();
+        await Assert.That(bound.IsFailure()).IsTrue();
         var error = bound.Match(_ => new NotFoundError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("Not found");
     }
@@ -219,7 +219,7 @@ public class ResultShould
             return new Success<string, Error>($"Value: {x}"); 
         });
         
-        await Assert.That(bound.IsSuccess).IsTrue();
+        await Assert.That(bound.IsSuccess()).IsTrue();
         var value = bound.Match(v => v, _ => "");
         await Assert.That(value).IsEqualTo("Value: 42");
     }
@@ -237,7 +237,7 @@ public class ResultShould
         var tapped = result.Tap(x => executed = true);
         
         await Assert.That(executed).IsTrue();
-        await Assert.That(tapped.IsSuccess).IsTrue();
+        await Assert.That(tapped.IsSuccess()).IsTrue();
     }
     
     [Test]
@@ -249,7 +249,7 @@ public class ResultShould
         var tapped = result.Tap(x => executed = true);
         
         await Assert.That(executed).IsFalse();
-        await Assert.That(tapped.IsFailure).IsTrue();
+        await Assert.That(tapped.IsFailure()).IsTrue();
     }
     
     [Test]
@@ -261,7 +261,7 @@ public class ResultShould
         var tapped = result.TapError(e => executed = true);
         
         await Assert.That(executed).IsTrue();
-        await Assert.That(tapped.IsFailure).IsTrue();
+        await Assert.That(tapped.IsFailure()).IsTrue();
     }
     
     [Test]
@@ -273,7 +273,7 @@ public class ResultShould
         var tapped = result.TapError(e => executed = true);
         
         await Assert.That(executed).IsFalse();
-        await Assert.That(tapped.IsSuccess).IsTrue();
+        await Assert.That(tapped.IsSuccess()).IsTrue();
     }
     
     #endregion
@@ -321,7 +321,7 @@ public class ResultShould
         
         var alternative = result.OrElse(new Success<int, Error>(99));
         
-        await Assert.That(alternative.IsSuccess).IsTrue();
+        await Assert.That(alternative.IsSuccess()).IsTrue();
         var value = alternative.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -333,7 +333,7 @@ public class ResultShould
         
         var alternative = result.OrElse(new Success<int, Error>(99));
         
-        await Assert.That(alternative.IsSuccess).IsTrue();
+        await Assert.That(alternative.IsSuccess()).IsTrue();
         var value = alternative.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(99);
     }
@@ -349,7 +349,7 @@ public class ResultShould
         
         var option = result.AsOption();
         
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var value = option.Match(v => v, () => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -361,7 +361,7 @@ public class ResultShould
         
         var option = result.AsOption();
         
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
     
     #endregion
@@ -376,7 +376,7 @@ public class ResultShould
         var query = from x in result
                     select x * 2;
         
-        await Assert.That(query.IsSuccess).IsTrue();
+        await Assert.That(query.IsSuccess()).IsTrue();
         var value = query.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -391,7 +391,7 @@ public class ResultShould
                     from y in result2
                     select x + y;
         
-        await Assert.That(query.IsSuccess).IsTrue();
+        await Assert.That(query.IsSuccess()).IsTrue();
         var value = query.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(30);
     }
@@ -406,7 +406,7 @@ public class ResultShould
                     from y in result2
                     select x + y;
         
-        await Assert.That(query.IsFailure).IsTrue();
+        await Assert.That(query.IsFailure()).IsTrue();
         var error = query.Match(_ => new ValidationError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("First error");
     }
@@ -421,7 +421,7 @@ public class ResultShould
                     from y in result2
                     select x + y;
         
-        await Assert.That(query.IsFailure).IsTrue();
+        await Assert.That(query.IsFailure()).IsTrue();
         var error = query.Match(_ => new ValidationError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("Second error");
     }
@@ -438,7 +438,7 @@ public class ResultShould
                     from z in result3
                     select x + y + z;
         
-        await Assert.That(query.IsSuccess).IsTrue();
+        await Assert.That(query.IsSuccess()).IsTrue();
         var value = query.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(30);
     }
@@ -504,7 +504,7 @@ public class ResultShould
 
         var mapped = await result.MapAsync(async x => { await Task.Yield(); return x * 2; });
 
-        await Assert.That(mapped.IsFailure).IsTrue();
+        await Assert.That(mapped.IsFailure()).IsTrue();
     }
 
     [Test]
@@ -518,7 +518,7 @@ public class ResultShould
             return Result.Success<string, Error>(x.ToString());
         });
 
-        await Assert.That(bound.IsFailure).IsTrue();
+        await Assert.That(bound.IsFailure()).IsTrue();
     }
 
     [Test]
@@ -528,7 +528,7 @@ public class ResultShould
 
         var bound = result.SelectMany(x => Result.Success<string, Error>(x.ToString()));
 
-        await Assert.That(bound.IsFailure).IsTrue();
+        await Assert.That(bound.IsFailure()).IsTrue();
     }
 
     #endregion

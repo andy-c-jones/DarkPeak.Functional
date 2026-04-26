@@ -43,14 +43,14 @@ public sealed record RetryPolicy
         {
             lastResult = func();
 
-            if (lastResult.IsSuccess)
+            if (lastResult.IsSuccess())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match<TError>(
+            var error = lastResult.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -80,14 +80,14 @@ public sealed record RetryPolicy
         {
             lastResult = await func();
 
-            if (lastResult.IsSuccess)
+            if (lastResult.IsSuccess())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match<TError>(
+            var error = lastResult.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -123,14 +123,14 @@ public sealed record RetryPolicy
             
             lastResult = await func(cancellationToken);
 
-            if (lastResult.IsSuccess)
+            if (lastResult.IsSuccess())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match<TError>(
+            var error = lastResult.Match(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 

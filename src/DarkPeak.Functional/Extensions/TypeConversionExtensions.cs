@@ -1,7 +1,7 @@
 namespace DarkPeak.Functional.Extensions;
 
 /// <summary>
-/// Extension methods for converting between Option, Result, Either, and OneOf types.
+/// Extension methods for converting between Option, Result, and Either types.
 /// </summary>
 public static class TypeConversionExtensions
 {
@@ -12,7 +12,7 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Result<T, TError> ToResult<T, TError>(this Option<T> option, TError error)
         where TError : Error =>
-        option.Match<Result<T, TError>>(
+        option.Match(
             some: value => new Success<T, TError>(value),
             none: () => new Failure<T, TError>(error)
         );
@@ -22,7 +22,7 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Result<T, TError> ToResult<T, TError>(this Option<T> option, Func<TError> errorFactory)
         where TError : Error =>
-        option.Match<Result<T, TError>>(
+        option.Match(
             some: value => new Success<T, TError>(value),
             none: () => new Failure<T, TError>(errorFactory())
         );
@@ -33,7 +33,7 @@ public static class TypeConversionExtensions
     /// Converts an Option to an Either, using the value as Right if Some, or the provided left value if None.
     /// </summary>
     public static Either<TLeft, T> ToEither<TLeft, T>(this Option<T> option, TLeft leftValue) =>
-        option.Match<Either<TLeft, T>>(
+        option.Match(
             some: value => new Right<TLeft, T>(value),
             none: () => new Left<TLeft, T>(leftValue)
         );
@@ -42,7 +42,7 @@ public static class TypeConversionExtensions
     /// Converts an Option to an Either, using the value as Right if Some, or a factory for the left value if None.
     /// </summary>
     public static Either<TLeft, T> ToEither<TLeft, T>(this Option<T> option, Func<TLeft> leftFactory) =>
-        option.Match<Either<TLeft, T>>(
+        option.Match(
             some: value => new Right<TLeft, T>(value),
             none: () => new Left<TLeft, T>(leftFactory())
         );
@@ -55,7 +55,7 @@ public static class TypeConversionExtensions
     /// <returns>Some with the value if successful, None if failure.</returns>
     public static Option<T> AsOption<T, TError>(this Result<T, TError> result)
         where TError : Error =>
-        result.Match<Option<T>>(
+        result.Match(
             success: value => new Some<T>(value),
             failure: _ => new None<T>()
         );
@@ -67,7 +67,7 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Either<TError, T> ToEither<T, TError>(this Result<T, TError> result)
         where TError : Error =>
-        result.Match<Either<TError, T>>(
+        result.Match(
             success: value => new Right<TError, T>(value),
             failure: error => new Left<TError, T>(error)
         );
@@ -78,7 +78,7 @@ public static class TypeConversionExtensions
     /// Converts the right value of an Either to an Option, discarding the left value.
     /// </summary>
     public static Option<TRight> RightToOption<TLeft, TRight>(this Either<TLeft, TRight> either) =>
-        either.Match<Option<TRight>>(
+        either.Match(
             left: _ => new None<TRight>(),
             right: value => new Some<TRight>(value)
         );
@@ -87,7 +87,7 @@ public static class TypeConversionExtensions
     /// Converts the left value of an Either to an Option, discarding the right value.
     /// </summary>
     public static Option<TLeft> LeftToOption<TLeft, TRight>(this Either<TLeft, TRight> either) =>
-        either.Match<Option<TLeft>>(
+        either.Match(
             left: value => new Some<TLeft>(value),
             right: _ => new None<TLeft>()
         );
@@ -100,28 +100,8 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Result<TRight, TLeft> ToResult<TLeft, TRight>(this Either<TLeft, TRight> either)
         where TLeft : Error =>
-        either.Match<Result<TRight, TLeft>>(
+        either.Match(
             left: error => new Failure<TRight, TLeft>(error),
             right: value => new Success<TRight, TLeft>(value)
-        );
-
-    // ── Either ↔ OneOf<TLeft, TRight> ──
-
-    /// <summary>
-    /// Converts an Either to a OneOf with matching generic arguments.
-    /// </summary>
-    public static OneOf<TLeft, TRight> ToOneOf<TLeft, TRight>(this Either<TLeft, TRight> either) =>
-        either.Match<OneOf<TLeft, TRight>>(
-            left: value => value,
-            right: value => value
-        );
-
-    /// <summary>
-    /// Converts a two-case OneOf to an Either with matching generic arguments.
-    /// </summary>
-    public static Either<TLeft, TRight> ToEither<TLeft, TRight>(this OneOf<TLeft, TRight> oneOf) =>
-        oneOf.Match<Either<TLeft, TRight>>(
-            t1: value => new Left<TLeft, TRight>(value),
-            t2: value => new Right<TLeft, TRight>(value)
         );
 }

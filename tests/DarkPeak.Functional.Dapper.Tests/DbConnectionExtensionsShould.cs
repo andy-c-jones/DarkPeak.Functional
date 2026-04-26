@@ -16,7 +16,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QueryResultAsync<ProductRow>("SELECT * FROM products ORDER BY id");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var products = result.GetValueOrThrow().ToList();
         await Assert.That(products.Count).IsEqualTo(3);
         await Assert.That(products[0].Name).IsEqualTo("Widget");
@@ -31,7 +31,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE price > @Price",
             new { Price = 9999m });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var products = result.GetValueOrThrow().ToList();
         await Assert.That(products.Count).IsEqualTo(0);
     }
@@ -43,7 +43,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QueryResultAsync<ProductRow>("SELECT * FROM nonexistent_table");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsTypeOf<DatabaseError>();
     }
@@ -55,7 +55,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QueryResultAsync<ProductRow>("SELECT * FROM nonexistent_table");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.SqlState).IsNotNull();
@@ -72,7 +72,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 1 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var product = result.GetValueOrThrow();
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -86,7 +86,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleResultAsync<ProductRow>("SELECT * FROM products");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- QuerySingleOrDefaultResultAsync ---
@@ -110,9 +110,9 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 1 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var product = ((Some<ProductRow>)option).Value;
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -126,9 +126,9 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -138,7 +138,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleOrDefaultResultAsync<ProductRow>("SELECT * FROM products");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- QueryFirstResultAsync ---
@@ -151,7 +151,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
         var result = await conn.QueryFirstResultAsync<ProductRow>(
             "SELECT * FROM products ORDER BY id");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var product = result.GetValueOrThrow();
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -165,7 +165,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- QueryFirstOrDefaultResultAsync ---
@@ -178,9 +178,9 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
         var result = await conn.QueryFirstOrDefaultResultAsync<ProductRow>(
             "SELECT * FROM products ORDER BY id");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     [Test]
@@ -192,9 +192,9 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // --- ExecuteResultAsync ---
@@ -208,7 +208,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "UPDATE products SET price = price + 1 WHERE id = @Id",
             new { Id = 1 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var rowsAffected = result.GetValueOrThrow();
         await Assert.That(rowsAffected).IsEqualTo(1);
 
@@ -227,7 +227,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "UPDATE products SET price = 0 WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var rowsAffected = result.GetValueOrThrow();
         await Assert.That(rowsAffected).IsEqualTo(0);
     }
@@ -241,7 +241,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "INSERT INTO users (email, name) VALUES (@Email, @Name)",
             new { Email = "alice@example.com", Name = "Alice Duplicate" });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsTypeOf<DatabaseError>();
     }
@@ -256,7 +256,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
         var result = await conn.ExecuteScalarResultAsync<long>(
             "SELECT COUNT(*) FROM products");
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var count = result.GetValueOrThrow();
         await Assert.That(count).IsEqualTo(3);
     }
@@ -268,7 +268,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.ExecuteScalarResultAsync<int>("SELECT COUNT(*) FROM no_such_table");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- Error code verification ---
@@ -282,7 +282,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("INVALID_RESULT_SET");
@@ -295,7 +295,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleResultAsync<ProductRow>("SELECT * FROM products");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("INVALID_RESULT_SET");
@@ -308,7 +308,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleOrDefaultResultAsync<ProductRow>("SELECT * FROM products");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("INVALID_RESULT_SET");
@@ -323,7 +323,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE id = @Id",
             new { Id = 9999 });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("EMPTY_RESULT_SET");
@@ -338,7 +338,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleResultAsync<ProductRow>("SELECT * FROM nonexistent");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("DATABASE");
@@ -351,7 +351,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QuerySingleOrDefaultResultAsync<ProductRow>("SELECT * FROM nonexistent");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("DATABASE");
@@ -364,7 +364,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QueryFirstResultAsync<ProductRow>("SELECT * FROM nonexistent");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("DATABASE");
@@ -377,7 +377,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.QueryFirstOrDefaultResultAsync<ProductRow>("SELECT * FROM nonexistent");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("DATABASE");
@@ -390,7 +390,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var result = await conn.ExecuteResultAsync("INSERT INTO nonexistent (x) VALUES (1)");
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as DatabaseError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("DATABASE");
@@ -407,7 +407,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
             "SELECT * FROM products WHERE price < @MaxPrice ORDER BY price",
             new { MaxPrice = 10m });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var products = result.GetValueOrThrow().ToList();
         await Assert.That(products.Count).IsEqualTo(2);
     }
@@ -422,7 +422,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
         var result = await conn.ExecuteScalarResultAsync<long>("SELECT COUNT(*) FROM products");
         var message = result.Map(count => $"Found {count} products");
 
-        await Assert.That(message.IsSuccess).IsTrue();
+        await Assert.That(message.IsSuccess()).IsTrue();
         await Assert.That(message.GetValueOrThrow()).IsEqualTo("Found 3 products");
     }
 
@@ -436,7 +436,7 @@ public class DbConnectionExtensionsShould(PostgresFixture fixture)
 
         var priceResult = result.Map(p => p.Price);
 
-        await Assert.That(priceResult.IsSuccess).IsTrue();
+        await Assert.That(priceResult.IsSuccess()).IsTrue();
         await Assert.That(priceResult.GetValueOrThrow()).IsEqualTo(9.99m);
     }
 

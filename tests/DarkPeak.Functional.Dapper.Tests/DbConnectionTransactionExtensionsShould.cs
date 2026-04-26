@@ -24,7 +24,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
                     "UPDATE accounts SET balance = balance + 25 WHERE id = 2", transaction: tx));
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
 
         // Verify both updates were committed
         var alice = await conn.QuerySingleResultAsync<decimal>(
@@ -59,7 +59,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
             });
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
 
         // Verify the debit was rolled back
         var alice = await conn.QuerySingleResultAsync<decimal>(
@@ -83,7 +83,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
             return await c.ExecuteResultAsync("INVALID SQL STATEMENT", transaction: tx);
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
 
         // Verify the debit was rolled back
         var alice = await conn.QuerySingleResultAsync<decimal>(
@@ -105,7 +105,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
                 "SELECT balance FROM accounts WHERE id = 1", transaction: tx);
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     // --- Isolation level ---
@@ -121,7 +121,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
                 "SELECT balance FROM accounts WHERE id = 1", transaction: tx);
         }, IsolationLevel.Serializable);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     // --- Unit overload ---
@@ -140,13 +140,13 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
             return insert.Map(_ => Unit.Value);
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
 
         var charlie = await conn.QuerySingleOrDefaultResultAsync<decimal>(
             "SELECT balance FROM accounts WHERE name = 'Charlie'");
-        await Assert.That(charlie.IsSuccess).IsTrue();
+        await Assert.That(charlie.IsSuccess()).IsTrue();
         var option = charlie.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     // --- Chained operations ---
@@ -168,7 +168,7 @@ public class DbConnectionTransactionExtensionsShould(PostgresFixture fixture)
                     new { Id = id }, tx));
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var account = result.GetValueOrThrow();
         await Assert.That(account.Name).IsEqualTo("Dana");
         await Assert.That(account.Balance).IsEqualTo(300.00m);

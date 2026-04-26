@@ -150,12 +150,12 @@ public class AsyncEnumerableOptionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSome).IsTrue();
+        await Assert.That(result[0].IsSome()).IsTrue();
         await Assert.That(result[0] is Some<int> s0 ? s0.Value : -1).IsEqualTo(6);
 
-        await Assert.That(result[1].IsNone).IsTrue();
+        await Assert.That(result[1].IsNone()).IsTrue();
 
-        await Assert.That(result[2].IsSome).IsTrue();
+        await Assert.That(result[2].IsSome()).IsTrue();
         await Assert.That(result[2] is Some<int> s2 ? s2.Value : -1).IsEqualTo(15);
     }
 
@@ -189,12 +189,12 @@ public class AsyncEnumerableOptionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSome).IsTrue();
+        await Assert.That(result[0].IsSome()).IsTrue();
         await Assert.That(result[0] is Some<int> s0 ? s0.Value : -1).IsEqualTo(4);
 
-        await Assert.That(result[1].IsNone).IsTrue();
+        await Assert.That(result[1].IsNone()).IsTrue();
 
-        await Assert.That(result[2].IsSome).IsTrue();
+        await Assert.That(result[2].IsSome()).IsTrue();
         await Assert.That(result[2] is Some<int> s2 ? s2.Value : -1).IsEqualTo(8);
     }
 
@@ -218,12 +218,12 @@ public class AsyncEnumerableOptionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSome).IsTrue();
+        await Assert.That(result[0].IsSome()).IsTrue();
         await Assert.That(result[0] is Some<string> s0 ? s0.Value : "").IsEqualTo("val:4");
 
-        await Assert.That(result[1].IsNone).IsTrue();
+        await Assert.That(result[1].IsNone()).IsTrue();
 
-        await Assert.That(result[2].IsNone).IsTrue();
+        await Assert.That(result[2].IsNone()).IsTrue();
     }
 
     // ── BindOptionAsync ──
@@ -246,12 +246,12 @@ public class AsyncEnumerableOptionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSome).IsTrue();
+        await Assert.That(result[0].IsSome()).IsTrue();
         await Assert.That(result[0] is Some<string> s0 ? s0.Value : "").IsEqualTo("val:4");
 
-        await Assert.That(result[1].IsNone).IsTrue();
+        await Assert.That(result[1].IsNone()).IsTrue();
 
-        await Assert.That(result[2].IsNone).IsTrue();
+        await Assert.That(result[2].IsNone()).IsTrue();
     }
 
     // ── SequenceAsync ──
@@ -269,7 +269,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var list = (result is Some<IReadOnlyList<int>> some) ? some.Value : [];
         await Assert.That(list.Count).IsEqualTo(3);
         await Assert.That(list[0]).IsEqualTo(1);
@@ -290,7 +290,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -303,7 +303,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var list = (result is Some<IReadOnlyList<int>> some) ? some.Value : null;
         await Assert.That(list).IsNotNull();
         await Assert.That(list!.Count).IsEqualTo(0);
@@ -321,7 +321,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.FirstOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(10);
     }
 
@@ -335,7 +335,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.FirstOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // ── FirstOrNoneAsync (with predicate) ──
@@ -350,7 +350,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.FirstOrNoneAsync(x => x > 3);
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(4);
     }
 
@@ -364,7 +364,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.FirstOrNoneAsync(x => x > 10);
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // ── SingleOrNoneAsync (no predicate) ──
@@ -379,7 +379,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(42);
     }
 
@@ -393,7 +393,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -406,7 +406,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // ── SingleOrNoneAsync (with predicate) ──
@@ -421,7 +421,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync(x => x == 3);
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(3);
     }
 
@@ -435,7 +435,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync(x => x > 10);
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -448,7 +448,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.SingleOrNoneAsync(x => x > 2);
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // ── LastOrNoneAsync (no predicate) ──
@@ -463,7 +463,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.LastOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(30);
     }
 
@@ -477,7 +477,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.LastOrNoneAsync();
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     // ── LastOrNoneAsync (with predicate) ──
@@ -492,7 +492,7 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.LastOrNoneAsync(x => x % 2 == 0);
 
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         await Assert.That(result is Some<int> some ? some.Value : -1).IsEqualTo(4);
     }
 
@@ -506,6 +506,6 @@ public class AsyncEnumerableOptionExtensionsShould
         var result = await source.LastOrNoneAsync(x => x > 10);
 
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 }

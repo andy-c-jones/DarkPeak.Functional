@@ -29,7 +29,7 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
             return await ctx.SaveChangesResultAsync();
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
 
         // Verify with fresh context
         await using var verifyDb = fixture.CreateDbContext();
@@ -75,7 +75,7 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
             });
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
 
         // Verify the debit was rolled back
         await using var verifyDb = fixture.CreateDbContext();
@@ -116,7 +116,7 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
 #pragma warning restore CS0162
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
 
         // Verify the debit was rolled back
         await using var verifyDb = fixture.CreateDbContext();
@@ -141,7 +141,7 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
             return save.Map(_ => Unit.Value);
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
 
         // Verify with fresh context
         await using var verifyDb = fixture.CreateDbContext();
@@ -149,9 +149,9 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
             .Where(a => a.Name == "Charlie")
             .SingleOrDefaultResultAsync();
 
-        await Assert.That(charlie.IsSuccess).IsTrue();
+        await Assert.That(charlie.IsSuccess()).IsTrue();
         var option = charlie.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     // --- Chained operations ---
@@ -170,7 +170,7 @@ public class DbContextTransactionExtensionsShould(PostgresFixture fixture)
             return save.Map(_ => account);
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var created = result.GetValueOrThrow();
         await Assert.That(created.Name).IsEqualTo("Dana");
         await Assert.That(created.Balance).IsEqualTo(300.00m);

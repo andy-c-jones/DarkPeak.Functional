@@ -14,8 +14,8 @@ public class EitherShould
     {
         var either = new Left<string, int>("left");
         
-        await Assert.That(either.IsLeft).IsTrue();
-        await Assert.That(either.IsRight).IsFalse();
+        await Assert.That(either.IsLeft()).IsTrue();
+        await Assert.That(either.IsRight()).IsFalse();
     }
     
     [Test]
@@ -23,8 +23,8 @@ public class EitherShould
     {
         var either = new Right<string, int>(42);
         
-        await Assert.That(either.IsRight).IsTrue();
-        await Assert.That(either.IsLeft).IsFalse();
+        await Assert.That(either.IsRight()).IsTrue();
+        await Assert.That(either.IsLeft()).IsFalse();
     }
     
     [Test]
@@ -32,7 +32,7 @@ public class EitherShould
     {
         Either<string, int> either = "left";
         
-        await Assert.That(either.IsLeft).IsTrue();
+        await Assert.That(either.IsLeft()).IsTrue();
     }
     
     [Test]
@@ -40,7 +40,7 @@ public class EitherShould
     {
         Either<string, int> either = 42;
         
-        await Assert.That(either.IsRight).IsTrue();
+        await Assert.That(either.IsRight()).IsTrue();
     }
     
     #endregion
@@ -110,7 +110,7 @@ public class EitherShould
         
         var mapped = either.MapLeft(s => s.ToUpper());
         
-        await Assert.That(mapped.IsLeft).IsTrue();
+        await Assert.That(mapped.IsLeft()).IsTrue();
         var value = mapped.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("ERROR");
     }
@@ -122,7 +122,7 @@ public class EitherShould
         
         var mapped = either.MapLeft(s => s.ToUpper());
         
-        await Assert.That(mapped.IsRight).IsTrue();
+        await Assert.That(mapped.IsRight()).IsTrue();
         var value = mapped.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -134,7 +134,7 @@ public class EitherShould
         
         var mapped = either.MapRight(i => i * 2);
         
-        await Assert.That(mapped.IsRight).IsTrue();
+        await Assert.That(mapped.IsRight()).IsTrue();
         var value = mapped.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -146,7 +146,7 @@ public class EitherShould
         
         var mapped = either.MapRight(i => i * 2);
         
-        await Assert.That(mapped.IsLeft).IsTrue();
+        await Assert.That(mapped.IsLeft()).IsTrue();
         var value = mapped.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }
@@ -160,10 +160,10 @@ public class EitherShould
         var mappedLeft = left.Map(s => s.ToUpper(), i => i * 2);
         var mappedRight = right.Map(s => s.ToUpper(), i => i * 2);
         
-        await Assert.That(mappedLeft.IsLeft).IsTrue();
+        await Assert.That(mappedLeft.IsLeft()).IsTrue();
         await Assert.That(mappedLeft.Match(s => s, _ => "")).IsEqualTo("ERROR");
         
-        await Assert.That(mappedRight.IsRight).IsTrue();
+        await Assert.That(mappedRight.IsRight()).IsTrue();
         await Assert.That(mappedRight.Match(_ => 0, i => i)).IsEqualTo(84);
     }
     
@@ -174,7 +174,7 @@ public class EitherShould
         
         var mapped = await either.MapLeftAsync(async s => { await Task.Delay(1); return s.ToUpper(); });
         
-        await Assert.That(mapped.IsLeft).IsTrue();
+        await Assert.That(mapped.IsLeft()).IsTrue();
         var value = mapped.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("ERROR");
     }
@@ -186,7 +186,7 @@ public class EitherShould
         
         var mapped = await either.MapRightAsync(async i => { await Task.Delay(1); return i * 2; });
         
-        await Assert.That(mapped.IsRight).IsTrue();
+        await Assert.That(mapped.IsRight()).IsTrue();
         var value = mapped.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -202,7 +202,7 @@ public class EitherShould
         
         var bound = either.Bind(i => new Right<string, string>($"Value: {i}"));
         
-        await Assert.That(bound.IsRight).IsTrue();
+        await Assert.That(bound.IsRight()).IsTrue();
         var value = bound.Match(_ => "", s => s);
         await Assert.That(value).IsEqualTo("Value: 42");
     }
@@ -214,7 +214,7 @@ public class EitherShould
         
         var bound = either.Bind(i => new Right<string, string>($"Value: {i}"));
         
-        await Assert.That(bound.IsLeft).IsTrue();
+        await Assert.That(bound.IsLeft()).IsTrue();
         var value = bound.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }
@@ -226,7 +226,7 @@ public class EitherShould
         
         var bound = either.Bind(i => new Left<string, string>("new error"));
         
-        await Assert.That(bound.IsLeft).IsTrue();
+        await Assert.That(bound.IsLeft()).IsTrue();
         var value = bound.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("new error");
     }
@@ -242,7 +242,7 @@ public class EitherShould
             return new Right<string, string>($"Value: {i}"); 
         });
         
-        await Assert.That(bound.IsRight).IsTrue();
+        await Assert.That(bound.IsRight()).IsTrue();
         var value = bound.Match(_ => "", s => s);
         await Assert.That(value).IsEqualTo("Value: 42");
     }
@@ -306,8 +306,8 @@ public class EitherShould
         
         var swapped = either.Swap();
         
-        await Assert.That(swapped.IsRight).IsTrue();
-        await Assert.That(swapped.IsLeft).IsFalse();
+        await Assert.That(swapped.IsRight()).IsTrue();
+        await Assert.That(swapped.IsLeft()).IsFalse();
         var value = swapped.Match(_ => "", s => s);
         await Assert.That(value).IsEqualTo("error");
     }
@@ -319,8 +319,8 @@ public class EitherShould
         
         var swapped = either.Swap();
         
-        await Assert.That(swapped.IsLeft).IsTrue();
-        await Assert.That(swapped.IsRight).IsFalse();
+        await Assert.That(swapped.IsLeft()).IsTrue();
+        await Assert.That(swapped.IsRight()).IsFalse();
         var value = swapped.Match(i => i, _ => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -337,7 +337,7 @@ public class EitherShould
         var query = from x in either
                     select x * 2;
         
-        await Assert.That(query.IsRight).IsTrue();
+        await Assert.That(query.IsRight()).IsTrue();
         var value = query.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(84);
     }
@@ -350,7 +350,7 @@ public class EitherShould
         var query = from x in either
                     select x * 2;
         
-        await Assert.That(query.IsLeft).IsTrue();
+        await Assert.That(query.IsLeft()).IsTrue();
         var value = query.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }
@@ -365,7 +365,7 @@ public class EitherShould
                     from y in either2
                     select x + y;
         
-        await Assert.That(query.IsRight).IsTrue();
+        await Assert.That(query.IsRight()).IsTrue();
         var value = query.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(30);
     }
@@ -380,7 +380,7 @@ public class EitherShould
                     from y in either2
                     select x + y;
         
-        await Assert.That(query.IsLeft).IsTrue();
+        await Assert.That(query.IsLeft()).IsTrue();
         var value = query.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("first error");
     }
@@ -395,7 +395,7 @@ public class EitherShould
                     from y in either2
                     select x + y;
         
-        await Assert.That(query.IsLeft).IsTrue();
+        await Assert.That(query.IsLeft()).IsTrue();
         var value = query.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("second error");
     }
@@ -407,7 +407,7 @@ public class EitherShould
 
         var result = either.SelectMany(x => (Either<string, int>)new Right<string, int>(x + 5));
 
-        await Assert.That(result.IsRight).IsTrue();
+        await Assert.That(result.IsRight()).IsTrue();
         var value = result.Match(_ => 0, i => i);
         await Assert.That(value).IsEqualTo(15);
     }
@@ -419,7 +419,7 @@ public class EitherShould
 
         var result = either.SelectMany(x => (Either<string, int>)new Right<string, int>(x + 5));
 
-        await Assert.That(either.IsLeft).IsTrue();
+        await Assert.That(either.IsLeft()).IsTrue();
         var value = result.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }
@@ -431,7 +431,7 @@ public class EitherShould
 
         var result = await either.MapRightAsync(async x => { await Task.Yield(); return x * 2; });
 
-        await Assert.That(result.IsLeft).IsTrue();
+        await Assert.That(result.IsLeft()).IsTrue();
         var value = result.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }
@@ -447,7 +447,7 @@ public class EitherShould
             return (Either<string, int>)new Right<string, int>(x + 5);
         });
 
-        await Assert.That(result.IsLeft).IsTrue();
+        await Assert.That(result.IsLeft()).IsTrue();
         var value = result.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("error");
     }

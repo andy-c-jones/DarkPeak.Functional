@@ -15,7 +15,7 @@ public class ResultExtensionsShould
     {
         var result = ResultExtensions.ToResult(() => 42);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.Match(v => v, _ => 0)).IsEqualTo(42);
     }
 
@@ -24,8 +24,8 @@ public class ResultExtensionsShould
     {
         var result = ResultExtensions.ToResult<int>(() => throw new InvalidOperationException("boom"));
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<Error?>(
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(
             success: _ => null,
             failure: e => e
         );
@@ -46,7 +46,7 @@ public class ResultExtensionsShould
             return 42;
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(result.Match(v => v, _ => 0)).IsEqualTo(42);
     }
 
@@ -59,8 +59,8 @@ public class ResultExtensionsShould
             throw new ArgumentException("bad arg");
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<Error?>(
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(
             success: _ => null,
             failure: e => e
         );
@@ -84,7 +84,7 @@ public class ResultExtensionsShould
 
         var combined = results.Sequence();
 
-        await Assert.That(combined.IsSuccess).IsTrue();
+        await Assert.That(combined.IsSuccess()).IsTrue();
         var values = combined.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -105,8 +105,8 @@ public class ResultExtensionsShould
 
         var combined = results.Sequence();
 
-        await Assert.That(combined.IsFailure).IsTrue();
-        var error = combined.Match<string>(v => "", e => e.Message);
+        await Assert.That(combined.IsFailure()).IsTrue();
+        var error = combined.Match(v => "", e => e.Message);
         await Assert.That(error).IsEqualTo("first error");
     }
 
@@ -123,7 +123,7 @@ public class ResultExtensionsShould
 
         var collected = results.CollectErrors();
 
-        await Assert.That(collected.IsSuccess).IsTrue();
+        await Assert.That(collected.IsSuccess()).IsTrue();
         var values = collected.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(2);
     }
@@ -154,8 +154,8 @@ public class ResultExtensionsShould
 
         var collected = results.CollectErrors();
 
-        await Assert.That(collected.IsFailure).IsTrue();
-        var error = collected.Match<ValidationError?>(
+        await Assert.That(collected.IsFailure()).IsTrue();
+        var error = collected.Match(
             success: _ => null,
             failure: e => e
         );
@@ -218,7 +218,7 @@ public class ResultExtensionsShould
         var result = source.Traverse(x =>
             Result.Success<string, InternalError>($"v{x}"));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo("v1");
@@ -236,8 +236,8 @@ public class ResultExtensionsShould
                 ? Result.Failure<string, InternalError>(new InternalError { Message = "bad" })
                 : Result.Success<string, InternalError>($"v{x}"));
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("bad");
     }
 
@@ -251,7 +251,7 @@ public class ResultExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsSuccess).IsTrue();
+        await Assert.That(joined.IsSuccess()).IsTrue();
         var (v1, v2) = joined.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -265,8 +265,8 @@ public class ResultExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsFailure).IsTrue();
-        var error = joined.Match<string>(_ => "", e => e.Message);
+        await Assert.That(joined.IsFailure()).IsTrue();
+        var error = joined.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err1");
     }
 
@@ -278,8 +278,8 @@ public class ResultExtensionsShould
 
         var joined = first.Join(second);
 
-        await Assert.That(joined.IsFailure).IsTrue();
-        var error = joined.Match<string>(_ => "", e => e.Message);
+        await Assert.That(joined.IsFailure()).IsTrue();
+        var error = joined.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err2");
     }
 
@@ -294,7 +294,7 @@ public class ResultExtensionsShould
 
         var joined = first.Join(second, third);
 
-        await Assert.That(joined.IsSuccess).IsTrue();
+        await Assert.That(joined.IsSuccess()).IsTrue();
         var (v1, v2, v3) = joined.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -310,8 +310,8 @@ public class ResultExtensionsShould
 
         var joined = first.Join(second, third);
 
-        await Assert.That(joined.IsFailure).IsTrue();
-        var error = joined.Match<string>(_ => "", e => e.Message);
+        await Assert.That(joined.IsFailure()).IsTrue();
+        var error = joined.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err1");
     }
 
@@ -326,7 +326,7 @@ public class ResultExtensionsShould
                 Result.Success<bool, InternalError>(true),
                 Result.Success<double, InternalError>(4.0));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var (v1, v2, v3, v4) = result.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v2).IsEqualTo("two");
@@ -343,7 +343,7 @@ public class ResultExtensionsShould
                 Result.Success<bool, InternalError>(true),
                 Result.Success<double, InternalError>(4.0));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // Join (5-arity)
@@ -358,7 +358,7 @@ public class ResultExtensionsShould
                 Result.Success<double, InternalError>(4.0),
                 Result.Success<char, InternalError>('e'));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var (v1, v2, v3, v4, v5) = result.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v5).IsEqualTo('e');
@@ -374,8 +374,8 @@ public class ResultExtensionsShould
                 Result.Success<double, InternalError>(4.0),
                 Result.Success<char, InternalError>('e'));
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err3");
     }
 
@@ -392,7 +392,7 @@ public class ResultExtensionsShould
                 Result.Success<char, InternalError>('e'),
                 Result.Success<long, InternalError>(6L));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var (v1, v2, v3, v4, v5, v6) = result.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v6).IsEqualTo(6L);
@@ -409,8 +409,8 @@ public class ResultExtensionsShould
                 Result.Success<char, InternalError>('e'),
                 Result.Failure<long, InternalError>(new InternalError { Message = "err6" }));
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err6");
     }
 
@@ -428,7 +428,7 @@ public class ResultExtensionsShould
                 Result.Success<long, InternalError>(6L),
                 Result.Success<float, InternalError>(7.0f));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7) = result.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v7).IsEqualTo(7.0f);
@@ -446,7 +446,7 @@ public class ResultExtensionsShould
                 Result.Success<long, InternalError>(6L),
                 Result.Success<float, InternalError>(7.0f));
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // Join (8-arity)
@@ -464,7 +464,7 @@ public class ResultExtensionsShould
                 Result.Success<float, InternalError>(7.0f),
                 Result.Success<byte, InternalError>((byte)8));
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var (v1, v2, v3, v4, v5, v6, v7, v8) = result.Match(v => v, _ => default);
         await Assert.That(v1).IsEqualTo(1);
         await Assert.That(v8).IsEqualTo((byte)8);
@@ -483,8 +483,8 @@ public class ResultExtensionsShould
                 Result.Success<float, InternalError>(7.0f),
                 Result.Success<byte, InternalError>((byte)8));
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err4");
     }
 
@@ -502,7 +502,7 @@ public class ResultExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -522,8 +522,8 @@ public class ResultExtensionsShould
 
         var result = await tasks.SequenceAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
-        var error = result.Match<string>(_ => "", e => e.Message);
+        await Assert.That(result.IsFailure()).IsTrue();
+        var error = result.Match(_ => "", e => e.Message);
         await Assert.That(error).IsEqualTo("err");
     }
 
@@ -540,7 +540,7 @@ public class ResultExtensionsShould
             return Result.Success<string, InternalError>($"v{x}");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo("v1");
@@ -559,7 +559,7 @@ public class ResultExtensionsShould
                 : Result.Success<string, InternalError>($"v{x}");
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // PartitionAsync (sequential)
@@ -618,7 +618,7 @@ public class ResultExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
     }
@@ -635,7 +635,7 @@ public class ResultExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // TraverseParallel
@@ -651,7 +651,7 @@ public class ResultExtensionsShould
             return Result.Success<string, InternalError>($"v{x}");
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v.ToList(), _ => []);
         await Assert.That(values).Count().IsEqualTo(3);
     }
@@ -669,7 +669,7 @@ public class ResultExtensionsShould
                 : Result.Success<string, InternalError>($"v{x}");
         });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // PartitionParallel
@@ -735,7 +735,7 @@ public class ResultExtensionsShould
 
         var result = await tasks.SequenceParallel();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -760,7 +760,7 @@ public class ResultExtensionsShould
             return Result.Success<int, InternalError>(x);
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]

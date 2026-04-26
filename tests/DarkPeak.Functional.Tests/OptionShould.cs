@@ -15,8 +15,8 @@ public class OptionShould
         var option = Option.Some(42);
         
         // Assert
-        await Assert.That(option.IsSome).IsTrue();
-        await Assert.That(option.IsNone).IsFalse();
+        await Assert.That(option.IsSome()).IsTrue();
+        await Assert.That(option.IsNone()).IsFalse();
     }
 
     [Test]
@@ -26,8 +26,8 @@ public class OptionShould
         var option = Option.None<int>();
         
         // Assert
-        await Assert.That(option.IsSome).IsFalse();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsSome()).IsFalse();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -72,7 +72,7 @@ public class OptionShould
         var result = option.Map(x => x * 2);
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(10);
     }
@@ -87,7 +87,7 @@ public class OptionShould
         var result = option.Map(x => x * 2);
         
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -100,7 +100,7 @@ public class OptionShould
         var result = option.Bind(x => x > 5 ? Option.Some(x * 2) : Option.None<int>());
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(20);
     }
@@ -115,7 +115,7 @@ public class OptionShould
         var result = option.Bind(x => x > 5 ? Option.Some(x * 2) : Option.None<int>());
         
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -128,7 +128,7 @@ public class OptionShould
         var result = option.Bind(x => Option.Some(x * 2));
         
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -141,7 +141,7 @@ public class OptionShould
         var result = option.Filter(x => x > 5);
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -154,7 +154,7 @@ public class OptionShould
         var result = option.Filter(x => x > 5);
         
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -190,7 +190,7 @@ public class OptionShould
         Option<string> option = "hello";
         
         // Assert
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var value = option.Match(some: x => x, none: () => "");
         await Assert.That(value).IsEqualTo("hello");
     }
@@ -202,7 +202,7 @@ public class OptionShould
         var option = Option.Some(42);
         
         // Act
-        var list = option.ToList();
+        var list = option.AsEnumerable().ToList();
         
         // Assert
         await Assert.That(list.Count).IsEqualTo(1);
@@ -216,7 +216,7 @@ public class OptionShould
         var option = Option.None<int>();
         
         // Act
-        var list = option.ToList();
+        var list = option.AsEnumerable().ToList();
         
         // Assert
         await Assert.That(list.Count).IsEqualTo(0);
@@ -233,7 +233,7 @@ public class OptionShould
                      select x * 2;
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(10);
     }
@@ -250,7 +250,7 @@ public class OptionShould
                      select y + 1;
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(11);
     }
@@ -267,7 +267,7 @@ public class OptionShould
                      select x;
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
     }
 
     [Test]
@@ -282,7 +282,7 @@ public class OptionShould
                      select x;
         
         // Assert
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -299,7 +299,7 @@ public class OptionShould
         };
         
         // Act - SelectMany flattens and naturally filters out None
-        var result = options.SelectMany(o => o).ToList();
+        var result = options.SelectMany(o => o.AsEnumerable()).ToList();
         
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
@@ -360,7 +360,7 @@ public class OptionShould
         });
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(10);
     }
@@ -379,7 +379,7 @@ public class OptionShould
         });
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(20);
     }
@@ -395,7 +395,7 @@ public class OptionShould
         var result = option.OrElse(alternative);
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -411,7 +411,7 @@ public class OptionShould
         var result = option.OrElse(alternative);
         
         // Assert
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
         await Assert.That(value).IsEqualTo(99);
     }
@@ -439,7 +439,7 @@ public class OptionShould
     {
         var option = Option.Try(() => int.Parse("42"));
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -448,7 +448,7 @@ public class OptionShould
     {
         var option = Option.Try(() => int.Parse("not a number"));
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -460,7 +460,7 @@ public class OptionShould
             return 42;
         });
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -473,7 +473,7 @@ public class OptionShould
             throw new InvalidOperationException("boom");
         });
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -481,7 +481,7 @@ public class OptionShould
     {
         var option = Option.TryParse<int>("42");
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -490,7 +490,7 @@ public class OptionShould
     {
         var option = Option.TryParse<int>("abc");
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -498,7 +498,7 @@ public class OptionShould
     {
         var option = Option.TryParse<int>(null);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -506,7 +506,7 @@ public class OptionShould
     {
         var option = Option.TryParse<double>("3.14");
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     [Test]
@@ -514,7 +514,7 @@ public class OptionShould
     {
         var option = Option.TryParse<int>("42", System.Globalization.CultureInfo.InvariantCulture);
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         await Assert.That(option.GetValueOrThrow()).IsEqualTo(42);
     }
 
@@ -523,7 +523,7 @@ public class OptionShould
     {
         var option = Option.TryParse<int>("abc", System.Globalization.CultureInfo.InvariantCulture);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -557,7 +557,7 @@ public class OptionShould
 
         var mapped = await option.MapAsync(async v => { await Task.Yield(); return v * 2; });
 
-        await Assert.That(mapped.IsNone).IsTrue();
+        await Assert.That(mapped.IsNone()).IsTrue();
     }
 
     [Test]
@@ -567,7 +567,7 @@ public class OptionShould
 
         var result = option.OrElse(() => Option.Some(99));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(x => x, () => 0);
         await Assert.That(value).IsEqualTo(99);
     }
@@ -579,7 +579,7 @@ public class OptionShould
 
         var result = option.OrElse(() => Option.Some(99));
 
-        await Assert.That(result.IsSome).IsTrue();
+        await Assert.That(result.IsSome()).IsTrue();
         var value = result.Match(x => x, () => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -589,7 +589,7 @@ public class OptionShould
     {
         var option = Option.From("hello");
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     [Test]
@@ -597,7 +597,7 @@ public class OptionShould
     {
         var option = Option.From<string>(null);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -605,7 +605,7 @@ public class OptionShould
     {
         var option = Option.From<int>(42);
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
     }
 
     [Test]
@@ -613,7 +613,7 @@ public class OptionShould
     {
         var option = Option.From<int>(null);
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -623,7 +623,7 @@ public class OptionShould
 
         var result = option.SelectMany(x => Option.Some(x * 2));
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 
     [Test]
@@ -633,6 +633,6 @@ public class OptionShould
 
         var result = option.Select(x => x * 2);
 
-        await Assert.That(result.IsNone).IsTrue();
+        await Assert.That(result.IsNone()).IsTrue();
     }
 }

@@ -14,7 +14,7 @@ public class TypeConversionShould
 
         var result = option.ToResult(new NotFoundError { Message = "Not found" });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -26,7 +26,7 @@ public class TypeConversionShould
 
         var result = option.ToResult(new NotFoundError { Message = "Not found" });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("Not found");
     }
@@ -38,7 +38,7 @@ public class TypeConversionShould
 
         var result = option.ToResult(() => new NotFoundError { Message = "Lazy error" });
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("Lazy error");
     }
@@ -55,7 +55,7 @@ public class TypeConversionShould
             return new NotFoundError { Message = "Not found" };
         });
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         await Assert.That(factoryCalled).IsFalse();
     }
 
@@ -70,7 +70,7 @@ public class TypeConversionShould
 
         var either = option.ToEither("missing");
 
-        await Assert.That(either.IsRight).IsTrue();
+        await Assert.That(either.IsRight()).IsTrue();
         var value = either.Match(_ => 0, v => v);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -82,7 +82,7 @@ public class TypeConversionShould
 
         var either = option.ToEither("missing");
 
-        await Assert.That(either.IsLeft).IsTrue();
+        await Assert.That(either.IsLeft()).IsTrue();
         var value = either.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("missing");
     }
@@ -94,7 +94,7 @@ public class TypeConversionShould
 
         var either = option.ToEither(() => "lazy missing");
 
-        await Assert.That(either.IsLeft).IsTrue();
+        await Assert.That(either.IsLeft()).IsTrue();
         var value = either.Match(s => s, _ => "");
         await Assert.That(value).IsEqualTo("lazy missing");
     }
@@ -111,7 +111,7 @@ public class TypeConversionShould
             return "missing";
         });
 
-        await Assert.That(either.IsRight).IsTrue();
+        await Assert.That(either.IsRight()).IsTrue();
         await Assert.That(factoryCalled).IsFalse();
     }
 
@@ -126,7 +126,7 @@ public class TypeConversionShould
 
         var either = result.ToEither();
 
-        await Assert.That(either.IsRight).IsTrue();
+        await Assert.That(either.IsRight()).IsTrue();
         var value = either.Match(_ => 0, v => v);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -138,7 +138,7 @@ public class TypeConversionShould
 
         var either = result.ToEither();
 
-        await Assert.That(either.IsLeft).IsTrue();
+        await Assert.That(either.IsLeft()).IsTrue();
         var error = either.Match(e => e.Message, _ => "");
         await Assert.That(error).IsEqualTo("Invalid");
     }
@@ -154,7 +154,7 @@ public class TypeConversionShould
 
         var option = either.RightToOption();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var value = option.Match(v => v, () => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -166,7 +166,7 @@ public class TypeConversionShould
 
         var option = either.RightToOption();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -176,7 +176,7 @@ public class TypeConversionShould
 
         var option = either.LeftToOption();
 
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var value = option.Match(v => v, () => "");
         await Assert.That(value).IsEqualTo("value");
     }
@@ -188,7 +188,7 @@ public class TypeConversionShould
 
         var option = either.LeftToOption();
 
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     #endregion
@@ -202,7 +202,7 @@ public class TypeConversionShould
 
         var result = either.ToResult();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var value = result.Match(v => v, _ => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -215,7 +215,7 @@ public class TypeConversionShould
 
         var result = either.ToResult();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var errorMsg = result.Match(_ => "", e => e.Message);
         await Assert.That(errorMsg).IsEqualTo("Invalid");
     }
@@ -233,7 +233,7 @@ public class TypeConversionShould
         var either = result.ToEither();
         var backToOption = either.RightToOption();
 
-        await Assert.That(backToOption.IsSome).IsTrue();
+        await Assert.That(backToOption.IsSome()).IsTrue();
         var value = backToOption.Match(v => v, () => 0);
         await Assert.That(value).IsEqualTo(42);
     }
@@ -247,8 +247,8 @@ public class TypeConversionShould
         var option = result.AsOption();
         var backToResult = option.ToResult(new InternalError { Message = "Unknown" });
 
-        await Assert.That(option.IsNone).IsTrue();
-        await Assert.That(backToResult.IsFailure).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
+        await Assert.That(backToResult.IsFailure()).IsTrue();
         var error = backToResult.Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error.Message).IsEqualTo("Unknown");
     }

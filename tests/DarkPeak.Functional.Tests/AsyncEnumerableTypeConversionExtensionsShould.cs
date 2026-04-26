@@ -44,15 +44,15 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSuccess).IsTrue();
+        await Assert.That(result[0].IsSuccess()).IsTrue();
         var value0 = result[0].Match(v => v, _ => 0);
         await Assert.That(value0).IsEqualTo(1);
 
-        await Assert.That(result[1].IsFailure).IsTrue();
+        await Assert.That(result[1].IsFailure()).IsTrue();
         var error1 = result[1].Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error1.Message).IsEqualTo("Not found");
 
-        await Assert.That(result[2].IsSuccess).IsTrue();
+        await Assert.That(result[2].IsSuccess()).IsTrue();
         var value2 = result[2].Match(v => v, _ => 0);
         await Assert.That(value2).IsEqualTo(3);
     }
@@ -92,11 +92,11 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
 
-        await Assert.That(result[0].IsSuccess).IsTrue();
+        await Assert.That(result[0].IsSuccess()).IsTrue();
         var value0 = result[0].Match(v => v, _ => 0);
         await Assert.That(value0).IsEqualTo(10);
 
-        await Assert.That(result[1].IsFailure).IsTrue();
+        await Assert.That(result[1].IsFailure()).IsTrue();
         var error1 = result[1].Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error1.Message).IsEqualTo("Error 1");
 
@@ -120,13 +120,13 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
 
-        await Assert.That(result[0].IsSome).IsTrue();
+        await Assert.That(result[0].IsSome()).IsTrue();
         var value0 = result[0].Match(v => v, () => 0);
         await Assert.That(value0).IsEqualTo(42);
 
-        await Assert.That(result[1].IsNone).IsTrue();
+        await Assert.That(result[1].IsNone()).IsTrue();
 
-        await Assert.That(result[2].IsSome).IsTrue();
+        await Assert.That(result[2].IsSome()).IsTrue();
         var value2 = result[2].Match(v => v, () => 0);
         await Assert.That(value2).IsEqualTo(99);
     }
@@ -160,11 +160,11 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
 
-        await Assert.That(result[0].IsRight).IsTrue();
+        await Assert.That(result[0].IsRight()).IsTrue();
         var value0 = result[0].Match(_ => 0, v => v);
         await Assert.That(value0).IsEqualTo(5);
 
-        await Assert.That(result[1].IsLeft).IsTrue();
+        await Assert.That(result[1].IsLeft()).IsTrue();
         var error1 = result[1].Match(e => e.Message, _ => "");
         await Assert.That(error1).IsEqualTo("Gone");
     }
@@ -199,11 +199,11 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
 
-        await Assert.That(result[0].IsRight).IsTrue();
+        await Assert.That(result[0].IsRight()).IsTrue();
         var value0 = result[0].Match(_ => 0, v => v);
         await Assert.That(value0).IsEqualTo(7);
 
-        await Assert.That(result[1].IsLeft).IsTrue();
+        await Assert.That(result[1].IsLeft()).IsTrue();
         var left1 = result[1].Match(l => l, _ => "");
         await Assert.That(left1).IsEqualTo("missing");
     }
@@ -227,11 +227,11 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
 
-        await Assert.That(result[0].IsSuccess).IsTrue();
+        await Assert.That(result[0].IsSuccess()).IsTrue();
         var value0 = result[0].Match(v => v, _ => 0);
         await Assert.That(value0).IsEqualTo(100);
 
-        await Assert.That(result[1].IsFailure).IsTrue();
+        await Assert.That(result[1].IsFailure()).IsTrue();
         var error1 = result[1].Match(_ => (Error)new InternalError { Message = "" }, e => e);
         await Assert.That(error1.Message).IsEqualTo("First error");
     }
@@ -265,11 +265,11 @@ public class AsyncEnumerableTypeConversionExtensionsShould
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
 
-        await Assert.That(result[0].IsValid).IsTrue();
+        await Assert.That(result[0].IsValid()).IsTrue();
         var value0 = result[0].Match(v => v, _ => 0);
         await Assert.That(value0).IsEqualTo(50);
 
-        await Assert.That(result[1].IsInvalid).IsTrue();
+        await Assert.That(result[1].IsInvalid()).IsTrue();
         var errors1 = result[1].Match(_ => Array.Empty<ValidationError>(), errors => errors.ToArray());
         await Assert.That(errors1.Length).IsEqualTo(1);
         await Assert.That(errors1[0].Message).IsEqualTo("Bad input");

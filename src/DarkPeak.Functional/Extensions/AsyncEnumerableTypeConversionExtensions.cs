@@ -92,7 +92,7 @@ public static class AsyncEnumerableTypeConversionExtensions
     public static IAsyncEnumerable<Result<T, TError>> ToResultStream<T, TError>(
         this IAsyncEnumerable<Validation<T, TError>> source)
         where TError : Error =>
-        source.Select(validation => validation.Match<Result<T, TError>>(
+        source.Select(validation => validation.Match(
             valid: value => new Success<T, TError>(value),
             invalid: errors => new Failure<T, TError>(errors[0])));
 
@@ -109,7 +109,7 @@ public static class AsyncEnumerableTypeConversionExtensions
     public static IAsyncEnumerable<Validation<T, TError>> ToValidationStream<T, TError>(
         this IAsyncEnumerable<Result<T, TError>> source)
         where TError : Error =>
-        source.Select(result => result.Match<Validation<T, TError>>(
+        source.Select(result => result.Match(
             success: value => new Valid<T, TError>(value),
             failure: error => new Invalid<T, TError>([error])));
 }

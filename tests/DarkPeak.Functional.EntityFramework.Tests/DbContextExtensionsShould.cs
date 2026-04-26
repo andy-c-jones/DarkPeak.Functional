@@ -17,7 +17,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         db.Products.Add(new Product { Name = "SaveTest", Price = 1.99m });
         var result = await db.SaveChangesResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var count = result.GetValueOrThrow();
         await Assert.That(count).IsEqualTo(1);
     }
@@ -30,7 +30,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         db.Users.Add(new User { Email = "alice@example.com", Name = "Alice Duplicate" });
         var result = await db.SaveChangesResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsTypeOf<SaveChangesError>();
     }
@@ -43,7 +43,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         db.Users.Add(new User { Email = "alice@example.com", Name = "Dupe" });
         var result = await db.SaveChangesResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as SaveChangesError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.SqlState).IsNotNull();
@@ -71,9 +71,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.FindResultAsync<Product>(1);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var product = ((Some<Product>)option).Value;
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -85,9 +85,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.FindResultAsync<Product>(9999);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // --- FirstOrDefaultResultAsync ---
@@ -101,9 +101,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "alice@example.com")
             .FirstOrDefaultResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var user = ((Some<User>)option).Value;
         await Assert.That(user.Name).IsEqualTo("Alice");
     }
@@ -117,9 +117,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "nobody@example.com")
             .FirstOrDefaultResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // --- SingleOrDefaultResultAsync ---
@@ -133,9 +133,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "bob@example.com")
             .SingleOrDefaultResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var user = ((Some<User>)option).Value;
         await Assert.That(user.Name).IsEqualTo("Bob");
     }
@@ -149,9 +149,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "nobody@example.com")
             .SingleOrDefaultResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     [Test]
@@ -163,7 +163,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Name == "Widget" || p.Name == "Gadget")
             .SingleOrDefaultResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- FirstResultAsync ---
@@ -177,7 +177,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .OrderBy(p => p.Id)
             .FirstResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var product = result.GetValueOrThrow();
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -191,7 +191,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Price > 9999m)
             .FirstResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- SingleResultAsync ---
@@ -205,7 +205,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "alice@example.com")
             .SingleResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var user = result.GetValueOrThrow();
         await Assert.That(user.Name).IsEqualTo("Alice");
     }
@@ -219,7 +219,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "nobody@example.com")
             .SingleResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     [Test]
@@ -231,7 +231,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Name == "Widget" || p.Name == "Gadget")
             .SingleResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
     }
 
     // --- ToListResultAsync ---
@@ -246,7 +246,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .OrderBy(p => p.Id)
             .ToListResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var products = result.GetValueOrThrow();
         await Assert.That(products.Count).IsGreaterThanOrEqualTo(3);
         await Assert.That(products[0].Name).IsEqualTo("Widget");
@@ -261,7 +261,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Price > 9999m)
             .ToListResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var products = result.GetValueOrThrow();
         await Assert.That(products.Count).IsEqualTo(0);
     }
@@ -277,7 +277,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Name == "Widget" || p.Name == "Gadget" || p.Name == "Doohickey")
             .CountResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var count = result.GetValueOrThrow();
         await Assert.That(count).IsEqualTo(3);
     }
@@ -291,7 +291,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Price > 9999m)
             .CountResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var count = result.GetValueOrThrow();
         await Assert.That(count).IsEqualTo(0);
     }
@@ -307,7 +307,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "alice@example.com")
             .AnyResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var any = result.GetValueOrThrow();
         await Assert.That(any).IsTrue();
     }
@@ -321,7 +321,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "nobody@example.com")
             .AnyResultAsync();
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var any = result.GetValueOrThrow();
         await Assert.That(any).IsFalse();
     }
@@ -338,7 +338,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .CountResultAsync();
         var message = result.Map(count => $"Found {count} products");
 
-        await Assert.That(message.IsSuccess).IsTrue();
+        await Assert.That(message.IsSuccess()).IsTrue();
         await Assert.That(message.GetValueOrThrow()).IsEqualTo("Found 3 products");
     }
 
@@ -353,7 +353,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var priceResult = result.Map(p => p.Price);
 
-        await Assert.That(priceResult.IsSuccess).IsTrue();
+        await Assert.That(priceResult.IsSuccess()).IsTrue();
         await Assert.That(priceResult.GetValueOrThrow()).IsEqualTo(9.99m);
     }
 
@@ -366,9 +366,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.FindResultAsync<Product>([1], CancellationToken.None);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsSome).IsTrue();
+        await Assert.That(option.IsSome()).IsTrue();
         var product = ((Some<Product>)option).Value;
         await Assert.That(product.Name).IsEqualTo("Widget");
     }
@@ -380,9 +380,9 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.FindResultAsync<Product>([9999], CancellationToken.None);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var option = result.GetValueOrThrow();
-        await Assert.That(option.IsNone).IsTrue();
+        await Assert.That(option.IsNone()).IsTrue();
     }
 
     // --- Concurrency error ---
@@ -414,7 +414,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         product2.Version = 3;
         var result = await ctx2.SaveChangesResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsTypeOf<ConcurrencyError>();
     }
@@ -472,7 +472,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Name == "Widget" || p.Name == "Gadget")
             .SingleOrDefaultResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("MULTIPLE_RESULTS");
@@ -487,7 +487,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Price > 9999m)
             .FirstResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("EMPTY_RESULT_SET");
@@ -502,7 +502,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(u => u.Email == "nobody@example.com")
             .SingleResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("INVALID_RESULT_SET");
@@ -517,7 +517,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
             .Where(p => p.Name == "Widget" || p.Name == "Gadget")
             .SingleResultAsync();
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("INVALID_RESULT_SET");
@@ -533,7 +533,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         db.Products.Add(new Product { Name = "CancelTest", Price = 1.00m });
         var result = await db.SaveChangesResultAsync(CancellationToken.None);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
     }
 
     [Test]
@@ -548,7 +548,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.SaveChangesResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -565,7 +565,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .ToListResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -582,7 +582,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .CountResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -599,7 +599,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .AnyResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -616,7 +616,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .FirstOrDefaultResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -633,7 +633,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .SingleOrDefaultResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -650,7 +650,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .FirstResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -667,7 +667,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
         var result = await db.Set<Product>()
             .SingleResultAsync(cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");
@@ -683,7 +683,7 @@ public class DbContextExtensionsShould(PostgresFixture fixture)
 
         var result = await db.FindResultAsync<Product>([1], cts.Token);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e) as EntityFrameworkError;
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.Code).IsEqualTo("CANCELLED");

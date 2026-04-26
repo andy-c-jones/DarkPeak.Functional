@@ -15,7 +15,7 @@ public sealed class ResultExceptionHandlerShould
 
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
 
         var failure = (Failure<string, Error>)result;
         await Assert.That(failure.Error).IsTypeOf<InternalError>();
@@ -49,7 +49,7 @@ public sealed class ResultExceptionHandlerShould
 
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var success = (Success<string, Error>)result;
         await Assert.That(success.Value).IsEqualTo("success");
     }
@@ -64,7 +64,7 @@ public sealed class ResultExceptionHandlerShould
 
         var result = await _sut.Handle(command, next, CancellationToken.None);
 
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var failure = (Failure<string, Error>)result;
         await Assert.That(failure.Error).IsTypeOf<NotFoundError>();
         await Assert.That(failure.Error.Message).IsEqualTo("Not found");

@@ -44,7 +44,7 @@ public class AsyncEnumerableResultExtensionsShould
         // Assert
         await Assert.That(results).Count().IsEqualTo(3);
         await Assert.That(results[0] is Success<int, NotFoundError> s0 && s0.Value == 10).IsTrue();
-        await Assert.That(results[1].IsFailure).IsTrue();
+        await Assert.That(results[1].IsFailure()).IsTrue();
         await Assert.That(results[2] is Success<int, NotFoundError> s2 && s2.Value == 30).IsTrue();
     }
 
@@ -84,7 +84,7 @@ public class AsyncEnumerableResultExtensionsShould
         // Assert
         await Assert.That(results).Count().IsEqualTo(3);
         await Assert.That(results[0] is Success<int, NotFoundError> s0 && s0.Value == 10).IsTrue();
-        await Assert.That(results[1].IsFailure).IsTrue();
+        await Assert.That(results[1].IsFailure()).IsTrue();
         await Assert.That(results[2] is Success<int, NotFoundError> s2 && s2.Value == 20).IsTrue();
     }
 
@@ -123,7 +123,7 @@ public class AsyncEnumerableResultExtensionsShould
 
         // Assert
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0].IsFailure).IsTrue();
+        await Assert.That(results[0].IsFailure()).IsTrue();
         var error = results[0].Match(_ => null!, e => e);
         await Assert.That(error.Message).IsEqualTo("bind failed");
     }
@@ -141,7 +141,7 @@ public class AsyncEnumerableResultExtensionsShould
 
         // Assert
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0].IsFailure).IsTrue();
+        await Assert.That(results[0].IsFailure()).IsTrue();
         var error = results[0].Match(_ => null!, e => e);
         await Assert.That(error.Message).IsEqualTo("original error");
     }
@@ -171,8 +171,8 @@ public class AsyncEnumerableResultExtensionsShould
         // Assert
         await Assert.That(results).Count().IsEqualTo(3);
         await Assert.That(results[0] is Success<string, NotFoundError> s0 && s0.Value == "7").IsTrue();
-        await Assert.That(results[1].IsFailure).IsTrue();
-        await Assert.That(results[2].IsFailure).IsTrue();
+        await Assert.That(results[1].IsFailure()).IsTrue();
+        await Assert.That(results[2].IsFailure()).IsTrue();
         var error = results[2].Match(_ => null!, e => e);
         await Assert.That(error.Message).IsEqualTo("too small");
     }
@@ -201,9 +201,9 @@ public class AsyncEnumerableResultExtensionsShould
 
         // Sequence is unchanged
         await Assert.That(results).Count().IsEqualTo(3);
-        await Assert.That(results[0].IsSuccess).IsTrue();
-        await Assert.That(results[1].IsFailure).IsTrue();
-        await Assert.That(results[2].IsSuccess).IsTrue();
+        await Assert.That(results[0].IsSuccess()).IsTrue();
+        await Assert.That(results[1].IsFailure()).IsTrue();
+        await Assert.That(results[2].IsSuccess()).IsTrue();
     }
 
     #endregion
@@ -231,10 +231,10 @@ public class AsyncEnumerableResultExtensionsShould
 
         // Sequence is unchanged
         await Assert.That(results).Count().IsEqualTo(4);
-        await Assert.That(results[0].IsSuccess).IsTrue();
-        await Assert.That(results[1].IsFailure).IsTrue();
-        await Assert.That(results[2].IsFailure).IsTrue();
-        await Assert.That(results[3].IsSuccess).IsTrue();
+        await Assert.That(results[0].IsSuccess()).IsTrue();
+        await Assert.That(results[1].IsFailure()).IsTrue();
+        await Assert.That(results[2].IsFailure()).IsTrue();
+        await Assert.That(results[3].IsSuccess()).IsTrue();
     }
 
     #endregion
@@ -307,7 +307,7 @@ public class AsyncEnumerableResultExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v, _ => null!);
         await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
@@ -328,7 +328,7 @@ public class AsyncEnumerableResultExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsFailure).IsTrue();
+        await Assert.That(result.IsFailure()).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error.Message).IsEqualTo("first error");
     }
@@ -343,7 +343,7 @@ public class AsyncEnumerableResultExtensionsShould
         var result = await source.SequenceAsync();
 
         // Assert
-        await Assert.That(result.IsSuccess).IsTrue();
+        await Assert.That(result.IsSuccess()).IsTrue();
         var values = result.Match(v => v, _ => null!);
         await Assert.That(values).Count().IsEqualTo(0);
     }
