@@ -93,8 +93,8 @@ public static class AsyncEnumerableTypeConversionExtensions
         this IAsyncEnumerable<Validation<T, TError>> source)
         where TError : Error =>
         source.Select(validation => validation.Match(
-            valid: value => new Success<T, TError>(value),
-            invalid: errors => new Failure<T, TError>(errors[0])));
+            valid: value => (Result<T, TError>)new Success<T, TError>(value),
+            invalid: errors => (Result<T, TError>)new Failure<T, TError>(errors[0])));
 
     // ── IAsyncEnumerable<Result<T, TError>> → IAsyncEnumerable<Validation<T, TError>> ──
 
@@ -110,6 +110,6 @@ public static class AsyncEnumerableTypeConversionExtensions
         this IAsyncEnumerable<Result<T, TError>> source)
         where TError : Error =>
         source.Select(result => result.Match(
-            success: value => new Valid<T, TError>(value),
-            failure: error => new Invalid<T, TError>([error])));
+            success: value => (Validation<T, TError>)new Valid<T, TError>(value),
+            failure: error => (Validation<T, TError>)new Invalid<T, TError>([error])));
 }

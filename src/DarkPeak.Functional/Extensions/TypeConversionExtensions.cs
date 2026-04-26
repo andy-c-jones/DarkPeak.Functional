@@ -13,8 +13,8 @@ public static class TypeConversionExtensions
     public static Result<T, TError> ToResult<T, TError>(this Option<T> option, TError error)
         where TError : Error =>
         option.Match(
-            some: value => new Success<T, TError>(value),
-            none: () => new Failure<T, TError>(error)
+            some: value => (Result<T, TError>)new Success<T, TError>(value),
+            none: () => (Result<T, TError>)new Failure<T, TError>(error)
         );
 
     /// <summary>
@@ -23,8 +23,8 @@ public static class TypeConversionExtensions
     public static Result<T, TError> ToResult<T, TError>(this Option<T> option, Func<TError> errorFactory)
         where TError : Error =>
         option.Match(
-            some: value => new Success<T, TError>(value),
-            none: () => new Failure<T, TError>(errorFactory())
+            some: value => (Result<T, TError>)new Success<T, TError>(value),
+            none: () => (Result<T, TError>)new Failure<T, TError>(errorFactory())
         );
 
     // ── Option → Either ──
@@ -34,8 +34,8 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Either<TLeft, T> ToEither<TLeft, T>(this Option<T> option, TLeft leftValue) =>
         option.Match(
-            some: value => new Right<TLeft, T>(value),
-            none: () => new Left<TLeft, T>(leftValue)
+            some: value => (Either<TLeft, T>)new Right<TLeft, T>(value),
+            none: () => (Either<TLeft, T>)new Left<TLeft, T>(leftValue)
         );
 
     /// <summary>
@@ -43,8 +43,8 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Either<TLeft, T> ToEither<TLeft, T>(this Option<T> option, Func<TLeft> leftFactory) =>
         option.Match(
-            some: value => new Right<TLeft, T>(value),
-            none: () => new Left<TLeft, T>(leftFactory())
+            some: value => (Either<TLeft, T>)new Right<TLeft, T>(value),
+            none: () => (Either<TLeft, T>)new Left<TLeft, T>(leftFactory())
         );
 
     // ── Result → Option ──
@@ -56,8 +56,8 @@ public static class TypeConversionExtensions
     public static Option<T> AsOption<T, TError>(this Result<T, TError> result)
         where TError : Error =>
         result.Match(
-            success: value => new Some<T>(value),
-            failure: _ => new None<T>()
+            success: value => (Option<T>)new Some<T>(value),
+            failure: _ => (Option<T>)new None<T>()
         );
 
     // ── Result → Either ──
@@ -68,8 +68,8 @@ public static class TypeConversionExtensions
     public static Either<TError, T> ToEither<T, TError>(this Result<T, TError> result)
         where TError : Error =>
         result.Match(
-            success: value => new Right<TError, T>(value),
-            failure: error => new Left<TError, T>(error)
+            success: value => (Either<TError, T>)new Right<TError, T>(value),
+            failure: error => (Either<TError, T>)new Left<TError, T>(error)
         );
 
     // ── Either → Option ──
@@ -79,8 +79,8 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Option<TRight> RightToOption<TLeft, TRight>(this Either<TLeft, TRight> either) =>
         either.Match(
-            left: _ => new None<TRight>(),
-            right: value => new Some<TRight>(value)
+            left: _ => (Option<TRight>)new None<TRight>(),
+            right: value => (Option<TRight>)new Some<TRight>(value)
         );
 
     /// <summary>
@@ -88,8 +88,8 @@ public static class TypeConversionExtensions
     /// </summary>
     public static Option<TLeft> LeftToOption<TLeft, TRight>(this Either<TLeft, TRight> either) =>
         either.Match(
-            left: value => new Some<TLeft>(value),
-            right: _ => new None<TLeft>()
+            left: value => (Option<TLeft>)new Some<TLeft>(value),
+            right: _ => (Option<TLeft>)new None<TLeft>()
         );
 
     // ── Either → Result ──
@@ -101,7 +101,7 @@ public static class TypeConversionExtensions
     public static Result<TRight, TLeft> ToResult<TLeft, TRight>(this Either<TLeft, TRight> either)
         where TLeft : Error =>
         either.Match(
-            left: error => new Failure<TRight, TLeft>(error),
-            right: value => new Success<TRight, TLeft>(value)
+            left: error => (Result<TRight, TLeft>)new Failure<TRight, TLeft>(error),
+            right: value => (Result<TRight, TLeft>)new Success<TRight, TLeft>(value)
         );
 }

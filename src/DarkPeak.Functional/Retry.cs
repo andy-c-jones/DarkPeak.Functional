@@ -37,20 +37,20 @@ public sealed record RetryPolicy
     /// </summary>
     public Result<T, TError> Execute<T, TError>(Func<Result<T, TError>> func) where TError : Error
     {
-        Result<T, TError>? lastResult = null;
+        Result<T, TError> lastResult = default!;
 
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
             lastResult = func();
 
-            if (lastResult.IsSuccess())
+            if (lastResult.IsSuccess<T, TError>())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match(
+            var error = lastResult.Match<T, TError, TError>(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -64,7 +64,7 @@ public sealed record RetryPolicy
                 Thread.Sleep(delay);
         }
 
-        return lastResult!;
+        return lastResult;
     }
 
     /// <summary>
@@ -74,20 +74,20 @@ public sealed record RetryPolicy
     public async Task<Result<T, TError>> ExecuteAsync<T, TError>(Func<Task<Result<T, TError>>> func)
         where TError : Error
     {
-        Result<T, TError>? lastResult = null;
+        Result<T, TError> lastResult = default!;
 
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
             lastResult = await func();
 
-            if (lastResult.IsSuccess())
+            if (lastResult.IsSuccess<T, TError>())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match(
+            var error = lastResult.Match<T, TError, TError>(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -101,7 +101,7 @@ public sealed record RetryPolicy
                 await Task.Delay(delay);
         }
 
-        return lastResult!;
+        return lastResult;
     }
 
     /// <summary>
@@ -115,7 +115,7 @@ public sealed record RetryPolicy
         CancellationToken cancellationToken = default)
         where TError : Error
     {
-        Result<T, TError>? lastResult = null;
+        Result<T, TError> lastResult = default!;
 
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
@@ -123,14 +123,14 @@ public sealed record RetryPolicy
             
             lastResult = await func(cancellationToken);
 
-            if (lastResult.IsSuccess())
+            if (lastResult.IsSuccess<T, TError>())
                 return lastResult;
 
             var shouldRetry = attempt < MaxAttempts;
             if (!shouldRetry)
                 break;
 
-            var error = lastResult.Match(
+            var error = lastResult.Match<T, TError, TError>(
                 success: _ => throw new InvalidOperationException("Unexpected success"),
                 failure: e => e);
 
@@ -144,7 +144,7 @@ public sealed record RetryPolicy
                 await Task.Delay(delay, cancellationToken);
         }
 
-        return lastResult!;
+        return lastResult;
     }
 }
 

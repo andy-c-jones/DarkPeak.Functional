@@ -39,7 +39,7 @@ public static class ValidationExtensions
         Validation<T2, TError> second,
         Func<T1, T2, TResult> combiner)
         where TError : Error =>
-        first.Map(a => b => combiner(a, b)).Apply(second);
+        first.Map<T1, TError, Func<T2, TResult>>(a => b => combiner(a, b)).Apply(second);
 
     /// <summary>
     /// Combines three validations with a projection function, accumulating errors from all.
@@ -51,7 +51,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => combiner(a, b, c))
+            .Map<T1, TError, Func<T2, Func<T3, TResult>>>(a => b => c => combiner(a, b, c))
             .Apply(second)
             .Apply(third);
 
@@ -66,7 +66,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, T4, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => d => combiner(a, b, c, d))
+            .Map<T1, TError, Func<T2, Func<T3, Func<T4, TResult>>>>(a => b => c => d => combiner(a, b, c, d))
             .Apply(second)
             .Apply(third)
             .Apply(fourth);
@@ -83,7 +83,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, T4, T5, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => d => e => combiner(a, b, c, d, e))
+            .Map<T1, TError, Func<T2, Func<T3, Func<T4, Func<T5, TResult>>>>>(a => b => c => d => e => combiner(a, b, c, d, e))
             .Apply(second)
             .Apply(third)
             .Apply(fourth)
@@ -102,7 +102,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, T4, T5, T6, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => d => e => f => combiner(a, b, c, d, e, f))
+            .Map<T1, TError, Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, TResult>>>>>>(a => b => c => d => e => f => combiner(a, b, c, d, e, f))
             .Apply(second)
             .Apply(third)
             .Apply(fourth)
@@ -123,7 +123,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, T4, T5, T6, T7, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => d => e => f => g => combiner(a, b, c, d, e, f, g))
+            .Map<T1, TError, Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, Func<T7, TResult>>>>>>>(a => b => c => d => e => f => g => combiner(a, b, c, d, e, f, g))
             .Apply(second)
             .Apply(third)
             .Apply(fourth)
@@ -146,7 +146,7 @@ public static class ValidationExtensions
         Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> combiner)
         where TError : Error =>
         first
-            .Map(a => b => c => d => e => f => g => h => combiner(a, b, c, d, e, f, g, h))
+            .Map<T1, TError, Func<T2, Func<T3, Func<T4, Func<T5, Func<T6, Func<T7, Func<T8, TResult>>>>>>>>(a => b => c => d => e => f => g => h => combiner(a, b, c, d, e, f, g, h))
             .Apply(second)
             .Apply(third)
             .Apply(fourth)
@@ -168,7 +168,7 @@ public static class ValidationExtensions
 
         foreach (var validation in validations)
         {
-            validation.Match(
+            validation.Match<T, TError, object?>(
                 valid: v => { values.Add(v); return null; },
                 invalid: errs => { errors.AddRange(errs); return null; }
             );
@@ -185,8 +185,8 @@ public static class ValidationExtensions
     public static Result<T, TError> ToResult<T, TError>(this Validation<T, TError> validation)
         where TError : Error =>
         validation.Match(
-            valid: value => new Success<T, TError>(value),
-            invalid: errors => new Failure<T, TError>(errors[0])
+            valid: value => (Result<T, TError>)new Success<T, TError>(value),
+            invalid: errors => (Result<T, TError>)new Failure<T, TError>(errors[0])
         );
 
     /// <summary>
@@ -195,8 +195,8 @@ public static class ValidationExtensions
     public static Validation<T, TError> ToValidation<T, TError>(this Result<T, TError> result)
         where TError : Error =>
         result.Match(
-            success: value => new Valid<T, TError>(value),
-            failure: error => new Invalid<T, TError>([error])
+            success: value => (Validation<T, TError>)new Valid<T, TError>(value),
+            failure: error => (Validation<T, TError>)new Invalid<T, TError>([error])
         );
 
     // --- Traverse ---
@@ -221,7 +221,7 @@ public static class ValidationExtensions
         foreach (var item in source)
         {
             var validation = func(item);
-            validation.Match(
+            validation.Match<TResult, TError, object?>(
                 valid: v => { values.Add(v); return null; },
                 invalid: errs => { errors.AddRange(errs); return null; }
             );
