@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
-    <PackageReference Include="StackExchange.Redis" Version="2.*" />
+    <PackageReference Include="StackExchange.Redis" Version="3.*" />
   </ItemGroup>
 
 </Project>
