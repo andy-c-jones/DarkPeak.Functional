@@ -19,4 +19,12 @@
 ## or put your custom commands -------------------
 #echo 'Husky.Net is awesome!'
 
-dotnet format DarkPeak.Functional.slnx --verify-no-changes --no-restore
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.cs')
+
+if [ -n "$staged_files" ]; then
+  dotnet format DarkPeak.Functional.slnx --include $staged_files --no-restore
+
+  printf '%s\n' "$staged_files" | while IFS= read -r file; do
+    git add -- "$file"
+  done
+fi
