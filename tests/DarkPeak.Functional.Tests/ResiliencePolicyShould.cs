@@ -88,7 +88,7 @@ public class ResiliencePolicyShould
 
         await Assert.That(result.IsFailure).IsTrue();
         await Assert.That(attempts).IsEqualTo(3); // Should retry 3 times
-        
+
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }
@@ -114,7 +114,7 @@ public class ResiliencePolicyShould
 
         await Assert.That(result.IsFailure).IsTrue();
         await Assert.That(attempts).IsLessThan(100); // Should be stopped by overall timeout
-        
+
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }
@@ -282,7 +282,7 @@ public class ResiliencePolicyShould
 
         await Assert.That(maxConcurrent).IsLessThanOrEqualTo(2);
         await Assert.That(result3.IsFailure).IsTrue();
-        
+
         var error = result3.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<BulkheadRejectedError>();
 
@@ -348,7 +348,7 @@ public class ResiliencePolicyShould
 
         await Assert.That(result.IsFailure).IsTrue();
         await Assert.That(attempts).IsEqualTo(3); // All retries exhausted
-        
+
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<ExternalServiceError>();
     }

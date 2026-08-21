@@ -13,7 +13,7 @@ public class OptionShould
     {
         // Arrange & Act
         var option = Option.Some(42);
-        
+
         // Assert
         await Assert.That(option.IsSome).IsTrue();
         await Assert.That(option.IsNone).IsFalse();
@@ -24,7 +24,7 @@ public class OptionShould
     {
         // Arrange & Act
         var option = Option.None<int>();
-        
+
         // Assert
         await Assert.That(option.IsSome).IsFalse();
         await Assert.That(option.IsNone).IsTrue();
@@ -35,13 +35,13 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some("hello");
-        
+
         // Act
         var result = option.Match(
             some: value => value.ToUpper(),
             none: () => "default"
         );
-        
+
         // Assert
         await Assert.That(result).IsEqualTo("HELLO");
     }
@@ -51,13 +51,13 @@ public class OptionShould
     {
         // Arrange
         var option = Option.None<string>();
-        
+
         // Act
         var result = option.Match(
             some: value => value.ToUpper(),
             none: () => "default"
         );
-        
+
         // Assert
         await Assert.That(result).IsEqualTo("default");
     }
@@ -67,10 +67,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(5);
-        
+
         // Act
         var result = option.Map(x => x * 2);
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -82,10 +82,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.None<int>();
-        
+
         // Act
         var result = option.Map(x => x * 2);
-        
+
         // Assert
         await Assert.That(result.IsNone).IsTrue();
     }
@@ -95,10 +95,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(10);
-        
+
         // Act
         var result = option.Bind(x => x > 5 ? Option.Some(x * 2) : Option.None<int>());
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -110,10 +110,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(3);
-        
+
         // Act
         var result = option.Bind(x => x > 5 ? Option.Some(x * 2) : Option.None<int>());
-        
+
         // Assert
         await Assert.That(result.IsNone).IsTrue();
     }
@@ -123,10 +123,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.None<int>();
-        
+
         // Act
         var result = option.Bind(x => Option.Some(x * 2));
-        
+
         // Assert
         await Assert.That(result.IsNone).IsTrue();
     }
@@ -136,10 +136,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(10);
-        
+
         // Act
         var result = option.Filter(x => x > 5);
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
     }
@@ -149,10 +149,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(3);
-        
+
         // Act
         var result = option.Filter(x => x > 5);
-        
+
         // Assert
         await Assert.That(result.IsNone).IsTrue();
     }
@@ -162,10 +162,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(42);
-        
+
         // Act
         var result = option.GetValueOrDefault(0);
-        
+
         // Assert
         await Assert.That(result).IsEqualTo(42);
     }
@@ -175,10 +175,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.None<int>();
-        
+
         // Act
         var result = option.GetValueOrDefault(99);
-        
+
         // Assert
         await Assert.That(result).IsEqualTo(99);
     }
@@ -188,7 +188,7 @@ public class OptionShould
     {
         // Arrange & Act
         Option<string> option = "hello";
-        
+
         // Assert
         await Assert.That(option.IsSome).IsTrue();
         var value = option.Match(some: x => x, none: () => "");
@@ -200,10 +200,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(42);
-        
+
         // Act
         var list = option.ToList();
-        
+
         // Assert
         await Assert.That(list.Count).IsEqualTo(1);
         await Assert.That(list[0]).IsEqualTo(42);
@@ -214,10 +214,10 @@ public class OptionShould
     {
         // Arrange
         var option = Option.None<int>();
-        
+
         // Act
         var list = option.ToList();
-        
+
         // Assert
         await Assert.That(list.Count).IsEqualTo(0);
     }
@@ -227,11 +227,11 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(5);
-        
+
         // Act
         var result = from x in option
                      select x * 2;
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -243,12 +243,12 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(5);
-        
+
         // Act
         var result = from x in option
                      from y in Option.Some(x * 2)
                      select y + 1;
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -260,12 +260,12 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(10);
-        
+
         // Act
         var result = from x in option
                      where x > 5
                      select x;
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
     }
@@ -275,12 +275,12 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(3);
-        
+
         // Act
         var result = from x in option
                      where x > 5
                      select x;
-        
+
         // Assert
         await Assert.That(result.IsNone).IsTrue();
     }
@@ -297,10 +297,10 @@ public class OptionShould
             Option.None<int>(),
             Option.Some(3)
         };
-        
+
         // Act - SelectMany flattens and naturally filters out None
         var result = options.SelectMany(o => o).ToList();
-        
+
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result[0]).IsEqualTo(1);
@@ -320,10 +320,10 @@ public class OptionShould
             Option.None<string>(),
             Option.Some("c")
         };
-        
+
         // Act
         var result = options.Choose().ToList();
-        
+
         // Assert
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result[0]).IsEqualTo("a");
@@ -336,10 +336,10 @@ public class OptionShould
     {
         // Arrange
         var numbers = new[] { 1, 2, 3, 4, 5 };
-        
+
         // Act - Only keep even numbers
         var result = numbers.ChooseMap(n => n % 2 == 0 ? Option.Some(n) : Option.None<int>()).ToList();
-        
+
         // Assert
         await Assert.That(result.Count).IsEqualTo(2);
         await Assert.That(result[0]).IsEqualTo(2);
@@ -351,14 +351,14 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(5);
-        
+
         // Act
         var result = await option.MapAsync(async x =>
         {
             await Task.Delay(1);
             return x * 2;
         });
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -370,14 +370,14 @@ public class OptionShould
     {
         // Arrange
         var option = Option.Some(10);
-        
+
         // Act
         var result = await option.BindAsync(async x =>
         {
             await Task.Delay(1);
             return x > 5 ? Option.Some(x * 2) : Option.None<int>();
         });
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -390,10 +390,10 @@ public class OptionShould
         // Arrange
         var option = Option.Some(42);
         var alternative = Option.Some(99);
-        
+
         // Act
         var result = option.OrElse(alternative);
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);
@@ -406,10 +406,10 @@ public class OptionShould
         // Arrange
         var option = Option.None<int>();
         var alternative = Option.Some(99);
-        
+
         // Act
         var result = option.OrElse(alternative);
-        
+
         // Assert
         await Assert.That(result.IsSome).IsTrue();
         var value = result.Match(some: x => x, none: () => 0);

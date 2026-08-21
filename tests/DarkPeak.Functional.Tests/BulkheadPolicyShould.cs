@@ -31,7 +31,7 @@ public class BulkheadPolicyShould
         var maxConcurrent = 0;
 
         var tasks = new List<Task<Result<int, Error>>>();
-        
+
         for (var i = 0; i < 5; i++)
         {
             var task = bulkhead.ExecuteAsync<int, Error>(async ct =>
@@ -42,7 +42,7 @@ public class BulkheadPolicyShould
                 Interlocked.Decrement(ref executing);
                 return Result.Success<int, Error>(i);
             });
-            
+
             tasks.Add(task);
         }
 
@@ -146,7 +146,7 @@ public class BulkheadPolicyShould
             .WithMaxQueueSize(0);
 
         var started = new SemaphoreSlim(0, 1);
-        
+
         var task1 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
             started.Release(); // Signal that this task has started
@@ -184,7 +184,7 @@ public class BulkheadPolicyShould
             .OnRejected(() => rejectionCount++);
 
         var started = new SemaphoreSlim(0, 1);
-        
+
         var task1 = bulkhead.ExecuteAsync<int, Error>(async ct =>
         {
             started.Release(); // Signal that this task has started
