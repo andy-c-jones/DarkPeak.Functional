@@ -1,14 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>DarkPeak.Functional</PackageId>
     <Description>A functional programming library for .NET providing monadic types (Option, Result, Either, Validation) with railway-oriented programming, retry policies, circuit breaker, memoization, and MemoizeResult for caching successful results.</Description>
     <PackageTags>functional;monad;option;result;either;validation;railway;retry;memoize;circuit-breaker;memoize-result</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
-
+  <Target Name="Husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0" Inputs="../../.config/dotnet-tools.json" Outputs="../../.husky/_/install.stamp">
+    <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="../.." />
+    <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true" Condition="Exists('../../.husky/_')" />
+    <ItemGroup>
+      <FileWrites Include="../../.husky/_/install.stamp" />
+    </ItemGroup>
+  </Target>
 </Project>

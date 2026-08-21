@@ -1,0 +1,30 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+## husky task runner examples -------------------
+## Note : for local installation use 'dotnet' prefix. e.g. 'dotnet husky'
+
+## run all tasks
+#husky run
+
+### run all tasks with group: 'group-name'
+#husky run --group group-name
+
+## run task with name: 'task-name'
+#husky run --name task-name
+
+## pass hook arguments to task
+#husky run --args "$1" "$2"
+
+## or put your custom commands -------------------
+#echo 'Husky.Net is awesome!'
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.cs')
+
+if [ -n "$staged_files" ]; then
+  dotnet format DarkPeak.Functional.slnx --include $staged_files --no-restore
+
+  printf '%s\n' "$staged_files" | while IFS= read -r file; do
+    git add -- "$file"
+  done
+fi

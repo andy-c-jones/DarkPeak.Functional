@@ -39,7 +39,7 @@ public class TimeoutPolicyShould
         await Assert.That(result.IsFailure).IsTrue();
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
-        
+
         var timeoutError = (TimeoutError)error;
         await Assert.That(timeoutError.Timeout).IsEqualTo(TimeSpan.FromMilliseconds(200));
         await Assert.That(timeoutError.Elapsed).IsNotNull();
@@ -73,7 +73,7 @@ public class TimeoutPolicyShould
     {
         var timeout = Timeout.Create()
             .WithTimeout(TimeSpan.FromMilliseconds(200));
-        
+
         var wasCancelled = false;
 
         var result = await timeout.ExecuteAsync<int, Error>(
@@ -250,7 +250,7 @@ public class TimeoutPolicyShould
 
         await Assert.That(result.IsFailure).IsTrue();
         await Assert.That(attempts).IsEqualTo(1);
-        
+
         var error = result.Match(_ => null!, e => e);
         await Assert.That(error).IsAssignableTo<TimeoutError>();
     }

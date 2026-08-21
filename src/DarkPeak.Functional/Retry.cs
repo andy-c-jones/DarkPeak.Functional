@@ -120,7 +120,7 @@ public sealed record RetryPolicy
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             lastResult = await func(cancellationToken);
 
             if (lastResult.IsSuccess)

@@ -66,14 +66,14 @@ public static class OptionExtensions
     public static Option<T> SingleOrNone<T>(this IEnumerable<T> source)
     {
         using var enumerator = source.GetEnumerator();
-        
+
         if (!enumerator.MoveNext())
         {
             return Option.None<T>();
         }
 
         var first = enumerator.Current;
-        
+
         if (enumerator.MoveNext())
         {
             return Option.None<T>();
@@ -101,14 +101,14 @@ public static class OptionExtensions
     public static Option<T> LastOrNone<T>(this IEnumerable<T> source)
     {
         using var enumerator = source.GetEnumerator();
-        
+
         if (!enumerator.MoveNext())
         {
             return Option.None<T>();
         }
 
         var last = enumerator.Current;
-        
+
         while (enumerator.MoveNext())
         {
             last = enumerator.Current;

@@ -69,7 +69,7 @@ public static class ResultExtensions
         where TError : Error
     {
         var values = new List<T>();
-        
+
         foreach (var result in results)
         {
             if (result.IsFailure)
@@ -79,13 +79,13 @@ public static class ResultExtensions
                     failure: error => Result.Failure<IEnumerable<T>, TError>(error)
                 );
             }
-            
+
             values.Add(result.Match(
                 success: value => value,
                 failure: _ => throw new InvalidOperationException("Unexpected failure")
             ));
         }
-        
+
         return Result.Success<IEnumerable<T>, TError>(values);
     }
 
@@ -101,7 +101,7 @@ public static class ResultExtensions
     {
         var values = new List<T>();
         var errors = new List<ValidationError>();
-        
+
         foreach (var result in results)
         {
             if (result.IsSuccess)
@@ -113,7 +113,7 @@ public static class ResultExtensions
                 errors.Add(result.Match(success: _ => default!, failure: e => e));
             }
         }
-        
+
         if (errors.Count > 0)
         {
             return Result.Failure<IEnumerable<T>, ValidationError>(new ValidationError
@@ -128,7 +128,7 @@ public static class ResultExtensions
                     )
             });
         }
-        
+
         return Result.Success<IEnumerable<T>, ValidationError>(values);
     }
 
@@ -167,7 +167,7 @@ public static class ResultExtensions
     {
         var successes = new List<T>();
         var failures = new List<TError>();
-        
+
         foreach (var result in source)
         {
             if (result.IsSuccess)
@@ -179,7 +179,7 @@ public static class ResultExtensions
                 failures.Add(result.Match(success: _ => default!, failure: e => e));
             }
         }
-        
+
         return (successes, failures);
     }
 
