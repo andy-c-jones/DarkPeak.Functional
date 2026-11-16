@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mediator.Abstractions" Version="3.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.*" />
     <ProjectReference Include="..\DarkPeak.Functional\DarkPeak.Functional.csproj" />
   </ItemGroup>
 
